@@ -69,6 +69,21 @@ inline NVDECException NVDECException::makeNVDECException(const std::string& erro
         }                                                                                                          \
     } while (0)
 
+#define CUDA_DRVAPI_CALL( call )                                                                                                 \
+    do                                                                                                                           \
+    {                                                                                                                            \
+        CUresult err__ = call;                                                                                                   \
+        if (err__ != CUDA_SUCCESS)                                                                                               \
+        {                                                                                                                        \
+            const char *szErrName = NULL;                                                                                        \
+            cuGetErrorName(err__, &szErrName);                                                                                   \
+            std::ostringstream errorLog;                                                                                         \
+            errorLog << "CUDA driver API error " << szErrName ;                                                                  \
+            throw NVDECException::makeNVDECException(errorLog.str(), err__, __FUNCTION__, __FILE__, __LINE__);                   \
+        }                                                                                                                        \
+    }                                                                                                                            \
+    while (0)
+
 struct Rect {
     int l, t, r, b;
 };
@@ -197,17 +212,20 @@ private:
 
 private:
     CUcontext m_cuContext = NULL;
-    CUvideoctxlock m_ctxLock;
+    bool m_bUseDeviceFrame;
+    cudaVideoCodec m_eCodec = cudaVideoCodec_NumCodecs;
     std::mutex *m_pMutex;
+    bool m_bDeviceFramePitched = false;
+    unsigned int m_nMaxWidth = 0, m_nMaxHeight = 0;
+
+    CUvideoctxlock m_ctxLock;
     CUvideoparser m_hParser = NULL;
     CUvideodecoder m_hDecoder = NULL;
-    bool m_bUseDeviceFrame;
     // dimension of the output
     unsigned int m_nWidth = 0, m_nHeight = 0;
     // height of the mapped surface 
     int m_nSurfaceHeight = 0;
     int m_nSurfaceWidth = 0;
-    cudaVideoCodec m_eCodec = cudaVideoCodec_NumCodecs;
     cudaVideoChromaFormat m_eChromaFormat;
     int m_nBitDepthMinus8 = 0;
     CUVIDEOFORMAT m_videoFormat = {};
@@ -224,13 +242,11 @@ private:
     std::mutex m_mtxVPFrame;
     int m_nFrameAlloc = 0;
     CUstream m_cuvidStream = 0;
-    bool m_bDeviceFramePitched = false;
     size_t m_nDeviceFramePitch = 0;
     Rect m_cropRect = {};
     Dim m_resizeDim = {};
 
     std::ostringstream m_videoInfo;
-    unsigned int m_nMaxWidth = 0, m_nMaxHeight = 0;
     bool m_bReconfigExternal = false;
     bool m_bReconfigExtPPChange = false;
 };

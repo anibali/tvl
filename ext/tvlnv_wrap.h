@@ -15,13 +15,13 @@
 #include <string>
 
 
-class SwigDirector_TvlnvFrameReader : public TvlnvFrameReader, public Swig::Director {
+class SwigDirector_MemManager : public MemManager, public Swig::Director {
 
 public:
-    SwigDirector_TvlnvFrameReader(PyObject *self, std::string video_file_path);
-    virtual std::string get_filename();
-    virtual uint8_t *read_frame();
-    virtual void read_frames();
+    SwigDirector_MemManager(PyObject *self);
+    virtual void *allocate(size_t size);
+    virtual void clear();
+    virtual MemType get_mem_type();
 
 /* Internal director utilities */
 public:
@@ -43,7 +43,7 @@ private:
         swig::SwigVar_PyObject name = SWIG_Python_str_FromChar(method_name);
         method = PyObject_GetAttr(swig_get_self(), name);
         if (!method) {
-          std::string msg = "Method in class TvlnvFrameReader doesn't exist, undefined ";
+          std::string msg = "Method in class MemManager doesn't exist, undefined ";
           msg += method_name;
           Swig::DirectorMethodException::raise(msg.c_str());
         }

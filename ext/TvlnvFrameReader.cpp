@@ -6,8 +6,8 @@
 simplelogger::Logger *logger = simplelogger::LoggerFactory::CreateConsoleLogger();
 
 
-TvlnvFrameReader::TvlnvFrameReader(std::string filename)
-    : _filename(filename)
+TvlnvFrameReader::TvlnvFrameReader(MemManager* mem_manager, std::string filename)
+    : _mem_manager(mem_manager), _filename(filename)
 {
     const int gpu_index = 0;
     const bool keep_frame_on_gpu = true;
@@ -23,6 +23,8 @@ TvlnvFrameReader::TvlnvFrameReader(std::string filename)
     // printf("GPU in use: %s\n", szDeviceName);
 
     ck(cuCtxCreate(&_cu_context, CU_CTX_SCHED_BLOCKING_SYNC, cu_device));
+    _mem_manager->cu_context = _cu_context;
+
     _demuxer = new FFmpegDemuxer(_filename.c_str());
     _decoder = new NvDecoder(_cu_context, _demuxer->GetWidth(), _demuxer->GetHeight(),
                              keep_frame_on_gpu, FFmpeg2NvCodecId(_demuxer->GetVideoCodec()));
@@ -32,7 +34,10 @@ TvlnvFrameReader::TvlnvFrameReader(std::string filename)
 TvlnvFrameReader::~TvlnvFrameReader() {
     delete _decoder;
     delete _demuxer;
+    _mem_manager->clear();
+    _mem_manager->cu_context = NULL;
     cuCtxDestroy(_cu_context);
+    printf("DESTROYED\n");
 }
 
 std::string TvlnvFrameReader::get_filename() {

@@ -23,21 +23,6 @@
     std::chrono::high_resolution_clock::now() - start).count() \
     << " ms " << std::endl;
 
-#define CUDA_DRVAPI_CALL( call )                                                                                                 \
-    do                                                                                                                           \
-    {                                                                                                                            \
-        CUresult err__ = call;                                                                                                   \
-        if (err__ != CUDA_SUCCESS)                                                                                               \
-        {                                                                                                                        \
-            const char *szErrName = NULL;                                                                                        \
-            cuGetErrorName(err__, &szErrName);                                                                                   \
-            std::ostringstream errorLog;                                                                                         \
-            errorLog << "CUDA driver API error " << szErrName ;                                                                  \
-            throw NVDECException::makeNVDECException(errorLog.str(), err__, __FUNCTION__, __FILE__, __LINE__);                   \
-        }                                                                                                                        \
-    }                                                                                                                            \
-    while (0)
-
 static const char * GetVideoCodecString(cudaVideoCodec eCodec) {
     static struct {
         cudaVideoCodec eCodec;
@@ -65,7 +50,7 @@ static const char * GetVideoCodecString(cudaVideoCodec eCodec) {
     if (eCodec >= 0 && eCodec <= cudaVideoCodec_NumCodecs) {
         return aCodecName[eCodec].name;
     }
-    for (int i = cudaVideoCodec_NumCodecs + 1; i < sizeof(aCodecName) / sizeof(aCodecName[0]); i++) {
+    for (size_t i = cudaVideoCodec_NumCodecs + 1; i < sizeof(aCodecName) / sizeof(aCodecName[0]); i++) {
         if (eCodec == aCodecName[i].eCodec) {
             return aCodecName[eCodec].name;
         }
@@ -212,9 +197,9 @@ int NvDecoder::HandleVideoSequence(CUVIDEOFORMAT *pVideoFormat)
     videoDecodeCreateInfo.vidLock = m_ctxLock;
     videoDecodeCreateInfo.ulWidth = pVideoFormat->coded_width;
     videoDecodeCreateInfo.ulHeight = pVideoFormat->coded_height;
-    if (m_nMaxWidth < (int)pVideoFormat->coded_width)
+    if (m_nMaxWidth < pVideoFormat->coded_width)
         m_nMaxWidth = pVideoFormat->coded_width;
-    if (m_nMaxHeight < (int)pVideoFormat->coded_height)
+    if (m_nMaxHeight < pVideoFormat->coded_height)
         m_nMaxHeight = pVideoFormat->coded_height;
     videoDecodeCreateInfo.ulMaxWidth = m_nMaxWidth;
     videoDecodeCreateInfo.ulMaxHeight = m_nMaxHeight;
@@ -553,7 +538,7 @@ NvDecoder::~NvDecoder() {
     }
 
     std::lock_guard<std::mutex> lock(m_mtxVPFrame);
-    if (m_vpFrame.size() != m_nFrameAlloc)
+    if (m_vpFrame.size() != (size_t)m_nFrameAlloc)
     {
         //LOG(WARNING) << "nFrameAlloc(" << m_nFrameAlloc << ") != m_vpFrame.size()(" << m_vpFrame.size() << ")";
     }
@@ -622,7 +607,7 @@ bool NvDecoder::Decode(const uint8_t *pData, int nSize, uint8_t ***pppFrame, int
 
 bool NvDecoder::DecodeLockFrame(const uint8_t *pData, int nSize, uint8_t ***pppFrame, int *pnFrameReturned, uint32_t flags, int64_t **ppTimestamp, int64_t timestamp, CUstream stream)
 {
-    bool ret = Decode(pData, nSize, pppFrame, pnFrameReturned, flags, ppTimestamp, timestamp, stream);
+    Decode(pData, nSize, pppFrame, pnFrameReturned, flags, ppTimestamp, timestamp, stream);
     std::lock_guard<std::mutex> lock(m_mtxVPFrame);
     m_vpFrame.erase(m_vpFrame.begin(), m_vpFrame.begin() + m_nDecodedFrame);
     return true;

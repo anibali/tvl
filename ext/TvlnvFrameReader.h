@@ -5,17 +5,25 @@
 #include "NvDecoder/NvDecoder.h"
 #include "Utils/FFmpegDemuxer.h"
 
+#include "MemManager.h"
+
 class TvlnvFrameReader
 {
 public:
-    TvlnvFrameReader(std::string video_file_path);
+    TvlnvFrameReader(MemManager* mem_manager, std::string video_file_path);
     ~TvlnvFrameReader();
 
     std::string get_filename();
     uint8_t* read_frame();
     void read_frames();
 
+    void test_callback() {
+        printf("Returned: %p\n", this->_mem_manager->allocate(8));
+        this->_mem_manager->clear();
+    }
+
 private:
+    MemManager* _mem_manager;
     std::string _filename;
     CUcontext _cu_context = NULL;
     FFmpegDemuxer* _demuxer;

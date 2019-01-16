@@ -185,8 +185,6 @@ public:
                 return false;
             }
 
-            printf("%d %d\n", pkt.pts, seek_pts);
-
             // TODO: Account for out-of-order packets somehow.
             if(pkt.pts != AV_NOPTS_VALUE && pkt.pts >= seek_pts) {
                 seek_pts = AV_NOPTS_VALUE;
