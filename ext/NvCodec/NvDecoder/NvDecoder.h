@@ -21,6 +21,8 @@
 #include <string.h>
 #include "nvcuvid.h"
 
+#include "MemManager.h"
+
 /**
 * @brief Exception class for error reporting from the decode API.
 */
@@ -103,7 +105,7 @@ public:
     *  Application must call this function to initialize the decoder, before
     *  starting to decode any frames.
     */
-    NvDecoder(CUcontext cuContext, int nWidth, int nHeight, bool bUseDeviceFrame, cudaVideoCodec eCodec, std::mutex *pMutex = NULL,
+    NvDecoder(CUcontext cuContext, int nWidth, int nHeight, MemManager* memManager, cudaVideoCodec eCodec, std::mutex *pMutex = NULL,
         bool bLowLatency = false, bool bDeviceFramePitched = false, const Rect *pCropRect = NULL, const Dim *pResizeDim = NULL, int maxWidth = 0, int maxHeight = 0);
     ~NvDecoder();
 
@@ -212,7 +214,7 @@ private:
 
 private:
     CUcontext m_cuContext = NULL;
-    bool m_bUseDeviceFrame;
+    MemManager* m_memManager;
     cudaVideoCodec m_eCodec = cudaVideoCodec_NumCodecs;
     std::mutex *m_pMutex;
     bool m_bDeviceFramePitched = false;

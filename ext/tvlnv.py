@@ -129,9 +129,6 @@ class TvlnvFrameReader(_object):
 
     def read_frames(self):
         return _tvlnv.TvlnvFrameReader_read_frames(self)
-
-    def test_callback(self):
-        return _tvlnv.TvlnvFrameReader_test_callback(self)
 TvlnvFrameReader_swigregister = _tvlnv.TvlnvFrameReader_swigregister
 TvlnvFrameReader_swigregister(TvlnvFrameReader)
 
@@ -144,6 +141,8 @@ class MemManager(_object):
     __swig_getmethods__ = {}
     __getattr__ = lambda self, name: _swig_getattr(self, MemManager, name)
     __repr__ = _swig_repr
+    __swig_destroy__ = _tvlnv.delete_MemManager
+    __del__ = lambda self: None
 
     def allocate(self, size):
         return _tvlnv.MemManager_allocate(self, size)
@@ -168,8 +167,6 @@ class MemManager(_object):
             self.this.append(this)
         except __builtin__.Exception:
             self.this = this
-    __swig_destroy__ = _tvlnv.delete_MemManager
-    __del__ = lambda self: None
     def __disown__(self):
         self.this.disown()
         _tvlnv.disown_MemManager(self)

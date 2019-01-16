@@ -3457,9 +3457,8 @@ namespace Swig {
 #define SWIGTYPE_p_TvlnvFrameReader swig_types[5]
 #define SWIGTYPE_p_char swig_types[6]
 #define SWIGTYPE_p_uint8_t swig_types[7]
-#define SWIGTYPE_p_void swig_types[8]
-static swig_type_info *swig_types[10];
-static swig_module_info swig_module = {swig_types, 9, 0, 0, 0, 0};
+static swig_type_info *swig_types[9];
+static swig_module_info swig_module = {swig_types, 8, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -4086,8 +4085,11 @@ SwigDirector_MemManager::SwigDirector_MemManager(PyObject *self): MemManager(), 
 
 
 
-void *SwigDirector_MemManager::allocate(size_t size) {
-  void *c_result;
+SwigDirector_MemManager::~SwigDirector_MemManager() {
+}
+
+uint8_t *SwigDirector_MemManager::allocate(size_t size) {
+  uint8_t *c_result;
   swig::SwigVar_PyObject obj0;
   obj0 = SWIG_From_size_t(static_cast< size_t >(size));
   if (!swig_get_self()) {
@@ -4108,9 +4110,9 @@ void *SwigDirector_MemManager::allocate(size_t size) {
     }
   }
   
-  c_result = (void*)PyInt_AsLong(result);
+  c_result = (uint8_t*)PyInt_AsLong(result);
   
-  return (void *) c_result;
+  return (uint8_t *) c_result;
 }
 
 
@@ -4286,33 +4288,33 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_TvlnvFrameReader_test_callback(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  TvlnvFrameReader *arg1 = (TvlnvFrameReader *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:TvlnvFrameReader_test_callback",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_TvlnvFrameReader, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TvlnvFrameReader_test_callback" "', argument " "1"" of type '" "TvlnvFrameReader *""'"); 
-  }
-  arg1 = reinterpret_cast< TvlnvFrameReader * >(argp1);
-  (arg1)->test_callback();
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
 SWIGINTERN PyObject *TvlnvFrameReader_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *obj;
   if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
   SWIG_TypeNewClientData(SWIGTYPE_p_TvlnvFrameReader, SWIG_NewClientData(obj));
   return SWIG_Py_Void();
 }
+
+SWIGINTERN PyObject *_wrap_delete_MemManager(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MemManager *arg1 = (MemManager *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:delete_MemManager",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MemManager, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_MemManager" "', argument " "1"" of type '" "MemManager *""'"); 
+  }
+  arg1 = reinterpret_cast< MemManager * >(argp1);
+  delete arg1;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
 
 SWIGINTERN PyObject *_wrap_MemManager_allocate(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
@@ -4326,7 +4328,7 @@ SWIGINTERN PyObject *_wrap_MemManager_allocate(PyObject *SWIGUNUSEDPARM(self), P
   PyObject * obj1 = 0 ;
   Swig::Director *director = 0;
   bool upcall = false;
-  void *result = 0 ;
+  uint8_t *result = 0 ;
   
   if (!PyArg_ParseTuple(args,(char *)"OO:MemManager_allocate",&obj0,&obj1)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MemManager, 0 |  0 );
@@ -4345,12 +4347,12 @@ SWIGINTERN PyObject *_wrap_MemManager_allocate(PyObject *SWIGUNUSEDPARM(self), P
     if (upcall) {
       Swig::DirectorPureVirtualException::raise("MemManager::allocate");
     } else {
-      result = (void *)(arg1)->allocate(arg2);
+      result = (uint8_t *)(arg1)->allocate(arg2);
     }
   } catch (Swig::DirectorException&) {
     SWIG_fail;
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_void, 0 |  0 );
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_uint8_t, 0 |  0 );
   if (director) {
     SWIG_AcquirePtr(resultobj, director->swig_release_ownership(SWIG_as_voidptr(result)));
   }
@@ -4510,27 +4512,6 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_delete_MemManager(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  MemManager *arg1 = (MemManager *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:delete_MemManager",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MemManager, SWIG_POINTER_DISOWN |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_MemManager" "', argument " "1"" of type '" "MemManager *""'"); 
-  }
-  arg1 = reinterpret_cast< MemManager * >(argp1);
-  delete arg1;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
 SWIGINTERN PyObject *_wrap_disown_MemManager(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   MemManager *arg1 = (MemManager *) 0 ;
@@ -4652,15 +4633,14 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"TvlnvFrameReader_get_filename", _wrap_TvlnvFrameReader_get_filename, METH_VARARGS, NULL},
 	 { (char *)"TvlnvFrameReader_read_frame", _wrap_TvlnvFrameReader_read_frame, METH_VARARGS, NULL},
 	 { (char *)"TvlnvFrameReader_read_frames", _wrap_TvlnvFrameReader_read_frames, METH_VARARGS, NULL},
-	 { (char *)"TvlnvFrameReader_test_callback", _wrap_TvlnvFrameReader_test_callback, METH_VARARGS, NULL},
 	 { (char *)"TvlnvFrameReader_swigregister", TvlnvFrameReader_swigregister, METH_VARARGS, NULL},
+	 { (char *)"delete_MemManager", _wrap_delete_MemManager, METH_VARARGS, NULL},
 	 { (char *)"MemManager_allocate", _wrap_MemManager_allocate, METH_VARARGS, NULL},
 	 { (char *)"MemManager_clear", _wrap_MemManager_clear, METH_VARARGS, NULL},
 	 { (char *)"MemManager_get_mem_type", _wrap_MemManager_get_mem_type, METH_VARARGS, NULL},
 	 { (char *)"MemManager_cu_context_set", _wrap_MemManager_cu_context_set, METH_VARARGS, NULL},
 	 { (char *)"MemManager_cu_context_get", _wrap_MemManager_cu_context_get, METH_VARARGS, NULL},
 	 { (char *)"new_MemManager", _wrap_new_MemManager, METH_VARARGS, NULL},
-	 { (char *)"delete_MemManager", _wrap_delete_MemManager, METH_VARARGS, NULL},
 	 { (char *)"disown_MemManager", _wrap_disown_MemManager, METH_VARARGS, NULL},
 	 { (char *)"MemManager_swigregister", MemManager_swigregister, METH_VARARGS, NULL},
 	 { (char *)"new_HostMemManager", _wrap_new_HostMemManager, METH_VARARGS, NULL},
@@ -4689,7 +4669,6 @@ static swig_type_info _swigt__p_MemType = {"_p_MemType", "enum MemType *|MemType
 static swig_type_info _swigt__p_TvlnvFrameReader = {"_p_TvlnvFrameReader", "TvlnvFrameReader *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_char = {"_p_char", "char *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_uint8_t = {"_p_uint8_t", "uint8_t *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_void = {"_p_void", "void *", 0, 0, (void*)0, 0};
 
 static swig_type_info *swig_type_initial[] = {
   &_swigt__p_CUcontext,
@@ -4700,7 +4679,6 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_TvlnvFrameReader,
   &_swigt__p_char,
   &_swigt__p_uint8_t,
-  &_swigt__p_void,
 };
 
 static swig_cast_info _swigc__p_CUcontext[] = {  {&_swigt__p_CUcontext, 0, 0, 0},{0, 0, 0, 0}};
@@ -4711,7 +4689,6 @@ static swig_cast_info _swigc__p_MemType[] = {  {&_swigt__p_MemType, 0, 0, 0},{0,
 static swig_cast_info _swigc__p_TvlnvFrameReader[] = {  {&_swigt__p_TvlnvFrameReader, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_char[] = {  {&_swigt__p_char, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_uint8_t[] = {  {&_swigt__p_uint8_t, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_void[] = {  {&_swigt__p_void, 0, 0, 0},{0, 0, 0, 0}};
 
 static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_CUcontext,
@@ -4722,7 +4699,6 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_TvlnvFrameReader,
   _swigc__p_char,
   _swigc__p_uint8_t,
-  _swigc__p_void,
 };
 
 

@@ -19,7 +19,8 @@ class SwigDirector_MemManager : public MemManager, public Swig::Director {
 
 public:
     SwigDirector_MemManager(PyObject *self);
-    virtual void *allocate(size_t size);
+    virtual ~SwigDirector_MemManager();
+    virtual uint8_t *allocate(size_t size);
     virtual void clear();
     virtual MemType get_mem_type();
 

@@ -17,7 +17,7 @@ setup(
                      'ext/TvlnvFrameReader.cpp', 'ext/MemManager.cpp'],
             swig_opts=['-c++'],
             extra_compile_args=['-std=c++11'],
-            include_dirs=['/usr/local/cuda/include', 'ext/NvCodec'],
+            include_dirs=['/usr/local/cuda/include', 'ext/NvCodec', 'ext'],
             library_dirs=['ext/NvCodec/Lib/linux/stubs/x86_64'],
             libraries=['avcodec', 'avutil', 'avformat', 'cuda', 'nvcuvid']
         )

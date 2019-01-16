@@ -17,11 +17,6 @@ public:
     uint8_t* read_frame();
     void read_frames();
 
-    void test_callback() {
-        printf("Returned: %p\n", this->_mem_manager->allocate(8));
-        this->_mem_manager->clear();
-    }
-
 private:
     MemManager* _mem_manager;
     std::string _filename;

@@ -384,21 +384,8 @@ int NvDecoder::setReconfigParams(const Rect *pCropRect, const Dim *pResizeDim)
 
     // Clear existing output buffers of different size
     uint8_t *pFrame = NULL;
-    while (!m_vpFrame.empty())
-    {
-        pFrame = m_vpFrame.back();
-        m_vpFrame.pop_back();
-        if (m_bUseDeviceFrame)
-        {
-            CUDA_DRVAPI_CALL(cuCtxPushCurrent(m_cuContext));
-            CUDA_DRVAPI_CALL(cuMemFree((CUdeviceptr)pFrame));
-            CUDA_DRVAPI_CALL(cuCtxPopCurrent(NULL));
-        }
-        else
-        {
-            delete pFrame;
-        }
-    }
+    m_memManager->clear();
+    m_vpFrame.clear();
     m_vpFrameRet.clear();
 
     return 1;
@@ -448,24 +435,7 @@ int NvDecoder::HandlePictureDisplay(CUVIDPARSERDISPINFO *pDispInfo) {
         {
             // Not enough frames in stock
             m_nFrameAlloc++;
-            uint8_t *pFrame = NULL;
-            if (m_bUseDeviceFrame)
-            {
-                CUDA_DRVAPI_CALL(cuCtxPushCurrent(m_cuContext));
-                if (m_bDeviceFramePitched)
-                {
-                    CUDA_DRVAPI_CALL(cuMemAllocPitch((CUdeviceptr *)&pFrame, &m_nDeviceFramePitch, m_nWidth * (m_nBitDepthMinus8 ? 2 : 1), m_nHeight * 3 / 2, 16));
-                }
-                else 
-                {
-                    CUDA_DRVAPI_CALL(cuMemAlloc((CUdeviceptr *)&pFrame, GetFrameSize()));
-                }
-                CUDA_DRVAPI_CALL(cuCtxPopCurrent(NULL));
-            }
-            else 
-            {
-                pFrame = new uint8_t[GetFrameSize()];
-            }
+            uint8_t *pFrame = m_memManager->allocate(GetFrameSize());
             m_vpFrame.push_back(pFrame);
         }
         pDecodedFrame = m_vpFrame[m_nDecodedFrame - 1];
@@ -476,7 +446,11 @@ int NvDecoder::HandlePictureDisplay(CUVIDPARSERDISPINFO *pDispInfo) {
     m.srcMemoryType = CU_MEMORYTYPE_DEVICE;
     m.srcDevice = dpSrcFrame;
     m.srcPitch = nSrcPitch;
-    m.dstMemoryType = m_bUseDeviceFrame ? CU_MEMORYTYPE_DEVICE : CU_MEMORYTYPE_HOST;
+    if(m_memManager->get_mem_type() == MEM_TYPE_CUDA) {
+        m.dstMemoryType = CU_MEMORYTYPE_DEVICE;
+    } else {
+        m.dstMemoryType = CU_MEMORYTYPE_HOST;
+    }
     m.dstDevice = (CUdeviceptr)(m.dstHost = pDecodedFrame);
     m.dstPitch = m_nDeviceFramePitch ? m_nDeviceFramePitch : m_nWidth * (m_nBitDepthMinus8 ? 2 : 1);
     m.WidthInBytes = m_nWidth * (m_nBitDepthMinus8 ? 2 : 1);
@@ -498,9 +472,9 @@ int NvDecoder::HandlePictureDisplay(CUVIDPARSERDISPINFO *pDispInfo) {
     return 1;
 }
 
-NvDecoder::NvDecoder(CUcontext cuContext, int nWidth, int nHeight, bool bUseDeviceFrame, cudaVideoCodec eCodec, std::mutex *pMutex,
+NvDecoder::NvDecoder(CUcontext cuContext, int nWidth, int nHeight, MemManager* memManager, cudaVideoCodec eCodec, std::mutex *pMutex,
     bool bLowLatency, bool bDeviceFramePitched, const Rect *pCropRect, const Dim *pResizeDim, int maxWidth, int maxHeight) :
-    m_cuContext(cuContext), m_bUseDeviceFrame(bUseDeviceFrame), m_eCodec(eCodec), m_pMutex(pMutex), m_bDeviceFramePitched(bDeviceFramePitched),
+    m_cuContext(cuContext), m_memManager(memManager), m_eCodec(eCodec), m_pMutex(pMutex), m_bDeviceFramePitched(bDeviceFramePitched),
     m_nMaxWidth (maxWidth), m_nMaxHeight(maxHeight)
 {
     if (pCropRect) m_cropRect = *pCropRect;
@@ -542,21 +516,9 @@ NvDecoder::~NvDecoder() {
     {
         //LOG(WARNING) << "nFrameAlloc(" << m_nFrameAlloc << ") != m_vpFrame.size()(" << m_vpFrame.size() << ")";
     }
-    for (uint8_t *pFrame : m_vpFrame)
-    {
-        if (m_bUseDeviceFrame)
-        {
-            if (m_pMutex) m_pMutex->lock();
-            cuCtxPushCurrent(m_cuContext);
-            cuMemFree((CUdeviceptr)pFrame);
-            cuCtxPopCurrent(NULL);
-            if (m_pMutex) m_pMutex->unlock();
-        }
-        else
-        {
-            delete[] pFrame;
-        }
-    }
+    if (m_pMutex) m_pMutex->lock();
+    m_memManager->clear();
+    if (m_pMutex) m_pMutex->unlock();
     cuvidCtxLockDestroy(m_ctxLock);
     STOP_TIMER("Session Deinitialization Time: ");
 }

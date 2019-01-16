@@ -3,7 +3,7 @@
 #include "NvDecoder/NvDecoder.h"
 
 
-void* HostMemManager::allocate(size_t size) {
+uint8_t* HostMemManager::allocate(size_t size) {
     uint8_t* pFrame = new uint8_t[size];
     _allocated.push_back(pFrame);
     return pFrame;
@@ -23,7 +23,7 @@ MemType HostMemManager::get_mem_type() {
     return MEM_TYPE_HOST;
 }
 
-void* CuMemManager::allocate(size_t size) {
+uint8_t* CuMemManager::allocate(size_t size) {
     uint8_t* pFrame = NULL;
     CUDA_DRVAPI_CALL(cuCtxPushCurrent(cu_context));
     CUDA_DRVAPI_CALL(cuMemAlloc((CUdeviceptr *)&pFrame, size));

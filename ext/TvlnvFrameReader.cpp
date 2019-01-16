@@ -10,7 +10,6 @@ TvlnvFrameReader::TvlnvFrameReader(MemManager* mem_manager, std::string filename
     : _mem_manager(mem_manager), _filename(filename)
 {
     const int gpu_index = 0;
-    const bool keep_frame_on_gpu = true;
 
     CheckInputFile(filename.c_str());
 
@@ -27,15 +26,15 @@ TvlnvFrameReader::TvlnvFrameReader(MemManager* mem_manager, std::string filename
 
     _demuxer = new FFmpegDemuxer(_filename.c_str());
     _decoder = new NvDecoder(_cu_context, _demuxer->GetWidth(), _demuxer->GetHeight(),
-                             keep_frame_on_gpu, FFmpeg2NvCodecId(_demuxer->GetVideoCodec()));
+                             _mem_manager, FFmpeg2NvCodecId(_demuxer->GetVideoCodec()));
     printf("Frame size: %d\n", _demuxer->GetFrameSize());
 }
 
 TvlnvFrameReader::~TvlnvFrameReader() {
     delete _decoder;
     delete _demuxer;
-    _mem_manager->clear();
     _mem_manager->cu_context = NULL;
+    delete _mem_manager;
     cuCtxDestroy(_cu_context);
     printf("DESTROYED\n");
 }

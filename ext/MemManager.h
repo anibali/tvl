@@ -12,7 +12,8 @@ typedef enum {
 
 class MemManager {
 public:
-    virtual void* allocate(size_t size) = 0;
+    virtual ~MemManager() {}
+    virtual uint8_t* allocate(size_t size) = 0;
     virtual void clear() {}
     virtual MemType get_mem_type() = 0;
 
@@ -20,7 +21,7 @@ public:
 };
 
 class HostMemManager: public MemManager {
-    virtual void* allocate(size_t size);
+    virtual uint8_t* allocate(size_t size);
     virtual void clear();
     virtual MemType get_mem_type();
 
@@ -29,7 +30,7 @@ private:
 };
 
 class CuMemManager: public MemManager {
-    virtual void* allocate(size_t size);
+    virtual uint8_t* allocate(size_t size);
     virtual void clear();
     virtual MemType get_mem_type();
 

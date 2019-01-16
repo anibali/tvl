@@ -7,8 +7,8 @@
 
 %feature("director") MemManager;
 
-%typemap(directorout) void* MemManager::allocate %{
-  $result = (void*)PyInt_AsLong($1);
+%typemap(directorout) uint8_t* MemManager::allocate %{
+  $result = (uint8_t*)PyInt_AsLong($1);
 %}
 
 %include <std_string.i>
