@@ -25,7 +25,6 @@ TvlnvFrameReader::TvlnvFrameReader(MemManager* mem_manager, std::string filename
     _demuxer = new FFmpegDemuxer(_filename.c_str());
     _decoder = new NvDecoder(_cu_context, _demuxer->GetWidth(), _demuxer->GetHeight(),
                              _mem_manager, FFmpeg2NvCodecId(_demuxer->GetVideoCodec()));
-    printf("Frame size: %d\n", _demuxer->GetFrameSize());
 }
 
 TvlnvFrameReader::~TvlnvFrameReader() {
@@ -34,7 +33,6 @@ TvlnvFrameReader::~TvlnvFrameReader() {
     _mem_manager->cu_context = NULL;
     delete _mem_manager;
     cuCtxDestroy(_cu_context);
-    printf("DESTROYED\n");
 }
 
 std::string TvlnvFrameReader::get_filename() {

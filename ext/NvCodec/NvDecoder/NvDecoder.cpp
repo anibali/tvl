@@ -451,7 +451,7 @@ int NvDecoder::HandlePictureDisplay(CUVIDPARSERDISPINFO *pDispInfo) {
         m.dstMemoryType = CU_MEMORYTYPE_HOST;
     }
     m.dstDevice = (CUdeviceptr)(m.dstHost = pDecodedFrame);
-    m.dstPitch = m_nDeviceFramePitch ? m_nDeviceFramePitch : m_nWidth * (m_nBitDepthMinus8 ? 2 : 1);
+    m.dstPitch = m_nWidth * (m_nBitDepthMinus8 ? 2 : 1);
     m.WidthInBytes = m_nWidth * (m_nBitDepthMinus8 ? 2 : 1);
     m.Height = m_nHeight;
     CUDA_DRVAPI_CALL(cuMemcpy2DAsync(&m, m_cuvidStream));
@@ -472,8 +472,8 @@ int NvDecoder::HandlePictureDisplay(CUVIDPARSERDISPINFO *pDispInfo) {
 }
 
 NvDecoder::NvDecoder(CUcontext cuContext, int nWidth, int nHeight, MemManager* memManager, cudaVideoCodec eCodec, std::mutex *pMutex,
-    bool bLowLatency, bool bDeviceFramePitched, const Rect *pCropRect, const Dim *pResizeDim, int maxWidth, int maxHeight) :
-    m_cuContext(cuContext), m_memManager(memManager), m_eCodec(eCodec), m_pMutex(pMutex), m_bDeviceFramePitched(bDeviceFramePitched),
+    bool bLowLatency, const Rect *pCropRect, const Dim *pResizeDim, int maxWidth, int maxHeight) :
+    m_cuContext(cuContext), m_memManager(memManager), m_eCodec(eCodec), m_pMutex(pMutex),
     m_nMaxWidth (maxWidth), m_nMaxHeight(maxHeight)
 {
     if (pCropRect) m_cropRect = *pCropRect;

@@ -106,7 +106,7 @@ public:
     *  starting to decode any frames.
     */
     NvDecoder(CUcontext cuContext, int nWidth, int nHeight, MemManager* memManager, cudaVideoCodec eCodec, std::mutex *pMutex = NULL,
-        bool bLowLatency = false, bool bDeviceFramePitched = false, const Rect *pCropRect = NULL, const Dim *pResizeDim = NULL, int maxWidth = 0, int maxHeight = 0);
+        bool bLowLatency = false, const Rect *pCropRect = NULL, const Dim *pResizeDim = NULL, int maxWidth = 0, int maxHeight = 0);
     ~NvDecoder();
 
     /**
@@ -132,7 +132,7 @@ public:
     /**
     *  @brief  This function is used to get the pitch of the device buffer holding the decoded frame.
     */
-    int GetDeviceFramePitch() { assert(m_nWidth); return m_nDeviceFramePitch ? (int)m_nDeviceFramePitch : m_nWidth * (m_nBitDepthMinus8 ? 2 : 1); }
+    int GetDeviceFramePitch() { assert(m_nWidth); return m_nWidth * (m_nBitDepthMinus8 ? 2 : 1); }
 
     /**
     *   @brief  This function is used to get the bit depth associated with the pixel format.
@@ -217,7 +217,6 @@ private:
     MemManager* m_memManager;
     cudaVideoCodec m_eCodec = cudaVideoCodec_NumCodecs;
     std::mutex *m_pMutex;
-    bool m_bDeviceFramePitched = false;
     unsigned int m_nMaxWidth = 0, m_nMaxHeight = 0;
 
     CUvideoctxlock m_ctxLock;
@@ -244,7 +243,6 @@ private:
     std::mutex m_mtxVPFrame;
     int m_nFrameAlloc = 0;
     CUstream m_cuvidStream = 0;
-    size_t m_nDeviceFramePitch = 0;
     Rect m_cropRect = {};
     Dim m_resizeDim = {};
 
