@@ -3451,14 +3451,16 @@ namespace Swig {
 
 #define SWIGTYPE_p_CUcontext swig_types[0]
 #define SWIGTYPE_p_CuMemManager swig_types[1]
-#define SWIGTYPE_p_HostMemManager swig_types[2]
-#define SWIGTYPE_p_MemManager swig_types[3]
-#define SWIGTYPE_p_MemType swig_types[4]
-#define SWIGTYPE_p_TvlnvFrameReader swig_types[5]
-#define SWIGTYPE_p_char swig_types[6]
-#define SWIGTYPE_p_uint8_t swig_types[7]
-static swig_type_info *swig_types[9];
-static swig_module_info swig_module = {swig_types, 8, 0, 0, 0, 0};
+#define SWIGTYPE_p_Dim swig_types[2]
+#define SWIGTYPE_p_HostMemManager swig_types[3]
+#define SWIGTYPE_p_MemManager swig_types[4]
+#define SWIGTYPE_p_MemType swig_types[5]
+#define SWIGTYPE_p_Rect swig_types[6]
+#define SWIGTYPE_p_TvlnvFrameReader swig_types[7]
+#define SWIGTYPE_p_char swig_types[8]
+#define SWIGTYPE_p_uint8_t swig_types[9]
+static swig_type_info *swig_types[11];
+static swig_module_info swig_module = {swig_types, 10, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -4209,7 +4211,118 @@ MemType SwigDirector_MemManager::get_mem_type() {
 #ifdef __cplusplus
 extern "C" {
 #endif
-SWIGINTERN PyObject *_wrap_new_TvlnvFrameReader(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_TvlnvFrameReader__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MemManager *arg1 = (MemManager *) 0 ;
+  std::string arg2 ;
+  int arg3 ;
+  Rect *arg4 = (Rect *) 0 ;
+  Dim *arg5 = (Dim *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  void *argp4 = 0 ;
+  int res4 = 0 ;
+  void *argp5 = 0 ;
+  int res5 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  PyObject * obj4 = 0 ;
+  TvlnvFrameReader *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOOO:new_TvlnvFrameReader",&obj0,&obj1,&obj2,&obj3,&obj4)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MemManager, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_TvlnvFrameReader" "', argument " "1"" of type '" "MemManager *""'"); 
+  }
+  arg1 = reinterpret_cast< MemManager * >(argp1);
+  {
+    std::string *ptr = (std::string *)0;
+    int res = SWIG_AsPtr_std_string(obj1, &ptr);
+    if (!SWIG_IsOK(res) || !ptr) {
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_TvlnvFrameReader" "', argument " "2"" of type '" "std::string""'"); 
+    }
+    arg2 = *ptr;
+    if (SWIG_IsNewObj(res)) delete ptr;
+  }
+  ecode3 = SWIG_AsVal_int(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "new_TvlnvFrameReader" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = static_cast< int >(val3);
+  res4 = SWIG_ConvertPtr(obj3, &argp4,SWIGTYPE_p_Rect, 0 |  0 );
+  if (!SWIG_IsOK(res4)) {
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "new_TvlnvFrameReader" "', argument " "4"" of type '" "Rect *""'"); 
+  }
+  arg4 = reinterpret_cast< Rect * >(argp4);
+  res5 = SWIG_ConvertPtr(obj4, &argp5,SWIGTYPE_p_Dim, 0 |  0 );
+  if (!SWIG_IsOK(res5)) {
+    SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "new_TvlnvFrameReader" "', argument " "5"" of type '" "Dim *""'"); 
+  }
+  arg5 = reinterpret_cast< Dim * >(argp5);
+  result = (TvlnvFrameReader *)new TvlnvFrameReader(arg1,arg2,arg3,arg4,arg5);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_TvlnvFrameReader, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_TvlnvFrameReader__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MemManager *arg1 = (MemManager *) 0 ;
+  std::string arg2 ;
+  int arg3 ;
+  Rect *arg4 = (Rect *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  void *argp4 = 0 ;
+  int res4 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  TvlnvFrameReader *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOO:new_TvlnvFrameReader",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MemManager, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_TvlnvFrameReader" "', argument " "1"" of type '" "MemManager *""'"); 
+  }
+  arg1 = reinterpret_cast< MemManager * >(argp1);
+  {
+    std::string *ptr = (std::string *)0;
+    int res = SWIG_AsPtr_std_string(obj1, &ptr);
+    if (!SWIG_IsOK(res) || !ptr) {
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_TvlnvFrameReader" "', argument " "2"" of type '" "std::string""'"); 
+    }
+    arg2 = *ptr;
+    if (SWIG_IsNewObj(res)) delete ptr;
+  }
+  ecode3 = SWIG_AsVal_int(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "new_TvlnvFrameReader" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = static_cast< int >(val3);
+  res4 = SWIG_ConvertPtr(obj3, &argp4,SWIGTYPE_p_Rect, 0 |  0 );
+  if (!SWIG_IsOK(res4)) {
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "new_TvlnvFrameReader" "', argument " "4"" of type '" "Rect *""'"); 
+  }
+  arg4 = reinterpret_cast< Rect * >(argp4);
+  result = (TvlnvFrameReader *)new TvlnvFrameReader(arg1,arg2,arg3,arg4);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_TvlnvFrameReader, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_TvlnvFrameReader__SWIG_2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   MemManager *arg1 = (MemManager *) 0 ;
   std::string arg2 ;
@@ -4248,6 +4361,101 @@ SWIGINTERN PyObject *_wrap_new_TvlnvFrameReader(PyObject *SWIGUNUSEDPARM(self), 
   return resultobj;
 fail:
   return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_TvlnvFrameReader(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[6] = {
+    0
+  };
+  Py_ssize_t ii;
+  
+  if (!PyTuple_Check(args)) SWIG_fail;
+  argc = args ? PyObject_Length(args) : 0;
+  for (ii = 0; (ii < 5) && (ii < argc); ii++) {
+    argv[ii] = PyTuple_GET_ITEM(args,ii);
+  }
+  if (argc == 3) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_MemManager, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_AsPtr_std_string(argv[1], (std::string**)(0));
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        {
+          int res = SWIG_AsVal_int(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          return _wrap_new_TvlnvFrameReader__SWIG_2(self, args);
+        }
+      }
+    }
+  }
+  if (argc == 4) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_MemManager, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_AsPtr_std_string(argv[1], (std::string**)(0));
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        {
+          int res = SWIG_AsVal_int(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          void *vptr = 0;
+          int res = SWIG_ConvertPtr(argv[3], &vptr, SWIGTYPE_p_Rect, 0);
+          _v = SWIG_CheckState(res);
+          if (_v) {
+            return _wrap_new_TvlnvFrameReader__SWIG_1(self, args);
+          }
+        }
+      }
+    }
+  }
+  if (argc == 5) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_MemManager, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_AsPtr_std_string(argv[1], (std::string**)(0));
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        {
+          int res = SWIG_AsVal_int(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          void *vptr = 0;
+          int res = SWIG_ConvertPtr(argv[3], &vptr, SWIGTYPE_p_Rect, 0);
+          _v = SWIG_CheckState(res);
+          if (_v) {
+            void *vptr = 0;
+            int res = SWIG_ConvertPtr(argv[4], &vptr, SWIGTYPE_p_Dim, 0);
+            _v = SWIG_CheckState(res);
+            if (_v) {
+              return _wrap_new_TvlnvFrameReader__SWIG_0(self, args);
+            }
+          }
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'new_TvlnvFrameReader'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    TvlnvFrameReader::TvlnvFrameReader(MemManager *,std::string,int,Rect *,Dim *)\n"
+    "    TvlnvFrameReader::TvlnvFrameReader(MemManager *,std::string,int,Rect *)\n"
+    "    TvlnvFrameReader::TvlnvFrameReader(MemManager *,std::string,int)\n");
+  return 0;
 }
 
 
@@ -4898,6 +5106,400 @@ SWIGINTERN PyObject *CuMemManager_swigregister(PyObject *SWIGUNUSEDPARM(self), P
   return SWIG_Py_Void();
 }
 
+SWIGINTERN PyObject *_wrap_Rect_l_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Rect *arg1 = (Rect *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:Rect_l_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Rect, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Rect_l_set" "', argument " "1"" of type '" "Rect *""'"); 
+  }
+  arg1 = reinterpret_cast< Rect * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Rect_l_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  if (arg1) (arg1)->l = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Rect_l_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Rect *arg1 = (Rect *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:Rect_l_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Rect, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Rect_l_get" "', argument " "1"" of type '" "Rect *""'"); 
+  }
+  arg1 = reinterpret_cast< Rect * >(argp1);
+  result = (int) ((arg1)->l);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Rect_t_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Rect *arg1 = (Rect *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:Rect_t_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Rect, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Rect_t_set" "', argument " "1"" of type '" "Rect *""'"); 
+  }
+  arg1 = reinterpret_cast< Rect * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Rect_t_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  if (arg1) (arg1)->t = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Rect_t_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Rect *arg1 = (Rect *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:Rect_t_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Rect, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Rect_t_get" "', argument " "1"" of type '" "Rect *""'"); 
+  }
+  arg1 = reinterpret_cast< Rect * >(argp1);
+  result = (int) ((arg1)->t);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Rect_r_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Rect *arg1 = (Rect *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:Rect_r_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Rect, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Rect_r_set" "', argument " "1"" of type '" "Rect *""'"); 
+  }
+  arg1 = reinterpret_cast< Rect * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Rect_r_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  if (arg1) (arg1)->r = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Rect_r_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Rect *arg1 = (Rect *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:Rect_r_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Rect, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Rect_r_get" "', argument " "1"" of type '" "Rect *""'"); 
+  }
+  arg1 = reinterpret_cast< Rect * >(argp1);
+  result = (int) ((arg1)->r);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Rect_b_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Rect *arg1 = (Rect *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:Rect_b_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Rect, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Rect_b_set" "', argument " "1"" of type '" "Rect *""'"); 
+  }
+  arg1 = reinterpret_cast< Rect * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Rect_b_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  if (arg1) (arg1)->b = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Rect_b_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Rect *arg1 = (Rect *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:Rect_b_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Rect, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Rect_b_get" "', argument " "1"" of type '" "Rect *""'"); 
+  }
+  arg1 = reinterpret_cast< Rect * >(argp1);
+  result = (int) ((arg1)->b);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_Rect(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Rect *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)":new_Rect")) SWIG_fail;
+  result = (Rect *)new Rect();
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Rect, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_Rect(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Rect *arg1 = (Rect *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:delete_Rect",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Rect, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_Rect" "', argument " "1"" of type '" "Rect *""'"); 
+  }
+  arg1 = reinterpret_cast< Rect * >(argp1);
+  delete arg1;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *Rect_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj;
+  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_Rect, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
+SWIGINTERN PyObject *_wrap_Dim_w_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Dim *arg1 = (Dim *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:Dim_w_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Dim, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Dim_w_set" "', argument " "1"" of type '" "Dim *""'"); 
+  }
+  arg1 = reinterpret_cast< Dim * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Dim_w_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  if (arg1) (arg1)->w = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Dim_w_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Dim *arg1 = (Dim *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:Dim_w_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Dim, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Dim_w_get" "', argument " "1"" of type '" "Dim *""'"); 
+  }
+  arg1 = reinterpret_cast< Dim * >(argp1);
+  result = (int) ((arg1)->w);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Dim_h_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Dim *arg1 = (Dim *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:Dim_h_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Dim, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Dim_h_set" "', argument " "1"" of type '" "Dim *""'"); 
+  }
+  arg1 = reinterpret_cast< Dim * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Dim_h_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  if (arg1) (arg1)->h = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Dim_h_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Dim *arg1 = (Dim *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:Dim_h_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Dim, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Dim_h_get" "', argument " "1"" of type '" "Dim *""'"); 
+  }
+  arg1 = reinterpret_cast< Dim * >(argp1);
+  result = (int) ((arg1)->h);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_Dim(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Dim *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)":new_Dim")) SWIG_fail;
+  result = (Dim *)new Dim();
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Dim, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_Dim(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Dim *arg1 = (Dim *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:delete_Dim",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Dim, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_Dim" "', argument " "1"" of type '" "Dim *""'"); 
+  }
+  arg1 = reinterpret_cast< Dim * >(argp1);
+  delete arg1;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *Dim_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj;
+  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_Dim, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
 static PyMethodDef SwigMethods[] = {
 	 { (char *)"SWIG_PyInstanceMethod_New", (PyCFunction)SWIG_PyInstanceMethod_New, METH_O, NULL},
 	 { (char *)"new_TvlnvFrameReader", _wrap_new_TvlnvFrameReader, METH_VARARGS, NULL},
@@ -4930,6 +5532,24 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"new_CuMemManager", _wrap_new_CuMemManager, METH_VARARGS, NULL},
 	 { (char *)"delete_CuMemManager", _wrap_delete_CuMemManager, METH_VARARGS, NULL},
 	 { (char *)"CuMemManager_swigregister", CuMemManager_swigregister, METH_VARARGS, NULL},
+	 { (char *)"Rect_l_set", _wrap_Rect_l_set, METH_VARARGS, NULL},
+	 { (char *)"Rect_l_get", _wrap_Rect_l_get, METH_VARARGS, NULL},
+	 { (char *)"Rect_t_set", _wrap_Rect_t_set, METH_VARARGS, NULL},
+	 { (char *)"Rect_t_get", _wrap_Rect_t_get, METH_VARARGS, NULL},
+	 { (char *)"Rect_r_set", _wrap_Rect_r_set, METH_VARARGS, NULL},
+	 { (char *)"Rect_r_get", _wrap_Rect_r_get, METH_VARARGS, NULL},
+	 { (char *)"Rect_b_set", _wrap_Rect_b_set, METH_VARARGS, NULL},
+	 { (char *)"Rect_b_get", _wrap_Rect_b_get, METH_VARARGS, NULL},
+	 { (char *)"new_Rect", _wrap_new_Rect, METH_VARARGS, NULL},
+	 { (char *)"delete_Rect", _wrap_delete_Rect, METH_VARARGS, NULL},
+	 { (char *)"Rect_swigregister", Rect_swigregister, METH_VARARGS, NULL},
+	 { (char *)"Dim_w_set", _wrap_Dim_w_set, METH_VARARGS, NULL},
+	 { (char *)"Dim_w_get", _wrap_Dim_w_get, METH_VARARGS, NULL},
+	 { (char *)"Dim_h_set", _wrap_Dim_h_set, METH_VARARGS, NULL},
+	 { (char *)"Dim_h_get", _wrap_Dim_h_get, METH_VARARGS, NULL},
+	 { (char *)"new_Dim", _wrap_new_Dim, METH_VARARGS, NULL},
+	 { (char *)"delete_Dim", _wrap_delete_Dim, METH_VARARGS, NULL},
+	 { (char *)"Dim_swigregister", Dim_swigregister, METH_VARARGS, NULL},
 	 { NULL, NULL, 0, NULL }
 };
 
@@ -4944,9 +5564,11 @@ static void *_p_CuMemManagerTo_p_MemManager(void *x, int *SWIGUNUSEDPARM(newmemo
 }
 static swig_type_info _swigt__p_CUcontext = {"_p_CUcontext", "CUcontext *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_CuMemManager = {"_p_CuMemManager", "CuMemManager *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_Dim = {"_p_Dim", "Dim *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_HostMemManager = {"_p_HostMemManager", "HostMemManager *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_MemManager = {"_p_MemManager", "MemManager *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_MemType = {"_p_MemType", "enum MemType *|MemType *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_Rect = {"_p_Rect", "Rect *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_TvlnvFrameReader = {"_p_TvlnvFrameReader", "TvlnvFrameReader *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_char = {"_p_char", "char *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_uint8_t = {"_p_uint8_t", "uint8_t *", 0, 0, (void*)0, 0};
@@ -4954,9 +5576,11 @@ static swig_type_info _swigt__p_uint8_t = {"_p_uint8_t", "uint8_t *", 0, 0, (voi
 static swig_type_info *swig_type_initial[] = {
   &_swigt__p_CUcontext,
   &_swigt__p_CuMemManager,
+  &_swigt__p_Dim,
   &_swigt__p_HostMemManager,
   &_swigt__p_MemManager,
   &_swigt__p_MemType,
+  &_swigt__p_Rect,
   &_swigt__p_TvlnvFrameReader,
   &_swigt__p_char,
   &_swigt__p_uint8_t,
@@ -4964,9 +5588,11 @@ static swig_type_info *swig_type_initial[] = {
 
 static swig_cast_info _swigc__p_CUcontext[] = {  {&_swigt__p_CUcontext, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_CuMemManager[] = {  {&_swigt__p_CuMemManager, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_Dim[] = {  {&_swigt__p_Dim, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_HostMemManager[] = {  {&_swigt__p_HostMemManager, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_MemManager[] = {  {&_swigt__p_MemManager, 0, 0, 0},  {&_swigt__p_HostMemManager, _p_HostMemManagerTo_p_MemManager, 0, 0},  {&_swigt__p_CuMemManager, _p_CuMemManagerTo_p_MemManager, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_MemType[] = {  {&_swigt__p_MemType, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_Rect[] = {  {&_swigt__p_Rect, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_TvlnvFrameReader[] = {  {&_swigt__p_TvlnvFrameReader, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_char[] = {  {&_swigt__p_char, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_uint8_t[] = {  {&_swigt__p_uint8_t, 0, 0, 0},{0, 0, 0, 0}};
@@ -4974,9 +5600,11 @@ static swig_cast_info _swigc__p_uint8_t[] = {  {&_swigt__p_uint8_t, 0, 0, 0},{0,
 static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_CUcontext,
   _swigc__p_CuMemManager,
+  _swigc__p_Dim,
   _swigc__p_HostMemManager,
   _swigc__p_MemManager,
   _swigc__p_MemType,
+  _swigc__p_Rect,
   _swigc__p_TvlnvFrameReader,
   _swigc__p_char,
   _swigc__p_uint8_t,

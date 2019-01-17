@@ -10,7 +10,7 @@
 class TvlnvFrameReader
 {
 public:
-    TvlnvFrameReader(MemManager* mem_manager, std::string video_file_path, int gpu_index);
+    TvlnvFrameReader(MemManager* mem_manager, std::string video_file_path, int gpu_index, Rect* crop_rect=NULL, Dim* resize_dim=NULL);
     ~TvlnvFrameReader();
 
     std::string get_filename();

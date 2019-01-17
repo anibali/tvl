@@ -112,8 +112,8 @@ class TvlnvFrameReader(_object):
     __getattr__ = lambda self, name: _swig_getattr(self, TvlnvFrameReader, name)
     __repr__ = _swig_repr
 
-    def __init__(self, mem_manager, video_file_path, gpu_index):
-        this = _tvlnv.new_TvlnvFrameReader(mem_manager, video_file_path, gpu_index)
+    def __init__(self, mem_manager, video_file_path, gpu_index, crop_rect=None, resize_dim=None):
+        this = _tvlnv.new_TvlnvFrameReader(mem_manager, video_file_path, gpu_index, crop_rect, resize_dim)
         try:
             self.this.append(this)
         except __builtin__.Exception:
@@ -244,6 +244,66 @@ class CuMemManager(MemManager):
     __del__ = lambda self: None
 CuMemManager_swigregister = _tvlnv.CuMemManager_swigregister
 CuMemManager_swigregister(CuMemManager)
+
+class Rect(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, Rect, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, Rect, name)
+    __repr__ = _swig_repr
+    __swig_setmethods__["l"] = _tvlnv.Rect_l_set
+    __swig_getmethods__["l"] = _tvlnv.Rect_l_get
+    if _newclass:
+        l = _swig_property(_tvlnv.Rect_l_get, _tvlnv.Rect_l_set)
+    __swig_setmethods__["t"] = _tvlnv.Rect_t_set
+    __swig_getmethods__["t"] = _tvlnv.Rect_t_get
+    if _newclass:
+        t = _swig_property(_tvlnv.Rect_t_get, _tvlnv.Rect_t_set)
+    __swig_setmethods__["r"] = _tvlnv.Rect_r_set
+    __swig_getmethods__["r"] = _tvlnv.Rect_r_get
+    if _newclass:
+        r = _swig_property(_tvlnv.Rect_r_get, _tvlnv.Rect_r_set)
+    __swig_setmethods__["b"] = _tvlnv.Rect_b_set
+    __swig_getmethods__["b"] = _tvlnv.Rect_b_get
+    if _newclass:
+        b = _swig_property(_tvlnv.Rect_b_get, _tvlnv.Rect_b_set)
+
+    def __init__(self):
+        this = _tvlnv.new_Rect()
+        try:
+            self.this.append(this)
+        except __builtin__.Exception:
+            self.this = this
+    __swig_destroy__ = _tvlnv.delete_Rect
+    __del__ = lambda self: None
+Rect_swigregister = _tvlnv.Rect_swigregister
+Rect_swigregister(Rect)
+
+class Dim(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, Dim, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, Dim, name)
+    __repr__ = _swig_repr
+    __swig_setmethods__["w"] = _tvlnv.Dim_w_set
+    __swig_getmethods__["w"] = _tvlnv.Dim_w_get
+    if _newclass:
+        w = _swig_property(_tvlnv.Dim_w_get, _tvlnv.Dim_w_set)
+    __swig_setmethods__["h"] = _tvlnv.Dim_h_set
+    __swig_getmethods__["h"] = _tvlnv.Dim_h_get
+    if _newclass:
+        h = _swig_property(_tvlnv.Dim_h_get, _tvlnv.Dim_h_set)
+
+    def __init__(self):
+        this = _tvlnv.new_Dim()
+        try:
+            self.this.append(this)
+        except __builtin__.Exception:
+            self.this = this
+    __swig_destroy__ = _tvlnv.delete_Dim
+    __del__ = lambda self: None
+Dim_swigregister = _tvlnv.Dim_swigregister
+Dim_swigregister(Dim)
 
 # This file is compatible with both classic and new-style classes.
 

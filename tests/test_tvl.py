@@ -8,8 +8,8 @@ import ctypes as C
 
 
 # VIDEO_FILENAME = '/home/aiden/Projects/PyTorch/tvl/tests/data/lines.mkv'
-VIDEO_FILENAME = '/home/aiden/Videos/bengio_twitter_boston_20160512/bengio_twitter_boston_20160512.mp4'
-# VIDEO_FILENAME = '/data/diving/processed/brisbane2016/DAY 4_6th May 2016_Friday/Day 4_Block 2.SCpkg/video.mkv'
+# VIDEO_FILENAME = '/home/aiden/Videos/bengio_twitter_boston_20160512/bengio_twitter_boston_20160512.mp4'
+VIDEO_FILENAME = '/data/diving/processed/brisbane2016/DAY 4_6th May 2016_Friday/Day 4_Block 2.SCpkg/video.mkv'
 
 
 class TorchMemManager(tvlnv.MemManager):
@@ -37,7 +37,12 @@ def test_torch_mem_manager():
     mm = TorchMemManager(torch.device('cuda:1'))
     mm.__disown__()
 
-    fr = tvlnv.TvlnvFrameReader(mm, VIDEO_FILENAME, mm.device.index)
+    dim = tvlnv.Dim()
+    dim.w = 1280
+    dim.h = 720
+
+    fr = tvlnv.TvlnvFrameReader(mm, VIDEO_FILENAME, mm.device.index, resize_dim=dim)
+
     fr.seek(120.0)
     start = time()
     frame_ptr = int(fr.read_frame())
@@ -61,8 +66,6 @@ def test_torch_mem_manager():
 
 
 # def test_tvl():
-#     # mm = TorchMemManager(torch.device('cuda:0'))
-#     # mm.__disown__()
 #     mm = tvlnv.CuMemManager()
 #     mm.thisown = 0
 #     fr = tvlnv.TvlnvFrameReader(mm, VIDEO_FILENAME, gpu_index=1)

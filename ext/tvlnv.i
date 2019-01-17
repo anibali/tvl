@@ -14,3 +14,11 @@
 %include <std_string.i>
 %include "TvlnvFrameReader.h"
 %include "MemManager.h"
+
+struct Rect {
+    int l, t, r, b;
+};
+
+struct Dim {
+    int w, h;
+};
