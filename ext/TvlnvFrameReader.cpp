@@ -6,11 +6,9 @@
 simplelogger::Logger *logger = simplelogger::LoggerFactory::CreateConsoleLogger();
 
 
-TvlnvFrameReader::TvlnvFrameReader(MemManager* mem_manager, std::string filename)
+TvlnvFrameReader::TvlnvFrameReader(MemManager* mem_manager, std::string filename, int gpu_index)
     : _mem_manager(mem_manager), _filename(filename)
 {
-    const int gpu_index = 0;
-
     CheckInputFile(filename.c_str());
 
     ck(cuInit(0));
@@ -40,15 +38,29 @@ TvlnvFrameReader::~TvlnvFrameReader() {
 }
 
 std::string TvlnvFrameReader::get_filename() {
-    return this->_filename;
+    return _filename;
+}
+
+int TvlnvFrameReader::get_width() {
+    return _demuxer->GetWidth();
+}
+
+int TvlnvFrameReader::get_height() {
+    return _demuxer->GetHeight();
+}
+
+int TvlnvFrameReader::get_frame_size() {
+    return _demuxer->GetFrameSize();
+}
+
+void TvlnvFrameReader::seek(float time_secs) {
+    _demuxer->Seek(time_secs);
 }
 
 uint8_t* TvlnvFrameReader::read_frame() {
     int nVideoBytes = 0, nFrameReturned = 0, nFrame = 0;
     uint8_t *pVideo = NULL;
     uint8_t **ppFrame = NULL;
-
-//    _demuxer->Seek(50.0);
 
     do {
         _demuxer->Demux(&pVideo, &nVideoBytes);
@@ -65,23 +77,4 @@ uint8_t* TvlnvFrameReader::read_frame() {
     }
 
     return ppFrame[0];
-}
-
-void TvlnvFrameReader::read_frames() {
-    int nVideoBytes = 0, nFrameReturned = 0, nFrame = 0;
-    uint8_t *pVideo = NULL;
-    uint8_t **ppFrame = 0;
-
-    _demuxer->Seek(5.2);
-
-    do {
-        _demuxer->Demux(&pVideo, &nVideoBytes);
-        _decoder->Decode(pVideo, nVideoBytes, &ppFrame, &nFrameReturned);
-
-        if (!nFrame && nFrameReturned)
-            LOG(INFO) << _decoder->GetVideoInfo();
-
-        nFrame += nFrameReturned;
-    } while (nVideoBytes);
-    std::cout << "Total frame decoded: " << nFrame << std::endl;
 }

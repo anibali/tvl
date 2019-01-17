@@ -383,7 +383,6 @@ int NvDecoder::setReconfigParams(const Rect *pCropRect, const Dim *pResizeDim)
     }
 
     // Clear existing output buffers of different size
-    uint8_t *pFrame = NULL;
     m_memManager->clear();
     m_vpFrame.clear();
     m_vpFrameRet.clear();

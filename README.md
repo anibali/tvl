@@ -9,4 +9,5 @@ rm -rf build && python setup.py build_ext --inplace && cp ext/tvlnv.py src/ && p
 * Remove unnecessary stuff from NvDecoder
   - Pitched memory stuff
   - m_vpFrame?
-* Select the appropriate GPU device index for the cuContext
+* Some of the stuff in the TvlnvFrameReader constructor should probably be moved to
+  a global init function of some variety

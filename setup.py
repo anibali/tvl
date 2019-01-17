@@ -1,4 +1,15 @@
 from setuptools import setup, find_packages, Extension
+from setuptools.command.build_ext import build_ext as build_ext_orig
+from shutil import copy
+
+
+class build_ext(build_ext_orig):
+    def run(self):
+        # Build extensions
+        super().run()
+
+        # Copy generated Python file into the source tree
+        copy('ext/tvlnv.py', 'src/tvlnv.py')
 
 
 setup(
@@ -22,4 +33,7 @@ setup(
             libraries=['avcodec', 'avutil', 'avformat', 'cuda', 'nvcuvid']
         )
     ],
+    cmdclass={
+        'build_ext': build_ext,
+    }
 )

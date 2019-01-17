@@ -10,12 +10,15 @@
 class TvlnvFrameReader
 {
 public:
-    TvlnvFrameReader(MemManager* mem_manager, std::string video_file_path);
+    TvlnvFrameReader(MemManager* mem_manager, std::string video_file_path, int gpu_index);
     ~TvlnvFrameReader();
 
     std::string get_filename();
+    int get_width();
+    int get_height();
+    int get_frame_size();
+    void seek(float time_secs);
     uint8_t* read_frame();
-    void read_frames();
 
 private:
     MemManager* _mem_manager;

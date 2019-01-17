@@ -112,8 +112,8 @@ class TvlnvFrameReader(_object):
     __getattr__ = lambda self, name: _swig_getattr(self, TvlnvFrameReader, name)
     __repr__ = _swig_repr
 
-    def __init__(self, mem_manager, video_file_path):
-        this = _tvlnv.new_TvlnvFrameReader(mem_manager, video_file_path)
+    def __init__(self, mem_manager, video_file_path, gpu_index):
+        this = _tvlnv.new_TvlnvFrameReader(mem_manager, video_file_path, gpu_index)
         try:
             self.this.append(this)
         except __builtin__.Exception:
@@ -124,11 +124,20 @@ class TvlnvFrameReader(_object):
     def get_filename(self):
         return _tvlnv.TvlnvFrameReader_get_filename(self)
 
+    def get_width(self):
+        return _tvlnv.TvlnvFrameReader_get_width(self)
+
+    def get_height(self):
+        return _tvlnv.TvlnvFrameReader_get_height(self)
+
+    def get_frame_size(self):
+        return _tvlnv.TvlnvFrameReader_get_frame_size(self)
+
+    def seek(self, time_secs):
+        return _tvlnv.TvlnvFrameReader_seek(self, time_secs)
+
     def read_frame(self):
         return _tvlnv.TvlnvFrameReader_read_frame(self)
-
-    def read_frames(self):
-        return _tvlnv.TvlnvFrameReader_read_frames(self)
 TvlnvFrameReader_swigregister = _tvlnv.TvlnvFrameReader_swigregister
 TvlnvFrameReader_swigregister(TvlnvFrameReader)
 
@@ -185,6 +194,15 @@ class HostMemManager(MemManager):
     __getattr__ = lambda self, name: _swig_getattr(self, HostMemManager, name)
     __repr__ = _swig_repr
 
+    def allocate(self, size):
+        return _tvlnv.HostMemManager_allocate(self, size)
+
+    def clear(self):
+        return _tvlnv.HostMemManager_clear(self)
+
+    def get_mem_type(self):
+        return _tvlnv.HostMemManager_get_mem_type(self)
+
     def __init__(self):
         this = _tvlnv.new_HostMemManager()
         try:
@@ -206,6 +224,15 @@ class CuMemManager(MemManager):
         __swig_getmethods__.update(getattr(_s, '__swig_getmethods__', {}))
     __getattr__ = lambda self, name: _swig_getattr(self, CuMemManager, name)
     __repr__ = _swig_repr
+
+    def allocate(self, size):
+        return _tvlnv.CuMemManager_allocate(self, size)
+
+    def clear(self):
+        return _tvlnv.CuMemManager_clear(self)
+
+    def get_mem_type(self):
+        return _tvlnv.CuMemManager_get_mem_type(self)
 
     def __init__(self):
         this = _tvlnv.new_CuMemManager()
