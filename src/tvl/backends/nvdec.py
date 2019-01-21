@@ -1,6 +1,7 @@
 import torch
 
 import tvlnv
+from .common import BackendInstance, Backend
 
 
 class TorchMemManager(tvlnv.MemManager):
@@ -53,7 +54,7 @@ def nv12_to_rgb(planar_yuv, h, w):
     return rgb.clamp_(0, 1)
 
 
-class NvdecBackendInstance:
+class NvdecBackendInstance(BackendInstance):
     def __init__(self, filename, device):
         mem_manager = TorchMemManager(device)
         mem_manager.__disown__()
@@ -73,6 +74,6 @@ class NvdecBackendInstance:
         return rgb
 
 
-class NvdecBackend:
+class NvdecBackend(Backend):
     def create(self, filename, device):
         return NvdecBackendInstance(filename, torch.device(device))

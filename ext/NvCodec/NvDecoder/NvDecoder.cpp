@@ -17,11 +17,13 @@
 #include "../Utils/NvCodecUtils.h"
 #include "NvDecoder/NvDecoder.h"
 
-#define START_TIMER auto start = std::chrono::high_resolution_clock::now();
-#define STOP_TIMER(print_message) std::cout << print_message << \
-    std::chrono::duration_cast<std::chrono::milliseconds>( \
-    std::chrono::high_resolution_clock::now() - start).count() \
-    << " ms " << std::endl;
+//#define START_TIMER auto start = std::chrono::high_resolution_clock::now();
+//#define STOP_TIMER(print_message) std::cout << print_message << \
+//    std::chrono::duration_cast<std::chrono::milliseconds>( \
+//    std::chrono::high_resolution_clock::now() - start).count() \
+//    << " ms " << std::endl;
+#define START_TIMER ;
+#define STOP_TIMER(print_message) ;
 
 static const char * GetVideoCodecString(cudaVideoCodec eCodec) {
     static struct {

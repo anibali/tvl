@@ -65,8 +65,8 @@ uint8_t* TvlnvFrameReader::read_frame() {
         _demuxer->Demux(&pVideo, &nVideoBytes);
         _decoder->Decode(pVideo, nVideoBytes, &ppFrame, &nFrameReturned);
 
-        if (!nFrame && nFrameReturned)
-            LOG(INFO) << _decoder->GetVideoInfo();
+//        if (!nFrame && nFrameReturned)
+//            LOG(INFO) << _decoder->GetVideoInfo();
 
         nFrame += nFrameReturned;
     } while(nVideoBytes && nFrameReturned < 1);
