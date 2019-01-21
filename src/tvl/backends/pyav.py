@@ -11,6 +11,14 @@ class PyAvBackendInstance(BackendInstance):
         self.generator = None
         self.seek_time = None
 
+    @property
+    def duration(self):
+        return self.container.duration / av.time_base
+
+    @property
+    def frame_rate(self):
+        return self.container.streams.video[0].average_rate
+
     def seek(self, time_secs):
         self.container.seek(round(time_secs * av.time_base))
         self.seek_time = time_secs
@@ -30,5 +38,5 @@ class PyAvBackendInstance(BackendInstance):
 
 
 class PyAvBackend(Backend):
-    def create(self, filename, device):
+    def create(self, filename, device) -> PyAvBackendInstance:
         return PyAvBackendInstance(filename, torch.device(device))

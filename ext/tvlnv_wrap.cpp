@@ -3923,6 +3923,9 @@ SWIGINTERNINLINE PyObject*
 }
 
 
+  #define SWIG_From_double   PyFloat_FromDouble 
+
+
 /* Getting isfinite working pre C99 across multiple platforms is non-trivial. Users can provide SWIG_isfinite on older platforms. */
 #ifndef SWIG_isfinite
 /* isfinite() is a macro for C99, but a function in namespace std for C++11. */
@@ -4562,6 +4565,50 @@ SWIGINTERN PyObject *_wrap_TvlnvFrameReader_get_frame_size(PyObject *SWIGUNUSEDP
   arg1 = reinterpret_cast< TvlnvFrameReader * >(argp1);
   result = (int)(arg1)->get_frame_size();
   resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_TvlnvFrameReader_get_duration(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  TvlnvFrameReader *arg1 = (TvlnvFrameReader *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:TvlnvFrameReader_get_duration",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_TvlnvFrameReader, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TvlnvFrameReader_get_duration" "', argument " "1"" of type '" "TvlnvFrameReader *""'"); 
+  }
+  arg1 = reinterpret_cast< TvlnvFrameReader * >(argp1);
+  result = (double)(arg1)->get_duration();
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_TvlnvFrameReader_get_frame_rate(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  TvlnvFrameReader *arg1 = (TvlnvFrameReader *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:TvlnvFrameReader_get_frame_rate",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_TvlnvFrameReader, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TvlnvFrameReader_get_frame_rate" "', argument " "1"" of type '" "TvlnvFrameReader *""'"); 
+  }
+  arg1 = reinterpret_cast< TvlnvFrameReader * >(argp1);
+  result = (double)(arg1)->get_frame_rate();
+  resultobj = SWIG_From_double(static_cast< double >(result));
   return resultobj;
 fail:
   return NULL;
@@ -5508,6 +5555,8 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"TvlnvFrameReader_get_width", _wrap_TvlnvFrameReader_get_width, METH_VARARGS, NULL},
 	 { (char *)"TvlnvFrameReader_get_height", _wrap_TvlnvFrameReader_get_height, METH_VARARGS, NULL},
 	 { (char *)"TvlnvFrameReader_get_frame_size", _wrap_TvlnvFrameReader_get_frame_size, METH_VARARGS, NULL},
+	 { (char *)"TvlnvFrameReader_get_duration", _wrap_TvlnvFrameReader_get_duration, METH_VARARGS, NULL},
+	 { (char *)"TvlnvFrameReader_get_frame_rate", _wrap_TvlnvFrameReader_get_frame_rate, METH_VARARGS, NULL},
 	 { (char *)"TvlnvFrameReader_seek", _wrap_TvlnvFrameReader_seek, METH_VARARGS, NULL},
 	 { (char *)"TvlnvFrameReader_read_frame", _wrap_TvlnvFrameReader_read_frame, METH_VARARGS, NULL},
 	 { (char *)"TvlnvFrameReader_swigregister", TvlnvFrameReader_swigregister, METH_VARARGS, NULL},

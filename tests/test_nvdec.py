@@ -37,3 +37,15 @@ def test_nvdec_seek(video_filename, mid_frame_image):
     rgb_bytes = (rgb * 255).round_().byte().cpu()
     img = PIL.Image.fromarray(rgb_bytes.permute(1, 2, 0).numpy(), 'RGB')
     np.testing.assert_allclose(img, mid_frame_image, rtol=0, atol=50)
+
+
+def test_nvdec_duration(video_filename):
+    backend = NvdecBackend()
+    inst = backend.create(video_filename, 'cuda:0')
+    assert inst.duration == 2.0
+
+
+def test_nvdec_frame_rate(video_filename):
+    backend = NvdecBackend()
+    inst = backend.create(video_filename, 'cuda:0')
+    assert inst.frame_rate == 25

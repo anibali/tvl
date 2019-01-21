@@ -62,6 +62,14 @@ class NvdecBackendInstance(BackendInstance):
 
         self.frame_reader = tvlnv.TvlnvFrameReader(mem_manager, filename, device.index)
 
+    @property
+    def duration(self):
+        return self.frame_reader.get_duration()
+
+    @property
+    def frame_rate(self):
+        return self.frame_reader.get_frame_rate()
+
     def seek(self, time_secs):
         self.frame_reader.seek(time_secs)
 
@@ -78,5 +86,5 @@ class NvdecBackendInstance(BackendInstance):
 
 
 class NvdecBackend(Backend):
-    def create(self, filename, device):
+    def create(self, filename, device) -> NvdecBackendInstance:
         return NvdecBackendInstance(filename, torch.device(device))

@@ -52,6 +52,14 @@ int TvlnvFrameReader::get_frame_size() {
     return _decoder->GetFrameSize();
 }
 
+double TvlnvFrameReader::get_duration() {
+    return _demuxer->GetDuration();
+}
+
+double TvlnvFrameReader::get_frame_rate() {
+    return _demuxer->GetFrameRate();
+}
+
 void TvlnvFrameReader::seek(float time_secs) {
     _demuxer->Seek(time_secs);
 }

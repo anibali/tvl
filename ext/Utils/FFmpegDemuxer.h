@@ -28,6 +28,7 @@ private:
     bool bMp4H264;
     AVCodecID eVideoCodec;
     int nWidth, nHeight, nBitDepth;
+    double durationSecs, frameRate;
 
     int64_t seek_pts = AV_NOPTS_VALUE;
 
@@ -63,6 +64,9 @@ private:
             nBitDepth = 10;
         if (fmtc->streams[iVideoStream]->codecpar->format == AV_PIX_FMT_YUV420P12LE)
             nBitDepth = 12;
+
+        durationSecs = fmtc->duration / (double)AV_TIME_BASE;
+        frameRate = av_q2d(av_guess_frame_rate(fmtc, fmtc->streams[iVideoStream], NULL));
 
         bMp4H264 = eVideoCodec == AV_CODEC_ID_H264 && (
                 !strcmp(fmtc->iformat->long_name, "QuickTime / MOV") 
@@ -157,6 +161,12 @@ public:
     }
     int GetFrameSize() {
         return nBitDepth == 8 ? nWidth * nHeight * 3 / 2: nWidth * nHeight * 3;
+    }
+    double GetDuration() {
+        return durationSecs;
+    }
+    double GetFrameRate() {
+        return frameRate;
     }
     void Seek(float time_secs) {
         float time_base = av_q2d(fmtc->streams[iVideoStream]->time_base);

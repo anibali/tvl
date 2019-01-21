@@ -133,6 +133,12 @@ class TvlnvFrameReader(_object):
     def get_frame_size(self):
         return _tvlnv.TvlnvFrameReader_get_frame_size(self)
 
+    def get_duration(self):
+        return _tvlnv.TvlnvFrameReader_get_duration(self)
+
+    def get_frame_rate(self):
+        return _tvlnv.TvlnvFrameReader_get_frame_rate(self)
+
     def seek(self, time_secs):
         return _tvlnv.TvlnvFrameReader_seek(self, time_secs)
 

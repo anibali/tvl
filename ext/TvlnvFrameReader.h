@@ -17,6 +17,8 @@ public:
     int get_width();
     int get_height();
     int get_frame_size();
+    double get_duration();
+    double get_frame_rate();
     void seek(float time_secs);
     uint8_t* read_frame();
 
