@@ -13,7 +13,7 @@
 
 %include <std_string.i>
 %include "TvlnvFrameReader.h"
-%include "MemManager.h"
+%include "nvidia/MemManager.h"
 
 struct Rect {
     int l, t, r, b;

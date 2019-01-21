@@ -24,12 +24,12 @@ setup(
     ext_modules=[
         Extension(
             '_tvlnv',
-            sources=['ext/NvCodec/NvDecoder/NvDecoder.cpp', 'ext/tvlnv.i',
-                     'ext/TvlnvFrameReader.cpp', 'ext/MemManager.cpp'],
+            sources=['ext/tvlnv.i', 'ext/nvidia/NvDecoder/NvDecoder.cpp',
+                     'ext/nvidia/MemManager.cpp', 'ext/TvlnvFrameReader.cpp'],
             swig_opts=['-c++'],
             extra_compile_args=['-std=c++11'],
-            include_dirs=['/usr/local/cuda/include', 'ext/NvCodec', 'ext'],
-            library_dirs=['ext/NvCodec/Lib/linux/stubs/x86_64'],
+            include_dirs=['/usr/local/cuda/include', 'ext/nvidia', 'ext'],
+            library_dirs=['ext/nvidia/Lib/linux/stubs/x86_64'],
             libraries=['avcodec', 'avutil', 'avformat', 'cuda', 'nvcuvid']
         )
     ],

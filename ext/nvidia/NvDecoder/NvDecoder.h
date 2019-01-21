@@ -21,7 +21,7 @@
 #include <string.h>
 #include "nvcuvid.h"
 
-#include "MemManager.h"
+#include "../MemManager.h"
 
 /**
 * @brief Exception class for error reporting from the decode API.
