@@ -7,7 +7,7 @@ class BackendInstance(ABC):
         pass
 
     @abstractmethod
-    def read_frame_rgb(self):
+    def read_frame(self):
         pass
 
 

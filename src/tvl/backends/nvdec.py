@@ -65,8 +65,11 @@ class NvdecBackendInstance(BackendInstance):
     def seek(self, time_secs):
         self.frame_reader.seek(time_secs)
 
-    def read_frame_rgb(self):
-        data_ptr = int(self.frame_reader.read_frame())
+    def read_frame(self):
+        result = self.frame_reader.read_frame()
+        if result is None:
+            raise EOFError()
+        data_ptr = int(result)
         planar_yuv = self.mem_manager.tensors[data_ptr]
         width = self.frame_reader.get_width()
         height = self.frame_reader.get_height()

@@ -8,6 +8,3 @@ rm -rf build && python setup.py build_ext --inplace && pytest -s
 
 * Some of the stuff in the TvlnvFrameReader constructor should probably be moved to
   a global init function of some variety
-* Consistent errors for common things
-  - Trying to read frame after end of video
-  - Invalid seek?
