@@ -1,8 +1,13 @@
 from typing import Dict
 
-from .backends import PyAvBackend, NvdecBackend
-from .backends.common import Backend
+import tvl.backends
+from tvl.backends.common import Backend
+from warnings import warn
 
+_backend_priorities = {
+    'cpu': ['PyAvBackend'],
+    'gpu': ['NvdecBackend'],
+}
 _device_backends: Dict[str, Backend] = {}
 
 
@@ -65,8 +70,16 @@ class VideoLoader:
 
 
 def _init():
-    set_device_backend('cpu', PyAvBackend())
-    set_device_backend('cuda', NvdecBackend())
+    unsupported_devices = []
+    for device_type, backend_names in _backend_priorities.items():
+        for backend_name in backend_names:
+            if hasattr(tvl.backends, backend_name):
+                set_device_backend(device_type, getattr(tvl.backends, backend_name)())
+                break
+        else:
+            unsupported_devices.append(device_type)
+    if len(unsupported_devices) > 0:
+        warn(f'No video loading backend available for the following devices: {repr(unsupported_devices)}')
 
 
 _init()

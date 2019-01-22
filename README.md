@@ -14,4 +14,3 @@ docker build -t tvl . && docker run --rm -it tvl
 
 * Some of the stuff in the TvlnvFrameReader constructor should probably be moved to
   a global init function of some variety
-* Make specific backends optional
