@@ -35,5 +35,10 @@ setup(
     ],
     cmdclass={
         'build_ext': build_ext,
-    }
+    },
+    install_requires=[
+        'av',
+        'numpy',
+        'torch',
+    ],
 )
