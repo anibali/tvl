@@ -1,4 +1,4 @@
-FROM nvidia/cuda:10.0-devel-ubuntu18.04 as ffmpeg-builder
+FROM nvidia/cuda:10.0-devel-ubuntu14.04 as ffmpeg-builder
 
 RUN apt-get update \
  && apt-get install -y curl git pkg-config yasm libx264-dev checkinstall \
@@ -35,7 +35,7 @@ RUN cd /tmp && curl -sO http://ffmpeg.org/releases/ffmpeg-$FFMPEG_VERSION.tar.bz
 ################################################################################
 
 
-FROM nvidia/cuda:10.0-devel-ubuntu18.04 as tvl-builder
+FROM nvidia/cuda:10.0-devel-ubuntu14.04 as tvl-builder
 
 RUN apt-get update \
  && apt-get install -y curl git \
@@ -91,7 +91,7 @@ RUN python setup.py bdist_wheel \
 ################################################################################
 
 
-FROM nvidia/cuda:10.0-devel-ubuntu18.04
+FROM nvidia/cuda:10.0-devel-ubuntu14.04
 
 RUN apt-get update \
  && apt-get install -y curl git \
