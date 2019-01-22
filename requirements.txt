@@ -1,0 +1,6 @@
+av==6.1.0
+numpy==1.14.6
+Pillow==5.2.0
+pytest-mock==1.10.0
+pytest==3.8.2
+torch==1.0.0

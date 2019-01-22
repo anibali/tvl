@@ -3,9 +3,11 @@ from collections import namedtuple
 
 import PIL.Image
 import pytest
+import pytest_mock
 
 import tvl
 
+mocker = pytest_mock.mocker
 data_dir = os.path.join(os.path.dirname(__file__), 'data')
 
 
@@ -35,11 +37,11 @@ def dummy_backend():
 
         @property
         def duration(self):
-            return 0.0
+            return len(self.frames) / self.frame_rate
 
         @property
         def frame_rate(self):
-            return 0.0
+            return 10
 
         def read_frame(self):
             if self.pos < len(self.frames):
