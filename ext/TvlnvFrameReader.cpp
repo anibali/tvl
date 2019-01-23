@@ -12,14 +12,13 @@ TvlnvFrameReader::TvlnvFrameReader(MemManager* mem_manager, std::string filename
     CheckInputFile(filename.c_str());
 
     ck(cuInit(0));
-    CUdevice cu_device = 0;
-    ck(cuDeviceGet(&cu_device, gpu_index));
+    ck(cuDeviceGet(&_cu_device, gpu_index));
 
     // char szDeviceName[80];
-    // ck(cuDeviceGetName(szDeviceName, sizeof(szDeviceName), cu_device));
+    // ck(cuDeviceGetName(szDeviceName, sizeof(szDeviceName), _cu_device));
     // printf("GPU in use: %s\n", szDeviceName);
 
-    ck(cuCtxCreate(&_cu_context, CU_CTX_SCHED_BLOCKING_SYNC, cu_device));
+    ck(cuDevicePrimaryCtxRetain(&_cu_context, _cu_device));
     _mem_manager->cu_context = _cu_context;
 
     _demuxer = new FFmpegDemuxer(_filename.c_str());
@@ -33,7 +32,7 @@ TvlnvFrameReader::~TvlnvFrameReader() {
     delete _demuxer;
     _mem_manager->cu_context = NULL;
     delete _mem_manager;
-    cuCtxDestroy(_cu_context);
+    cuDevicePrimaryCtxRelease(_cu_device);
 }
 
 std::string TvlnvFrameReader::get_filename() {

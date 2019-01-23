@@ -24,6 +24,7 @@ public:
     uint8_t* read_frame();
 
 private:
+    CUdevice _cu_device;
     MemManager* _mem_manager;
     std::string _filename;
     CUcontext _cu_context = NULL;
