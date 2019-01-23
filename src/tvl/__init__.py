@@ -6,7 +6,7 @@ from warnings import warn
 
 _backend_priorities = {
     'cpu': ['PyAvBackend'],
-    'gpu': ['NvdecBackend'],
+    'cuda': ['NvdecBackend'],
 }
 _device_backends: Dict[str, Backend] = {}
 
