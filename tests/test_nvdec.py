@@ -28,6 +28,20 @@ def test_nvdec_eof(video_filename):
         inst.read_frame()
 
 
+def test_nvdec_read_all_frames(video_filename):
+    backend = NvdecBackend()
+    inst = backend.create(video_filename, 'cuda:0')
+
+    n_read = 0
+    for i in range(1000):
+        try:
+            inst.read_frame()
+            n_read += 1
+        except EOFError:
+            break
+    assert n_read == 50
+
+
 def test_nvdec_seek(video_filename, mid_frame_image):
     backend = NvdecBackend()
 

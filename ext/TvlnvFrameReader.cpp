@@ -65,6 +65,12 @@ void TvlnvFrameReader::seek(float time_secs) {
 }
 
 uint8_t* TvlnvFrameReader::read_frame() {
+    if(!frame_buf.empty()) {
+        uint8_t* pFrame = frame_buf.front();
+        frame_buf.pop();
+        return pFrame;
+    }
+
     int nVideoBytes = 0, nFrameReturned = 0, nFrame = 0;
     uint8_t *pVideo = NULL;
     uint8_t **ppFrame = NULL;
@@ -81,6 +87,10 @@ uint8_t* TvlnvFrameReader::read_frame() {
 
     if(nFrameReturned < 1) {
         return NULL;
+    }
+
+    for(int i = 1; i < nFrameReturned; ++i) {
+        frame_buf.push(ppFrame[i]);
     }
 
     return ppFrame[0];

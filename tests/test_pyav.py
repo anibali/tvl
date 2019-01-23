@@ -28,6 +28,20 @@ def test_pyav_eof(video_filename):
         inst.read_frame()
 
 
+def test_pyav_read_all_frames(video_filename):
+    backend = PyAvBackend()
+    inst = backend.create(video_filename, 'cpu')
+
+    n_read = 0
+    for i in range(1000):
+        try:
+            inst.read_frame()
+            n_read += 1
+        except EOFError:
+            break
+    assert n_read == 50
+
+
 def test_pyav_seek(video_filename, mid_frame_image):
     backend = PyAvBackend()
 

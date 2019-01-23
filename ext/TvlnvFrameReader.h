@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cuda.h>
+#include <queue>
 
 #include "NvDecoder/NvDecoder.h"
 #include "Utils/FFmpegDemuxer.h"
@@ -28,4 +29,5 @@ private:
     CUcontext _cu_context = NULL;
     FFmpegDemuxer* _demuxer;
     NvDecoder* _decoder;
+    std::queue<uint8_t*> frame_buf;
 };
