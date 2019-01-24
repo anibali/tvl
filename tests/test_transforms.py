@@ -2,7 +2,7 @@ import torch
 import math
 from numpy.testing import assert_allclose
 
-from tvl.transforms import normalise, denormalise, resize
+from tvl.transforms import normalise, denormalise, resize, crop, flip
 
 
 DENORMALISED_IMAGE = torch.tensor([math.sqrt(3), -math.sqrt(3)]).add_(5).repeat(3, 2, 1)
@@ -39,7 +39,7 @@ def test_denormalise_inplace():
     assert_allclose(denormalised, DENORMALISED_IMAGE)  # Result should be correct
 
 
-def test_resize(first_frame_image):
+def test_resize():
     inp = torch.FloatTensor([[
         [1, 0],
         [0, 1],
@@ -51,4 +51,61 @@ def test_resize(first_frame_image):
         [0, 0, 1, 1],
     ]])
     actual = resize(inp, (4, 4), mode='nearest')
+    assert_allclose(actual, expected)
+
+
+def test_crop():
+    inp = torch.FloatTensor([[
+        [1, 1, 0, 0],
+        [1, 1, 0, 0],
+        [0, 0, 1, 1],
+        [0, 0, 1, 1],
+    ]])
+    expected = torch.FloatTensor([[
+        [1, 0],
+        [0, 1],
+        [0, 1],
+    ]])
+    actual = crop(inp, 1, 1, 3, 2)
+    assert_allclose(actual, expected)
+
+
+def test_crop_padded():
+    inp = torch.FloatTensor([[
+        [1, 1, 0, 0],
+        [1, 1, 0, 0],
+        [0, 0, 1, 1],
+        [0, 0, 1, 1],
+    ]])
+    expected = torch.FloatTensor([[
+        [2, 2, 2, 2, 2],
+        [1, 0, 0, 2, 2],
+    ]])
+    actual = crop(inp, -1, 1, 2, 5, padding_mode='constant', fill=2)
+    assert_allclose(actual, expected)
+
+
+def test_flip_horizontal():
+    inp = torch.FloatTensor([[
+        [1, 2],
+        [3, 4],
+    ]])
+    expected = torch.FloatTensor([[
+        [2, 1],
+        [4, 3],
+    ]])
+    actual = flip(inp, horizontal=True)
+    assert_allclose(actual, expected)
+
+
+def test_flip_vertical():
+    inp = torch.FloatTensor([[
+        [1, 2],
+        [3, 4],
+    ]])
+    expected = torch.FloatTensor([[
+        [3, 4],
+        [1, 2],
+    ]])
+    actual = flip(inp, vertical=True)
     assert_allclose(actual, expected)

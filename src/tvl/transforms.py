@@ -11,9 +11,21 @@ which is especially useful for videos.
 
 import torch
 from torch.nn.functional import interpolate
+from typing import Sequence
 
 
 def normalise(tensor, mean, stddev, inplace=False):
+    """Normalise the image with channel-wise mean and standard deviation.
+
+    Args:
+        tensor (Tensor): The image tensor to be normalised.
+        mean (Sequence of float): Means for each channel.
+        stddev (Sequence of float): Standard deviations for each channel.
+        inplace (bool): Perform normalisation in-place.
+
+    Returns:
+        Tensor: The normalised image tensor.
+    """
     mean = torch.as_tensor(mean, device=tensor.device)[..., :, None, None]
     stddev = torch.as_tensor(stddev, device=tensor.device)[..., :, None, None]
 
@@ -27,6 +39,17 @@ def normalise(tensor, mean, stddev, inplace=False):
 
 
 def denormalise(tensor, mean, stddev, inplace=False):
+    """Denormalise the image with channel-wise mean and standard deviation.
+
+    Args:
+        tensor (Tensor): The image tensor to be denormalised.
+        mean (Sequence of float): Means for each channel.
+        stddev (Sequence of float): Standard deviations for each channel.
+        inplace (bool): Perform denormalisation in-place.
+
+    Returns:
+        Tensor: The denormalised image tensor.
+    """
     mean = torch.as_tensor(mean, device=tensor.device)[..., :, None, None]
     stddev = torch.as_tensor(stddev, device=tensor.device)[..., :, None, None]
 
@@ -37,6 +60,16 @@ def denormalise(tensor, mean, stddev, inplace=False):
 
 
 def resize(tensor, size, mode='bilinear'):
+    """Resize the image.
+
+    Args:
+        tensor (Tensor): The image tensor to be resized.
+        size (tuple of int): Size of the resized image (height, width).
+        mode (str): The pixel sampling interpolation mode to be used.
+
+    Returns:
+        Tensor: The resized image tensor.
+    """
     is_unbatched = tensor.ndimension() == 3
     if is_unbatched:
         tensor = tensor.unsqueeze(0)
@@ -44,3 +77,77 @@ def resize(tensor, size, mode='bilinear'):
     if is_unbatched:
         resized = resized.squeeze(0)
     return resized
+
+
+def crop(tensor, t, l, h, w, padding_mode='constant', fill=0):
+    """Crop the image, padding out-of-bounds regions.
+
+    Args:
+        tensor (Tensor): The image tensor to be cropped.
+        t (int): Top pixel coordinate.
+        l (int): Left pixel coordinate.
+        h (int): Height of the cropped image.
+        w (int): Width of the cropped image.
+        padding_mode (str): Padding mode (currently "constant" is the only valid option).
+        fill (float): Fill value to use with constant padding.
+
+    Returns:
+        Tensor: The cropped image tensor.
+    """
+    # If the crop region is wholly within the image, simply narrow the tensor.
+    if t >= 0 and l >= 0 and h <= tensor.size(-2) and w <= tensor.size(-1):
+        return tensor[..., t:t+h, l:l+w]
+
+    if padding_mode == 'constant':
+        result = torch.full((*tensor.size()[:-2], h, w), fill)
+    else:
+        raise Exception('crop only supports "constant" padding currently.')
+
+    sx1 = l
+    sy1 = t
+    sx2 = l + w
+    sy2 = t + h
+    dx1 = 0
+    dy1 = 0
+
+    if sx1 < 0:
+        dx1 = -sx1
+        w += sx1
+        sx1 = 0
+
+    if sy1 < 0:
+        dy1 = -sy1
+        h += sy1
+        sy1 = 0
+
+    if sx2 >= tensor.size(-1):
+        w -= sx2 - tensor.size(-1)
+
+    if sy2 >= tensor.size(-2):
+        h -= sy2 - tensor.size(-2)
+
+    # Copy the in-bounds sub-area of the crop region into the result tensor.
+    if h > 0 and w > 0:
+        src = tensor.narrow(-2, sy1, h).narrow(-1, sx1, w)
+        dst = result.narrow(-2, dy1, h).narrow(-1, dx1, w)
+        dst.copy_(src)
+
+    return result
+
+
+def flip(tensor, horizontal=False, vertical=False):
+    """Flip the image.
+
+    Args:
+        tensor (Tensor): The image tensor to be flipped.
+        horizontal: Flip horizontally.
+        vertical: Flip vertically.
+
+    Returns:
+        Tensor: The flipped tensor.
+    """
+    if horizontal == True:
+        tensor = tensor.flip(-1)
+    if vertical == True:
+        tensor = tensor.flip(-2)
+    return tensor
