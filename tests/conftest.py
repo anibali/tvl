@@ -13,7 +13,7 @@ data_dir = os.path.join(os.path.dirname(__file__), 'data')
 
 @pytest.fixture
 def video_filename():
-    return os.path.join(data_dir, 'board_game.mkv')
+    return os.path.join(data_dir, 'board_game-h264.mkv')
 
 
 @pytest.fixture
