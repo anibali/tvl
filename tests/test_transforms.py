@@ -1,6 +1,6 @@
 import torch
 import math
-from numpy.testing import assert_allclose
+from torch.testing import assert_allclose
 
 from tvl.transforms import normalise, denormalise, resize, crop, flip, rotate
 
@@ -125,4 +125,21 @@ def test_rotate():
         [0, 0],
     ]])
     actual = rotate(inp, 90)
-    assert_allclose(actual, expected, atol=1e-4)
+    assert_allclose(actual, expected)
+
+
+def test_rotate_cuda():
+    inp = torch.cuda.FloatTensor([[
+        [1, 2],
+        [3, 4],
+        [5, 6],
+        [7, 8],
+    ]])
+    expected = torch.cuda.FloatTensor([[
+        [0, 0],
+        [4, 6],
+        [3, 5],
+        [0, 0],
+    ]])
+    actual = rotate(inp, 90)
+    assert_allclose(actual, expected)
