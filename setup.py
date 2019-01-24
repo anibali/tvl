@@ -40,5 +40,6 @@ setup(
         'av',
         'numpy',
         'torch',
+        'torchgeometry',
     ],
 )

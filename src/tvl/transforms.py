@@ -9,9 +9,12 @@ As an additional benefit, these functions are defined such that they also work i
 which is especially useful for videos.
 """
 
+import math
+from typing import Sequence
+
 import torch
 from torch.nn.functional import interpolate
-from typing import Sequence
+from torchgeometry.imgwarp import warp_affine
 
 
 def normalise(tensor, mean, stddev, inplace=False):
@@ -144,10 +147,53 @@ def flip(tensor, horizontal=False, vertical=False):
         vertical: Flip vertically.
 
     Returns:
-        Tensor: The flipped tensor.
+        Tensor: The flipped image tensor.
     """
     if horizontal == True:
         tensor = tensor.flip(-1)
     if vertical == True:
         tensor = tensor.flip(-2)
     return tensor
+
+
+def affine(tensor, matrix):
+    """Apply an affine transformation to the image.
+
+    Args:
+        tensor (Tensor): The image tensor to be warped.
+        matrix (Tensor): The 2x3 affine transformation matrix.
+
+    Returns:
+        Tensor: The warped image.
+    """
+    is_unbatched = tensor.ndimension() == 3
+    if is_unbatched:
+        tensor = tensor.unsqueeze(0)
+    warped = warp_affine(tensor, matrix, tensor.size()[-2:])
+    if is_unbatched:
+        warped = warped.squeeze(0)
+    return warped
+
+
+def rotate(tensor, degrees):
+    """Rotate the image anti-clockwise about the centre.
+
+    Args:
+        tensor (Tensor): The image tensor to be rotated.
+        degrees (float): The angle through which to rotate.
+
+    Returns:
+        Tensor: The rotated image tensor.
+    """
+    rads = math.radians(degrees)
+    h, w = tensor.size()[-2:]
+    c = math.cos(rads)
+    s = math.sin(rads)
+    x = (w - 1) / 2
+    y = (h - 1) / 2
+    # Transformation matrix for clockwise rotation about the centre of the image.
+    matrix = torch.tensor([
+        [ c, s, -c * x - s * y + x],
+        [-s, c,  s * x - c * y + y],
+    ], dtype=torch.float32, device=tensor.device)
+    return affine(tensor, matrix)

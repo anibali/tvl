@@ -2,7 +2,7 @@ import torch
 import math
 from numpy.testing import assert_allclose
 
-from tvl.transforms import normalise, denormalise, resize, crop, flip
+from tvl.transforms import normalise, denormalise, resize, crop, flip, rotate
 
 
 DENORMALISED_IMAGE = torch.tensor([math.sqrt(3), -math.sqrt(3)]).add_(5).repeat(3, 2, 1)
@@ -109,3 +109,20 @@ def test_flip_vertical():
     ]])
     actual = flip(inp, vertical=True)
     assert_allclose(actual, expected)
+
+
+def test_rotate():
+    inp = torch.FloatTensor([[
+        [1, 2],
+        [3, 4],
+        [5, 6],
+        [7, 8],
+    ]])
+    expected = torch.FloatTensor([[
+        [0, 0],
+        [4, 6],
+        [3, 5],
+        [0, 0],
+    ]])
+    actual = rotate(inp, 90)
+    assert_allclose(actual, expected, atol=1e-4)
