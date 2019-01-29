@@ -30,9 +30,9 @@ private:
     int nWidth, nHeight, nBitDepth;
     double durationSecs, frameRate;
 
-    int64_t seek_pts = AV_NOPTS_VALUE;
-
 public:
+    int64_t pkt_pts = 0;
+
     class DataProvider {
     public:
         virtual ~DataProvider() {}
@@ -168,11 +168,12 @@ public:
     double GetFrameRate() {
         return frameRate;
     }
-    void Seek(float time_secs) {
+    int64_t SecsToPts(float time_secs) {
         float time_base = av_q2d(fmtc->streams[iVideoStream]->time_base);
-        int64_t timestamp = (int64_t)floor(time_secs / time_base);
-        ck(av_seek_frame(fmtc, iVideoStream, timestamp, AVSEEK_FLAG_BACKWARD));
-        seek_pts = timestamp;
+        return (int64_t)floor(time_secs / time_base);
+    }
+    void Seek(int64_t pts) {
+        ck(av_seek_frame(fmtc, iVideoStream, pts, AVSEEK_FLAG_BACKWARD));
     }
     bool Demux(uint8_t **ppVideo, int *pnVideoBytes) {
         if (!fmtc) {
@@ -185,20 +186,15 @@ public:
             av_packet_unref(&pkt);
         }
 
+        int e = 0;
+        while ((e = av_read_frame(fmtc, &pkt)) >= 0 && pkt.stream_index != iVideoStream) {
+            av_packet_unref(&pkt);
+        }
+        if (e < 0) {
+            return false;
+        }
 
-        do {
-            int e = 0;
-            while ((e = av_read_frame(fmtc, &pkt)) >= 0 && pkt.stream_index != iVideoStream) {
-                av_packet_unref(&pkt);
-            }
-            if (e < 0) {
-                return false;
-            }
-
-            if(pkt.pts != AV_NOPTS_VALUE && pkt.pts >= seek_pts) {
-                seek_pts = AV_NOPTS_VALUE;
-            }
-        } while(seek_pts != AV_NOPTS_VALUE);
+        pkt_pts = pkt.pts;
 
         if (bMp4H264) {
             if (pktFiltered.data) {

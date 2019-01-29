@@ -31,4 +31,5 @@ private:
     FFmpegDemuxer* _demuxer;
     NvDecoder* _decoder;
     std::queue<uint8_t*> frame_buf;
+    int64_t _seek_pts = AV_NOPTS_VALUE;
 };

@@ -60,7 +60,11 @@ double TvlnvFrameReader::get_frame_rate() {
 }
 
 void TvlnvFrameReader::seek(float time_secs) {
-    _demuxer->Seek(time_secs);
+    _seek_pts = _demuxer->SecsToPts(time_secs);
+    _demuxer->Seek(_seek_pts);
+    while(!frame_buf.empty()) {
+        frame_buf.pop();
+    }
 }
 
 uint8_t* TvlnvFrameReader::read_frame() {
@@ -73,24 +77,42 @@ uint8_t* TvlnvFrameReader::read_frame() {
     int nVideoBytes = 0, nFrameReturned = 0, nFrame = 0;
     uint8_t *pVideo = NULL;
     uint8_t **ppFrame = NULL;
+    int64_t *pTimestamp;
 
+    bool seeking = _seek_pts != AV_NOPTS_VALUE;
     do {
         _demuxer->Demux(&pVideo, &nVideoBytes);
-        _decoder->Decode(pVideo, nVideoBytes, &ppFrame, &nFrameReturned);
+        _decoder->Decode(pVideo, nVideoBytes, &ppFrame, &nFrameReturned, CUVID_PKT_ENDOFPICTURE, &pTimestamp, _demuxer->pkt_pts);
 
 //        if (!nFrame && nFrameReturned)
 //            LOG(INFO) << _decoder->GetVideoInfo();
-
         nFrame += nFrameReturned;
-    } while(nVideoBytes && nFrameReturned < 1);
+
+        for (int i = 0; i < nFrameReturned; i++)
+        {
+            if(pTimestamp[i] >= _seek_pts) {
+                seeking = false;
+            }
+        }
+    } while(nVideoBytes && (seeking || nFrameReturned < 1));
 
     if(nFrameReturned < 1) {
         return NULL;
     }
 
-    for(int i = 1; i < nFrameReturned; ++i) {
-        frame_buf.push(ppFrame[i]);
+    for(int i = 0; i < nFrameReturned; ++i) {
+        if(pTimestamp[i] >= _seek_pts) {
+            frame_buf.push(ppFrame[i]);
+        }
     }
 
-    return ppFrame[0];
+    _seek_pts = AV_NOPTS_VALUE;
+
+    if(!frame_buf.empty()) {
+        uint8_t* pFrame = frame_buf.front();
+        frame_buf.pop();
+        return pFrame;
+    }
+
+    return NULL;
 }
