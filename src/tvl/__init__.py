@@ -3,6 +3,7 @@ from typing import Dict
 import tvl.backends
 from tvl.backends.common import Backend
 from warnings import warn
+import math
 
 _backend_priorities = {
     'cpu': ['PyAvBackend'],
@@ -32,6 +33,10 @@ class VideoLoader:
                 yield self.read_frame()
             except EOFError:
                 more_frames = False
+
+    @property
+    def n_frames(self):
+        return math.floor(self.backend_inst.duration * self.backend_inst.frame_rate)
 
     def pick_frames(self, frame_indices, stride_threshold=3):
         """
