@@ -1,30 +1,35 @@
 import tkinter as tk
+from functools import lru_cache
 from pathlib import Path
+from queue import Queue
+from threading import Thread
+from time import time, sleep
+from tkinter import filedialog
 
 import PIL.Image
 import PIL.ImageTk
 import torch
-from functools import lru_cache
-from threading import Thread
-from time import time, sleep
-from queue import Queue
 
 from tvl import VideoLoader
 
 data_dir = Path(__file__).parent.parent.joinpath('tests/data')
-video_filename = str(data_dir.joinpath('board_game-h264.mkv'))
 
 
 class VideoThread(Thread):
-    def __init__(self, vl):
+    def __init__(self):
         super().__init__(name='VideoThread')
-        self.vl = vl
+        self.vl = None
         self.running = True
-        self.paused = False
+        self.paused = True
         self.seeking = False
         self.frame_index = 0
         self.cur_image = None
-        self.queue = Queue(maxsize=30)
+        self.queue = Queue(maxsize=1)
+
+    def set_video_loader(self, vl):
+        self.vl = vl
+        self.frame_index = 0
+        self._read_frame()
 
     def seek_to_frame(self, frame_index):
         self.frame_index = frame_index
@@ -35,15 +40,20 @@ class VideoThread(Thread):
 
     def _read_frame(self):
         self.cur_image = self.vl.read_frame()
+        while not self.queue.empty():
+            self.queue.get()
         self.queue.put((self.cur_image, self.frame_index))
         self.frame_index += 1
 
     def run(self):
         last_time = time()
         acc_time = 0
-        frame_time = 1.0 / self.vl.frame_rate
         while self.running:
+            if self.vl is None:
+                sleep(10)
+                continue
             this_time = time()
+            frame_time = 1.0 / self.vl.frame_rate
             if self.seeking:
                 self.seeking = False
                 self.vl.seek_to_frame(self.frame_index)
@@ -71,12 +81,13 @@ class MainApp(tk.Tk):
     def __init__(self, video_thread):
         super().__init__()
 
+        self.device = torch.device('cuda:0')
+        torch.empty(0).to(self.device)  # Ensure device is initialised
+
         self.video_thread = video_thread
 
         self.wm_title('Video player')
         self.geometry('1280x720')
-
-        self.vl = VideoLoader(video_filename, torch.device('cuda:0'))
 
         self.var_frame_index = tk.IntVar(value=0)
 
@@ -88,6 +99,8 @@ class MainApp(tk.Tk):
 
         self.canvas = tk.Canvas(root_frame, background='#111111')
         self.canvas.pack(fill=tk.BOTH, expand=True)
+
+        self.first_file_open = True
 
         self.do_update()
 
@@ -108,6 +121,22 @@ class MainApp(tk.Tk):
             self.canvas.image = photo_image
             self.canvas.update()
 
+    def do_seek(self):
+        try:
+            self.video_thread.seek_to_frame(self.var_frame_index.get())
+        except tk.TclError:
+            pass
+
+    def do_select_video_file(self):
+        start_dir = None
+        if self.first_file_open and Path(data_dir).is_dir():
+            start_dir = str(data_dir)
+        filename = filedialog.askopenfilename(initialdir=start_dir, title='Select a video file')
+        if filename:
+            self.video_thread.set_video_loader(VideoLoader(filename, self.device))
+            self.spn_frame_index.configure(to=self.video_thread.vl.n_frames - 1)
+            self.first_file_open = False
+
     def do_update(self):
         rgb_tensor = None
         frame_index = 0
@@ -127,24 +156,23 @@ class MainApp(tk.Tk):
             label.pack(side=tk.LEFT, fill=tk.Y, padx=2, pady=2)
             return label
 
-        def do_seek_to_frame():
-            try:
-                self.video_thread.seek_to_frame(self.var_frame_index.get())
-            except tk.TclError:
-                pass
+        btn_open = tk.Button(toolbar, text='Open...', command=self.do_select_video_file)
+        btn_open.pack(side=tk.LEFT, fill=tk.Y, padx=2, pady=2)
 
         add_label('Frame:')
+        n_frames = self.video_thread.vl.n_frames - 1 if self.video_thread.vl is not None else 0
         spn_frame_index = tk.Spinbox(
             toolbar, textvariable=self.var_frame_index,
-            wrap=True, from_=0, to=self.vl.n_frames - 1,
-            command=do_seek_to_frame)
+            wrap=True, from_=0, to=n_frames,
+            command=self.do_seek)
         def on_key_spinbox(event):
             if event.keysym == 'Return':
-                do_seek_to_frame()
+                self.do_seek()
         spn_frame_index.bind('<Key>', on_key_spinbox)
         spn_frame_index.pack(side=tk.LEFT, fill=tk.Y, padx=2, pady=2)
+        self.spn_frame_index = spn_frame_index
 
-        btn_pause = tk.Button(toolbar, text='Seek', command=do_seek_to_frame)
+        btn_pause = tk.Button(toolbar, text='Seek', command=self.do_seek)
         btn_pause.pack(side=tk.LEFT, fill=tk.Y, padx=2, pady=2)
 
         def on_click_pause():
@@ -157,10 +185,7 @@ class MainApp(tk.Tk):
 
 
 def main():
-    device = torch.device('cuda:0')
-    torch.empty(0).to(device)  # Ensure device is initialised
-    vl = VideoLoader(video_filename, device)
-    video_thread = VideoThread(vl)
+    video_thread = VideoThread()
     video_thread.start()
     app = MainApp(video_thread)
     app.mainloop()
