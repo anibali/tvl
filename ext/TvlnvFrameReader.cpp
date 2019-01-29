@@ -6,7 +6,7 @@
 simplelogger::Logger *logger = simplelogger::LoggerFactory::CreateConsoleLogger();
 
 
-TvlnvFrameReader::TvlnvFrameReader(MemManager* mem_manager, std::string filename, int gpu_index, Rect* crop_rect, Dim* resize_dim)
+TvlnvFrameReader::TvlnvFrameReader(MemManager* mem_manager, std::string filename, int gpu_index)
     : _mem_manager(mem_manager), _filename(filename)
 {
     CheckInputFile(filename.c_str());
@@ -23,8 +23,7 @@ TvlnvFrameReader::TvlnvFrameReader(MemManager* mem_manager, std::string filename
 
     _demuxer = new FFmpegDemuxer(_filename.c_str());
     _decoder = new NvDecoder(_cu_context, _demuxer->GetWidth(), _demuxer->GetHeight(),
-                             _mem_manager, FFmpeg2NvCodecId(_demuxer->GetVideoCodec()),
-                             NULL, false, crop_rect, resize_dim);
+                             _mem_manager, FFmpeg2NvCodecId(_demuxer->GetVideoCodec()));
 }
 
 TvlnvFrameReader::~TvlnvFrameReader() {
@@ -62,9 +61,14 @@ double TvlnvFrameReader::get_frame_rate() {
 void TvlnvFrameReader::seek(float time_secs) {
     _seek_pts = _demuxer->SecsToPts(time_secs);
     _demuxer->Seek(_seek_pts);
+    // Clear all buffered frames.
     while(!frame_buf.empty()) {
         frame_buf.pop();
     }
+    // Reset the decoder.
+    delete _decoder;
+    _decoder = new NvDecoder(_cu_context, _demuxer->GetWidth(), _demuxer->GetHeight(),
+                             _mem_manager, FFmpeg2NvCodecId(_demuxer->GetVideoCodec()));
 }
 
 uint8_t* TvlnvFrameReader::read_frame() {

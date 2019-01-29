@@ -112,8 +112,8 @@ class TvlnvFrameReader(_object):
     __getattr__ = lambda self, name: _swig_getattr(self, TvlnvFrameReader, name)
     __repr__ = _swig_repr
 
-    def __init__(self, mem_manager, video_file_path, gpu_index, crop_rect=None, resize_dim=None):
-        this = _tvlnv.new_TvlnvFrameReader(mem_manager, video_file_path, gpu_index, crop_rect, resize_dim)
+    def __init__(self, mem_manager, video_file_path, gpu_index):
+        this = _tvlnv.new_TvlnvFrameReader(mem_manager, video_file_path, gpu_index)
         try:
             self.this.append(this)
         except __builtin__.Exception:
