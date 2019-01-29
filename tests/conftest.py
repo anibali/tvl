@@ -4,11 +4,16 @@ from collections import namedtuple
 import PIL.Image
 import pytest
 import pytest_mock
+import torch
 
 import tvl
 
 mocker = pytest_mock.mocker
 data_dir = os.path.join(os.path.dirname(__file__), 'data')
+
+# Get the slow CUDA initialisation out of the way
+for i in range(torch.cuda.device_count()):
+    torch.empty(0).to(torch.device('cuda', i))
 
 
 @pytest.fixture

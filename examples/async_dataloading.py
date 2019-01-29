@@ -33,7 +33,7 @@ class VideoDataset(Dataset):
 
 def main():
     device = torch.device('cuda:0')
-    torch.cuda.init()  # Initialise CUDA manually so that it doesn't interfere with timing.
+    torch.empty(0).to(device)  # Initialise CUDA manually so that it doesn't interfere with timing.
 
     dataset = VideoDataset([(video_filename, list(range(40)))] * 8, device=device)
     async_dataset = AsyncDataset(dataset, ThreadPoolExecutor(max_workers=1))

@@ -1,9 +1,13 @@
-import torch
 import math
+
+import hypothesis
+import numpy as np
+import torch
+from hypothesis.extra.numpy import arrays, array_shapes
+from hypothesis.strategies import booleans, one_of, just
 from torch.testing import assert_allclose
 
 from tvl.transforms import normalise, denormalise, resize, crop, flip, rotate
-
 
 DENORMALISED_IMAGE = torch.tensor([math.sqrt(3), -math.sqrt(3)]).add_(5).repeat(3, 2, 1)
 MEAN = [5.0, 5.0, 5.0]
@@ -83,6 +87,19 @@ def test_crop_padded():
     ]])
     actual = crop(inp, -1, 1, 2, 5, padding_mode='constant', fill=2)
     assert_allclose(actual, expected)
+
+
+@hypothesis.given(
+    data=arrays(np.float32, array_shapes(min_dims=2, max_dims=4)),
+    horizontal=booleans(),
+    vertical=booleans(),
+    device=one_of(just(torch.device(e)) for e in ['cpu', 'cuda:0'])
+)
+def test_flip_involution(data, horizontal, vertical, device):
+    inp = torch.from_numpy(data).to(device)
+    flipped_once = flip(inp, horizontal, vertical)
+    flipped_twice = flip(flipped_once, horizontal, vertical)
+    assert_allclose(flipped_twice, inp)
 
 
 def test_flip_horizontal():
