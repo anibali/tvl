@@ -23,6 +23,9 @@ class VideoLoader:
     def seek(self, time_secs):
         self.backend_inst.seek(time_secs)
 
+    def seek_to_frame(self, frame_index):
+        self.seek(frame_index / self.backend_inst.frame_rate)
+
     def read_frame(self):
         return self.backend_inst.read_frame()
 
@@ -35,8 +38,16 @@ class VideoLoader:
                 more_frames = False
 
     @property
+    def duration(self):
+        return self.backend_inst.duration
+
+    @property
+    def frame_rate(self):
+        return self.backend_inst.frame_rate
+
+    @property
     def n_frames(self):
-        return math.floor(self.backend_inst.duration * self.backend_inst.frame_rate)
+        return math.floor(self.duration * self.frame_rate)
 
     def pick_frames(self, frame_indices, stride_threshold=3):
         """
@@ -60,7 +71,7 @@ class VideoLoader:
         if avg_frame_stride > stride_threshold:
             # Read frames using random access
             for frame_index in sorted_frame_indices:
-                self.seek(frame_index / self.backend_inst.frame_rate)
+                self.seek_to_frame(frame_index)
                 frames[frame_index] = self.read_frame()
         else:
             # Read frames sequentially
