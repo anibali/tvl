@@ -1,4 +1,3 @@
-import math
 from typing import Dict
 from warnings import warn
 
@@ -8,7 +7,7 @@ import tvl.backends
 from tvl.backends.common import Backend
 
 _backend_priorities = {
-    'cpu': ['PyAvBackend'],
+    'cpu': ['PyAvBackend', 'OpenCvBackend'],
     'cuda': ['NvdecBackend'],
 }
 _device_backends: Dict[str, Backend] = {}

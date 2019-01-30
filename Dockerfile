@@ -125,6 +125,11 @@ RUN dpkg -i /tmp/ffmpeg.deb && rm /tmp/ffmpeg.deb
 RUN mkdir /app
 WORKDIR /app
 
+# Install OpenCV dependencies
+RUN apt-get update \
+ && apt-get install -y libsm6 libxext6 libxrender1 \
+ && rm -rf /var/lib/apt/lists/*
+
 COPY requirements.txt /app
 RUN pip install -r requirements.txt
 

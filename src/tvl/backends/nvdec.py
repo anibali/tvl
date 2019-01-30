@@ -1,7 +1,7 @@
 import torch
 
 import tvlnv
-from .common import BackendInstance, Backend
+from tvl.backends.common import BackendInstance, Backend
 
 
 class TorchMemManager(tvlnv.MemManager):

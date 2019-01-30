@@ -7,3 +7,8 @@ try:
     from .pyav import PyAvBackend
 except ImportError:
     pass
+
+try:
+    from .opencv import OpenCvBackend
+except ImportError:
+    pass

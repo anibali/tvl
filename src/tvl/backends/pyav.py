@@ -1,7 +1,7 @@
 import av
 import torch
 
-from .common import BackendInstance, Backend
+from tvl.backends.common import BackendInstance, Backend
 
 
 class PyAvBackendInstance(BackendInstance):
