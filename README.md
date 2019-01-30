@@ -45,6 +45,7 @@ python examples/video_player.py
 
 ## Notes
 
+
 ### Parallelism
 
 CUDA and multiprocessing don't mix very well. When multiprocessing is in "fork" mode, CUDA
@@ -54,6 +55,23 @@ Specifying spawn/forkserver for multiprocessing works, but is ridiculously slow.
 My recommendation is to run the video loader in a single background thread. This enables
 background loading of video frames in parallel with your programming doing some other work (eg.
 training a model). See [`examples/async_dataloading.py`](examples/async_dataloading.py).
+
+
+### Backends
+
+| Backend class | Supported devices |
+|---------------|-------------------|
+| NvdecBackend  | cuda              |
+| PyAvBackend   | cpu               |
+| OpenCvBackend | cpu               |
+
+If you wanted to install `tvl` with support for the NVDEC and PyAV backends you would install the
+package like so:
+
+```bash
+$ pip install "tvl[NvdecBackend,PyAvBackend]"
+```
+
 
 ### Limitations
 

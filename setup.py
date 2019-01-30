@@ -37,9 +37,13 @@ setup(
         'build_ext': build_ext,
     },
     install_requires=[
-        'av',
         'numpy',
         'torch',
         'torchgeometry',
     ],
+    extras_require={
+        'NvdecBackend': [],
+        'PyAvBackend': ['av'],
+        'OpenCvBackend': ['opencv-python'],
+    },
 )
