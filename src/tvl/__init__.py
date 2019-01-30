@@ -51,7 +51,7 @@ class VideoLoader:
 
     @property
     def n_frames(self):
-        return math.floor(self.duration * self.frame_rate)
+        return self.backend_inst.n_frames
 
     def pick_frames(self, frame_indices, skip_threshold=3):
         """

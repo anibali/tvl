@@ -71,6 +71,10 @@ class NvdecBackendInstance(BackendInstance):
     def frame_rate(self):
         return self.frame_reader.get_frame_rate()
 
+    @property
+    def n_frames(self):
+        return self.frame_reader.get_number_of_frames()
+
     def seek(self, time_secs):
         self.frame_reader.seek(time_secs)
 

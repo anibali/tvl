@@ -29,6 +29,7 @@ private:
     AVCodecID eVideoCodec;
     int nWidth, nHeight, nBitDepth;
     double durationSecs, frameRate;
+    int64_t nFrames;
 
 public:
     int64_t pkt_pts = 0;
@@ -67,6 +68,7 @@ private:
 
         durationSecs = fmtc->duration / (double)AV_TIME_BASE;
         frameRate = av_q2d(av_guess_frame_rate(fmtc, fmtc->streams[iVideoStream], NULL));
+        nFrames = fmtc->streams[iVideoStream]->nb_frames;
 
         bMp4H264 = eVideoCodec == AV_CODEC_ID_H264 && (
                 !strcmp(fmtc->iformat->long_name, "QuickTime / MOV") 
@@ -167,6 +169,12 @@ public:
     }
     double GetFrameRate() {
         return frameRate;
+    }
+    int64_t GetNumberOfFrames() {
+        if(nFrames > 0) {
+            return nFrames;
+        }
+        return (int64_t)(GetDuration() * GetFrameRate());
     }
     int64_t SecsToPts(float time_secs) {
         float time_base = av_q2d(fmtc->streams[iVideoStream]->time_base);

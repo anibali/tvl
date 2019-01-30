@@ -4418,6 +4418,30 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_TvlnvFrameReader_get_number_of_frames(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  TvlnvFrameReader *arg1 = (TvlnvFrameReader *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int64_t result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:TvlnvFrameReader_get_number_of_frames",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_TvlnvFrameReader, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TvlnvFrameReader_get_number_of_frames" "', argument " "1"" of type '" "TvlnvFrameReader *""'"); 
+  }
+  arg1 = reinterpret_cast< TvlnvFrameReader * >(argp1);
+  result = (arg1)->get_number_of_frames();
+  
+  resultobj = PyInt_FromLong(result);
+  
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_TvlnvFrameReader_seek(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   TvlnvFrameReader *arg1 = (TvlnvFrameReader *) 0 ;
@@ -5360,6 +5384,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"TvlnvFrameReader_get_frame_size", _wrap_TvlnvFrameReader_get_frame_size, METH_VARARGS, NULL},
 	 { (char *)"TvlnvFrameReader_get_duration", _wrap_TvlnvFrameReader_get_duration, METH_VARARGS, NULL},
 	 { (char *)"TvlnvFrameReader_get_frame_rate", _wrap_TvlnvFrameReader_get_frame_rate, METH_VARARGS, NULL},
+	 { (char *)"TvlnvFrameReader_get_number_of_frames", _wrap_TvlnvFrameReader_get_number_of_frames, METH_VARARGS, NULL},
 	 { (char *)"TvlnvFrameReader_seek", _wrap_TvlnvFrameReader_seek, METH_VARARGS, NULL},
 	 { (char *)"TvlnvFrameReader_read_frame", _wrap_TvlnvFrameReader_read_frame, METH_VARARGS, NULL},
 	 { (char *)"TvlnvFrameReader_swigregister", TvlnvFrameReader_swigregister, METH_VARARGS, NULL},

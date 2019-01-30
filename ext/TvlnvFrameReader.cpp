@@ -58,6 +58,10 @@ double TvlnvFrameReader::get_frame_rate() {
     return _demuxer->GetFrameRate();
 }
 
+int64_t TvlnvFrameReader::get_number_of_frames() {
+    return _demuxer->GetNumberOfFrames();
+}
+
 void TvlnvFrameReader::seek(float time_secs) {
     _seek_pts = _demuxer->SecsToPts(time_secs);
     _demuxer->Seek(_seek_pts);

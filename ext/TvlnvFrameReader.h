@@ -20,6 +20,7 @@ public:
     int get_frame_size();
     double get_duration();
     double get_frame_rate();
+    int64_t get_number_of_frames();
     void seek(float time_secs);
     uint8_t* read_frame();
 
