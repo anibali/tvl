@@ -3,7 +3,28 @@
 %{
 #include "TvlnvFrameReader.h"
 #include "MemManager.h"
+
+static PyObject* py_NVDECException;
 %}
+
+%init %{
+    py_NVDECException = PyErr_NewException("_tvlnv.NVDECException", NULL, NULL);
+    Py_INCREF(py_NVDECException);
+    PyModule_AddObject(m, "NVDECException", py_NVDECException);
+%}
+
+%pythoncode %{
+    NVDECException = _tvlnv.NVDECException
+%}
+
+%exception TvlnvFrameReader::TvlnvFrameReader {
+    try {
+        $function
+    } catch(const NVDECException &ex) {
+        PyErr_SetString(py_NVDECException, const_cast<char*>(ex.what()));
+        return NULL;
+    }
+}
 
 %feature("director") MemManager;
 

@@ -105,6 +105,9 @@ except __builtin__.Exception:
     weakref_proxy = lambda x: x
 
 
+
+NVDECException = _tvlnv.NVDECException
+
 class TvlnvFrameReader(_object):
     __swig_setmethods__ = {}
     __setattr__ = lambda self, name, value: _swig_setattr(self, TvlnvFrameReader, name, value)

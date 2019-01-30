@@ -3568,6 +3568,8 @@ namespace swig {
 #include "TvlnvFrameReader.h"
 #include "MemManager.h"
 
+static PyObject* py_NVDECException;
+
 
 #include <string>
 
@@ -4248,7 +4250,14 @@ SWIGINTERN PyObject *_wrap_new_TvlnvFrameReader(PyObject *SWIGUNUSEDPARM(self), 
     SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "new_TvlnvFrameReader" "', argument " "3"" of type '" "int""'");
   } 
   arg3 = static_cast< int >(val3);
-  result = (TvlnvFrameReader *)new TvlnvFrameReader(arg1,arg2,arg3);
+  {
+    try {
+      result = (TvlnvFrameReader *)new TvlnvFrameReader(arg1,arg2,arg3);
+    } catch(const NVDECException &ex) {
+      PyErr_SetString(py_NVDECException, const_cast<char*>(ex.what()));
+      return NULL;
+    }
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_TvlnvFrameReader, SWIG_POINTER_NEW |  0 );
   return resultobj;
 fail:
@@ -6144,6 +6153,11 @@ SWIG_init(void) {
 #endif
   
   SWIG_InstallConstants(d,swig_const_table);
+  
+  
+  py_NVDECException = PyErr_NewException("_tvlnv.NVDECException", NULL, NULL);
+  Py_INCREF(py_NVDECException);
+  PyModule_AddObject(m, "NVDECException", py_NVDECException);
   
   SWIG_Python_SetConstant(d, "MEM_TYPE_HOST",SWIG_From_int(static_cast< int >(MEM_TYPE_HOST)));
   SWIG_Python_SetConstant(d, "MEM_TYPE_CUDA",SWIG_From_int(static_cast< int >(MEM_TYPE_CUDA)));

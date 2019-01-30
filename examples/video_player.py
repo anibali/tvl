@@ -1,4 +1,5 @@
 import tkinter as tk
+import traceback
 from functools import lru_cache
 from pathlib import Path
 from queue import Queue
@@ -50,7 +51,7 @@ class VideoThread(Thread):
         acc_time = 0
         while self.running:
             if self.vl is None:
-                sleep(10)
+                sleep(0.01)
                 continue
             this_time = time()
             frame_time = 1.0 / self.vl.frame_rate
@@ -73,7 +74,7 @@ class VideoThread(Thread):
                         self.frame_index = 0
                         self._read_frame()
                     acc_time -= frame_time
-            sleep(max(frame_time - (time() - this_time), 0))
+            sleep(max(frame_time - (time() - this_time), 0.005))
             last_time = this_time
 
 
@@ -133,9 +134,13 @@ class MainApp(tk.Tk):
             start_dir = str(data_dir)
         filename = filedialog.askopenfilename(initialdir=start_dir, title='Select a video file')
         if filename:
-            self.video_thread.set_video_loader(VideoLoader(filename, self.device))
-            self.spn_frame_index.configure(to=self.video_thread.vl.n_frames - 1)
-            self.first_file_open = False
+            try:
+                self.video_thread.set_video_loader(VideoLoader(filename, self.device))
+                self.spn_frame_index.configure(to=self.video_thread.vl.n_frames - 1)
+                self.first_file_open = False
+            except Exception:
+                print(f'Failed to load video: {filename}')
+                traceback.print_exc()
 
     def do_update(self):
         rgb_tensor = None
