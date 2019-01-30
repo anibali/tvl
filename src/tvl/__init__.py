@@ -53,39 +53,37 @@ class VideoLoader:
     def n_frames(self):
         return math.floor(self.duration * self.frame_rate)
 
-    def pick_frames(self, frame_indices, stride_threshold=3):
+    def pick_frames(self, frame_indices, skip_threshold=3):
         """
 
         Args:
             frame_indices (list of int): Indices of frames to read.
-            stride_threshold (int, optional): Sequential reading threshold used to predict when
+            skip_threshold (int, optional): Sequential reading threshold used to predict when
                 multiple reads will be faster than seeking. Setting this value close to the video's
                 GOP size should be a reasonable choice.
 
         Returns:
             list of torch.Tensor: RGB frames corresponding to `frame_indices`.
         """
+        # We will be loading unique frames in ascending index order.
         sorted_frame_indices = list(sorted(set(frame_indices)))
-        first_frame = sorted_frame_indices[0]
-        last_frame = sorted_frame_indices[-1]
-        avg_frame_stride = (last_frame - first_frame) / len(sorted_frame_indices)
-
         frames = {}
 
-        if avg_frame_stride > stride_threshold:
-            # Read frames using random access
-            for frame_index in sorted_frame_indices:
+        pos = -(skip_threshold + 1)
+        for frame_index in sorted_frame_indices:
+            if frame_index - pos > skip_threshold:
+                # Skip to desired location by seeking.
                 self.seek_to_frame(frame_index)
-                frames[frame_index] = self.read_frame()
-        else:
-            # Read frames sequentially
-            self.seek(first_frame / self.backend_inst.frame_rate)
-            pos = first_frame
-            for frame_index in sorted_frame_indices:
-                while pos <= frame_index:
-                    frames[frame_index] = self.read_frame()
+            else:
+                # Skip to desired location by reading and discarding intermediate frames.
+                while pos < frame_index:
+                    self.read_frame()
                     pos += 1
+            # Read the frame that we care about.
+            frames[frame_index] = self.read_frame()
+            pos = frame_index + 1
 
+        # Order frames to correspond with `frame_indices`.
         return [frames[frame_index] for frame_index in frame_indices]
 
 
