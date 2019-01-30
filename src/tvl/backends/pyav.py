@@ -6,6 +6,7 @@ from .common import BackendInstance, Backend
 
 class PyAvBackendInstance(BackendInstance):
     def __init__(self, filename, device):
+        device = torch.device(device)
         assert device.type == 'cpu'
         self.container = av.open(filename)
         self.generator = None
@@ -39,4 +40,4 @@ class PyAvBackendInstance(BackendInstance):
 
 class PyAvBackend(Backend):
     def create(self, filename, device) -> PyAvBackendInstance:
-        return PyAvBackendInstance(filename, torch.device(device))
+        return PyAvBackendInstance(filename, device)

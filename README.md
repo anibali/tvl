@@ -5,10 +5,10 @@ frames are returned as [PyTorch](https://pytorch.org/) tensors, ready for use wi
 vision model.
 
 ```python
-import torch
 import tvl
 
-vl = tvl.VideoLoader('my_video.mkv', torch.device('cuda:0'))
+device = 'cuda:0'  # Use 'cpu' for CPU decoding
+vl = tvl.VideoLoader('my_video.mkv', device)
 list_of_rgb_tensors = vl.pick_frames([24, 26, 25])
 ```
 
@@ -57,5 +57,5 @@ training a model). See [`examples/async_dataloading.py`](examples/async_dataload
 
 ### Limitations
 
-* H.264 video codec only
-* NVIDIA GPUs only
+* GPU support is only available for NVIDIA cards
+* Decoding only, no encoding/transcoding

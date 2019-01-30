@@ -1,9 +1,11 @@
+import math
 from typing import Dict
+from warnings import warn
+
+import torch
 
 import tvl.backends
 from tvl.backends.common import Backend
-from warnings import warn
-import math
 
 _backend_priorities = {
     'cpu': ['PyAvBackend'],
@@ -18,6 +20,8 @@ def set_device_backend(device_type, backend):
 
 class VideoLoader:
     def __init__(self, filename, device):
+        if isinstance(device, str):
+            device = torch.device(device)
         self.backend_inst = _device_backends[device.type].create(filename, device)
 
     def seek(self, time_secs):

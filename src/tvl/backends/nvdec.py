@@ -56,6 +56,7 @@ def nv12_to_rgb(planar_yuv, h, w):
 
 class NvdecBackendInstance(BackendInstance):
     def __init__(self, filename, device):
+        device = torch.device(device)
         mem_manager = TorchMemManager(device)
         mem_manager.__disown__()
         self.mem_manager = mem_manager
@@ -87,4 +88,4 @@ class NvdecBackendInstance(BackendInstance):
 
 class NvdecBackend(Backend):
     def create(self, filename, device) -> NvdecBackendInstance:
-        return NvdecBackendInstance(filename, torch.device(device))
+        return NvdecBackendInstance(filename, device)
