@@ -48,6 +48,10 @@ def dummy_backend():
         def frame_rate(self):
             return 10
 
+        @property
+        def n_frames(self):
+            return int(self.duration * self.frame_rate)
+
         def read_frame(self):
             if self.pos < len(self.frames):
                 frame = self.frames[self.pos]

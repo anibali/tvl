@@ -13,9 +13,9 @@ class BackendInstance(ABC):
         """The frame rate of the video (in frames per second)."""
 
     @property
+    @abstractmethod
     def n_frames(self):
         """The number of frames in the video."""
-        return int(self.duration * self.frame_rate)
 
     @abstractmethod
     def seek(self, time_secs):

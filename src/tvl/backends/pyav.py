@@ -25,7 +25,7 @@ class PyAvBackendInstance(BackendInstance):
         frames = self.container.streams.video[0].frames
         if frames > 0:
             return frames
-        return super().n_frames
+        return int(self.duration * self.frame_rate)
 
     def seek(self, time_secs):
         self.container.seek(round(time_secs * av.time_base))
