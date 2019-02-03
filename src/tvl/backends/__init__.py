@@ -1,14 +1,14 @@
 try:
-    from .nvdec import NvdecBackend
+    from tvl_backends.nvdec import NvdecBackend
 except ImportError:
     pass
 
 try:
-    from .pyav import PyAvBackend
+    from tvl_backends.pyav import PyAvBackend
 except ImportError:
     pass
 
 try:
-    from .opencv import OpenCvBackend
+    from tvl_backends.opencv import OpenCvBackend
 except ImportError:
     pass

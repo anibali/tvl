@@ -1,7 +1,6 @@
 import os
 from collections import namedtuple
 
-import PIL.Image
 import pytest
 import pytest_mock
 import torch
@@ -14,21 +13,6 @@ data_dir = os.path.join(os.path.dirname(__file__), 'data')
 # Get the slow CUDA initialisation out of the way
 for i in range(torch.cuda.device_count()):
     torch.empty(0).to(torch.device('cuda', i))
-
-
-@pytest.fixture
-def video_filename():
-    return os.path.join(data_dir, 'board_game-h264.mkv')
-
-
-@pytest.fixture
-def first_frame_image():
-    return PIL.Image.open(os.path.join(data_dir, 'board_game_first.jpg'), 'r')
-
-
-@pytest.fixture
-def mid_frame_image():
-    return PIL.Image.open(os.path.join(data_dir, 'board_game_mid.jpg'), 'r')
 
 
 @pytest.fixture

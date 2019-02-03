@@ -13,7 +13,7 @@ import torch
 
 from tvl import VideoLoader
 
-data_dir = Path(__file__).parent.parent.joinpath('tests/data')
+data_dir = Path(__file__).parent.parent.joinpath('data')
 
 
 class VideoThread(Thread):

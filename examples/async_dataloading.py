@@ -9,7 +9,7 @@ from tvl import VideoLoader
 from tvl.async import AsyncDataset, BatchDataLoader
 
 
-data_dir = Path(__file__).parent.parent.joinpath('tests/data')
+data_dir = Path(__file__).parent.parent.joinpath('data')
 video_filename = str(data_dir.joinpath('board_game-h264.mkv'))
 
 

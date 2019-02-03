@@ -2,7 +2,7 @@ import PIL.Image
 import numpy as np
 import pytest
 
-from tvl.backends import NvdecBackend
+from tvl_backends.nvdec import NvdecBackend
 
 
 def test_nvdec_read_frame(video_filename, first_frame_image):

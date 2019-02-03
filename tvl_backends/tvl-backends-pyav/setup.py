@@ -1,26 +1,22 @@
 from pathlib import Path
 
-from setuptools import setup, find_packages
+from setuptools import setup
 
 version = Path(__file__).parent.joinpath('VERSION').read_text('utf-8').strip()
 
 
 setup(
-    name='tvl',
+    name='tvl-backends-pyav',
     version=version,
     author='Aiden Nibali',
     license='Apache Software License 2.0',
-    packages=find_packages('src'),
+    packages=['tvl_backends.pyav'],
     package_dir={'': 'src'},
     include_package_data=True,
     install_requires=[
+        'tvl==' + version,
         'numpy',
         'torch',
-        'torchgeometry',
+        'av',
     ],
-    extras_require={
-        'NvdecBackend': ['tvl-backends-nvdec==' + version],
-        'PyAvBackend': ['tvl-backends-pyav==' + version],
-        'OpenCvBackend': ['tvl-backends-opencv==' + version],
-    },
 )
