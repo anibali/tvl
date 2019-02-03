@@ -28,10 +28,13 @@ install-dev:
 		pushd $$dir && pip install -e . && popd || break; \
 	done
 
+uninstall:
+	pip uninstall tvl tvl-backends-nvdec tvl-backends-opencv tvl-backends-pyav
+
 test:
 	pytest tests
 	for dir in $(SUBDIRS); do \
 		pushd $$dir && pytest tests && popd || break; \
 	done
 
-.PHONY: clean build dist install-dev test
+.PHONY: clean build dist install-dev uninstall test
