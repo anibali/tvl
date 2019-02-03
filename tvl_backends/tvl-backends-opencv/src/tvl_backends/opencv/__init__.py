@@ -1,10 +1,10 @@
 import cv2
 import torch
 
-from tvl.backends.common import BackendInstance, Backend
+from tvl.backend import Backend, BackendFactory
 
 
-class OpenCvBackendInstance(BackendInstance):
+class OpenCvBackend(Backend):
     def __init__(self, filename, device):
         device = torch.device(device)
         assert device.type == 'cpu'
@@ -34,6 +34,6 @@ class OpenCvBackendInstance(BackendInstance):
             raise EOFError()
 
 
-class OpenCvBackend(Backend):
-    def create(self, filename, device) -> OpenCvBackendInstance:
-        return OpenCvBackendInstance(filename, device)
+class OpenCvBackendFactory(BackendFactory):
+    def create(self, filename, device) -> OpenCvBackend:
+        return OpenCvBackend(filename, device)

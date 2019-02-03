@@ -1,10 +1,10 @@
 import av
 import torch
 
-from tvl.backends.common import BackendInstance, Backend
+from tvl.backend import Backend, BackendFactory
 
 
-class PyAvBackendInstance(BackendInstance):
+class PyAvBackend(Backend):
     def __init__(self, filename, device):
         device = torch.device(device)
         assert device.type == 'cpu'
@@ -45,6 +45,6 @@ class PyAvBackendInstance(BackendInstance):
         return torch.from_numpy(np_frame).permute(2, 0, 1).float().div_(255)
 
 
-class PyAvBackend(Backend):
-    def create(self, filename, device) -> PyAvBackendInstance:
-        return PyAvBackendInstance(filename, device)
+class PyAvBackendFactory(BackendFactory):
+    def create(self, filename, device) -> PyAvBackend:
+        return PyAvBackend(filename, device)

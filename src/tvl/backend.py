@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 
-class BackendInstance(ABC):
+class Backend(ABC):
     @property
     @abstractmethod
     def duration(self):
@@ -26,7 +26,7 @@ class BackendInstance(ABC):
         """Read a single video frame as an RGB PyTorch tensor."""
 
 
-class Backend(ABC):
+class BackendFactory(ABC):
     @abstractmethod
-    def create(self, filename, device) -> BackendInstance:
+    def create(self, filename, device) -> Backend:
         pass

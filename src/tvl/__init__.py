@@ -1,36 +1,68 @@
+import importlib
 from typing import Dict
-from warnings import warn
 
 import torch
 
-import tvl.backends
-from tvl.backends.common import Backend
+import tvl.backend
+from tvl.backend import BackendFactory
 
-_backend_priorities = {
-    'cpu': ['PyAvBackend', 'OpenCvBackend'],
-    'cuda': ['NvdecBackend'],
+# Explicitly set backends for particular device types.
+_device_backends: Dict[str, BackendFactory] = {}
+# Known backends. These will be searched if a device type does not have a backend factory
+# set explicitly.
+_known_backends = {
+    'cpu': [
+        'tvl_backends.pyav.PyAvBackendFactory',     # PyPI package: tvl-backends-pyav
+        'tvl_backends.opencv.OpenCvBackendFactory', # PyPI package: tvl-backends-opencv
+    ],
+    'cuda': [
+        'tvl_backends.nvdec.NvdecBackendFactory',   # PyPI package: tvl-backends-nvdec
+    ],
 }
-_device_backends: Dict[str, Backend] = {}
 
 
-def set_device_backend(device_type, backend):
-    _device_backends[device_type] = backend
+def set_backend_factory(device_type, backend_factory):
+    """Set the backend factory to be used for a particular device type."""
+    _device_backends[device_type] = backend_factory
+
+
+def _auto_set_backend_factory(device_type):
+    """Attempt to automatically set the backend for `device_type` if not set already."""
+    if device_type in _device_backends and _device_backends[device_type] is not None:
+        return
+    if device_type in _known_backends:
+        for backend_name in _known_backends[device_type]:
+            try:
+                module_name, class_name = backend_name.rsplit('.', 1)
+                module = importlib.import_module(module_name)
+                set_backend_factory(device_type, getattr(module, class_name)())
+                return
+            except ImportError:
+                pass
+
+
+def get_backend_factory(device_type) -> BackendFactory:
+    """Get the backend factory which will be used for a particular device type."""
+    _auto_set_backend_factory(device_type)
+    if device_type in _device_backends:
+        return _device_backends[device_type]
+    raise Exception(f'failed to find a backend factory for device type: {device_type}')
 
 
 class VideoLoader:
     def __init__(self, filename, device):
         if isinstance(device, str):
             device = torch.device(device)
-        self.backend_inst = _device_backends[device.type].create(filename, device)
+        self.backend = get_backend_factory(device.type).create(filename, device)
 
     def seek(self, time_secs):
-        self.backend_inst.seek(time_secs)
+        self.backend.seek(time_secs)
 
     def seek_to_frame(self, frame_index):
-        self.seek(frame_index / self.backend_inst.frame_rate)
+        self.seek(frame_index / self.backend.frame_rate)
 
     def read_frame(self):
-        return self.backend_inst.read_frame()
+        return self.backend.read_frame()
 
     def read_frames(self):
         more_frames = True
@@ -42,15 +74,15 @@ class VideoLoader:
 
     @property
     def duration(self):
-        return self.backend_inst.duration
+        return self.backend.duration
 
     @property
     def frame_rate(self):
-        return self.backend_inst.frame_rate
+        return self.backend.frame_rate
 
     @property
     def n_frames(self):
-        return self.backend_inst.n_frames
+        return self.backend.n_frames
 
     def pick_frames(self, frame_indices, skip_threshold=3):
         """
@@ -84,19 +116,3 @@ class VideoLoader:
 
         # Order frames to correspond with `frame_indices`.
         return [frames[frame_index] for frame_index in frame_indices]
-
-
-def _init():
-    unsupported_devices = []
-    for device_type, backend_names in _backend_priorities.items():
-        for backend_name in backend_names:
-            if hasattr(tvl.backends, backend_name):
-                set_device_backend(device_type, getattr(tvl.backends, backend_name)())
-                break
-        else:
-            unsupported_devices.append(device_type)
-    if len(unsupported_devices) > 0:
-        warn(f'No video loading backend available for the following devices: {repr(unsupported_devices)}')
-
-
-_init()

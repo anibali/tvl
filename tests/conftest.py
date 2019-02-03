@@ -17,9 +17,9 @@ for i in range(torch.cuda.device_count()):
 
 @pytest.fixture
 def dummy_backend():
-    from tvl.backends.common import BackendInstance, Backend
+    from tvl.backend import Backend, BackendFactory
 
-    class DummyBackendInstance(BackendInstance):
+    class DummyBackend(Backend):
         def __init__(self, frames):
             self.frames = frames
             self.pos = 0
@@ -46,15 +46,15 @@ def dummy_backend():
         def seek(self, *args):
             pass
 
-    class DummyBackend(Backend):
+    class DummyBackendFactory(BackendFactory):
         def __init__(self, frames):
             self.frames = frames
             self.device = namedtuple('DummyDevice', ['type'])('dummy')
 
         def create(self, *args):
-            return DummyBackendInstance(self.frames)
+            return DummyBackend(self.frames)
 
-    dummy_backend = DummyBackend([object() for _ in range(5)])
-    tvl.set_device_backend(dummy_backend.device.type, dummy_backend)
+    dummy_backend = DummyBackendFactory([object() for _ in range(5)])
+    tvl.set_backend_factory(dummy_backend.device.type, dummy_backend)
     yield dummy_backend
     del tvl._device_backends[dummy_backend.device.type]
