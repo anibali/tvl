@@ -1,5 +1,7 @@
 # Torch Video Loader (TVL)
 
+**DISCLAIMER: This project is currently a work in progress.**
+
 TVL is a video loading library with a common interface for decoding on the GPU and CPU. Video
 frames are returned as [PyTorch](https://pytorch.org/) tensors, ready for use with a computer
 vision model.
