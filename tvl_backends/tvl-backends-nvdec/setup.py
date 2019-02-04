@@ -4,7 +4,7 @@ from shutil import copy
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext as build_ext_orig
 
-version = Path(__file__).parent.joinpath('VERSION').read_text('utf-8').strip()
+version = Path(__file__).absolute().parent.joinpath('VERSION').read_text('utf-8').strip()
 
 
 class build_ext(build_ext_orig):

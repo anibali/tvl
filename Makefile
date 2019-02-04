@@ -31,10 +31,10 @@ install-dev:
 uninstall:
 	pip uninstall tvl tvl-backends-nvdec tvl-backends-opencv tvl-backends-pyav
 
-test:
-	pytest tests
+test: build
+	pytest -s tests
 	for dir in $(SUBDIRS); do \
-		pushd $$dir && pytest tests && popd || break; \
+		pushd $$dir && pytest -s tests && popd || break; \
 	done
 
 .PHONY: clean build dist install-dev uninstall test

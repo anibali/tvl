@@ -80,12 +80,8 @@ RUN curl -so /usr/lib/x86_64-linux-gnu/libnvcuvid.so.1 \
 RUN mkdir /app
 WORKDIR /app
 
-COPY requirements.txt /app
-RUN pip install -r requirements.txt
-
 COPY . /app
-RUN python setup.py bdist_wheel \
- && mv dist/tvl-*.whl /
+RUN make dist
 
 
 ################################################################################
@@ -134,11 +130,16 @@ COPY requirements.txt /app
 RUN pip install -r requirements.txt
 
 # Install tvl
-COPY --from=tvl-builder /tvl-*.whl /tmp/
-RUN pip install --no-index -f /tmp tvl && rm /tmp/tvl-*.whl
+COPY --from=tvl-builder /app/dist/tvl*.whl /tmp/
+RUN pip install -f /tmp \
+    tvl \
+    tvl-backends-nvdec \
+    tvl-backends-opencv \
+    tvl-backends-pyav \
+  && rm /tmp/tvl*.whl
 
 COPY . /app
 
 ENV NVIDIA_DRIVER_CAPABILITIES=video,compute,utility
 
-CMD ["pytest", "-s"]
+CMD ["make", "test"]

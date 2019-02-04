@@ -20,13 +20,17 @@ list_of_rgb_tensors = vl.pick_frames([24, 26, 25])
 * NVIDIA drivers >= 396.24
 
 
-## Building
+## Building from source
+
+### Build wheels on host
 
 ```bash
-rm -rf build && python setup.py build_ext --inplace && pytest -s
+make dist
 ```
 
-Dockerised version:
+The wheels for tvl and all backends will be placed in `dist/`.
+
+### Build and run tests with Docker
 
 ```bash
 docker build -t tvl . && docker run --rm -it tvl

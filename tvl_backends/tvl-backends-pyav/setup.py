@@ -2,7 +2,7 @@ from pathlib import Path
 
 from setuptools import setup
 
-version = Path(__file__).parent.joinpath('VERSION').read_text('utf-8').strip()
+version = Path(__file__).absolute().parent.joinpath('VERSION').read_text('utf-8').strip()
 
 
 setup(
