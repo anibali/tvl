@@ -1,5 +1,5 @@
 import importlib
-from typing import Dict
+from typing import Dict, Sequence
 
 import torch
 
@@ -88,7 +88,7 @@ class VideoLoader:
         """
 
         Args:
-            frame_indices (list of int): Indices of frames to read.
+            frame_indices (Sequence of int): Indices of frames to read.
             skip_threshold (int, optional): Sequential reading threshold used to predict when
                 multiple reads will be faster than seeking. Setting this value close to the video's
                 GOP size should be a reasonable choice.
