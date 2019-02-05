@@ -64,14 +64,6 @@ class VideoLoader:
     def read_frame(self):
         return self.backend.read_frame()
 
-    def read_frames(self):
-        more_frames = True
-        while more_frames:
-            try:
-                yield self.read_frame()
-            except EOFError:
-                more_frames = False
-
     @property
     def duration(self):
         return self.backend.duration
@@ -84,21 +76,30 @@ class VideoLoader:
     def n_frames(self):
         return self.backend.n_frames
 
-    def pick_frames(self, frame_indices, skip_threshold=3):
-        """
+    def read_all_frames(self):
+        """Iterate over all frames in the video."""
+        self.seek_to_frame(0)
+        more_frames = True
+        while more_frames:
+            try:
+                yield self.read_frame()
+            except EOFError:
+                more_frames = False
+
+    def select_frames(self, frame_indices, skip_threshold=3):
+        """Iterate over frames selected by frame index.
+
+        Frames will be yielded in ascending order of frame index, regardless of the way
+        `frame_indices` is ordered.
 
         Args:
             frame_indices (Sequence of int): Indices of frames to read.
             skip_threshold (int, optional): Sequential reading threshold used to predict when
                 multiple reads will be faster than seeking. Setting this value close to the video's
                 GOP size should be a reasonable choice.
-
-        Returns:
-            list of torch.Tensor: RGB frames corresponding to `frame_indices`.
         """
         # We will be loading unique frames in ascending index order.
         sorted_frame_indices = list(sorted(set(frame_indices)))
-        frames = {}
 
         pos = -(skip_threshold + 1)
         for frame_index in sorted_frame_indices:
@@ -111,8 +112,5 @@ class VideoLoader:
                     self.read_frame()
                     pos += 1
             # Read the frame that we care about.
-            frames[frame_index] = self.read_frame()
+            yield self.read_frame()
             pos = frame_index + 1
-
-        # Order frames to correspond with `frame_indices`.
-        return [frames[frame_index] for frame_index in frame_indices]

@@ -24,7 +24,7 @@ class VideoDataset(Dataset):
     def __getitem__(self, index):
         video_filename, frame_indices = self.clips[index]
         vl = VideoLoader(video_filename, self.device)
-        frames = torch.stack(vl.pick_frames(frame_indices), 0)
+        frames = torch.stack(vl.select_frames_as_list(frame_indices), 0)
         return dict(
             frames=frames,
             example_index=index,
