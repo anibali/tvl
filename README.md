@@ -11,7 +11,8 @@ import tvl
 
 device = 'cuda:0'  # Use 'cpu' for CPU decoding
 vl = tvl.VideoLoader('my_video.mkv', device)
-list_of_rgb_tensors = vl.pick_frames([24, 26, 25])
+generator_of_rgb_tensors = vl.select_frames([24, 26, 25])
+list_of_rgb_tensors = list(generator_of_rgb_tensors)
 ```
 
 
