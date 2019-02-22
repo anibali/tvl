@@ -126,6 +126,10 @@ RUN apt-get update \
  && apt-get install -y libsm6 libxext6 libxrender1 \
  && rm -rf /var/lib/apt/lists/*
 
+# Install Swig (required for tvl to build wheel)
+RUN conda install -y swig=3.0.10 \
+ && conda clean -ya
+
 COPY requirements.txt /app
 RUN pip install -r requirements.txt
 
