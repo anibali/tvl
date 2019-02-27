@@ -59,9 +59,9 @@ CUDA and multiprocessing don't mix very well. When multiprocessing is in "fork" 
 straight-up [fails to initialise](https://devtalk.nvidia.com/default/topic/973477/-cuda8-0-bug-child-process-forked-after-cuinit-get-cuda_error_not_initialized-on-cuinit-/).
 Specifying spawn/forkserver for multiprocessing works, but is ridiculously slow.
 
-My recommendation is to run the video loader in a single background thread. This enables
-background loading of video frames in parallel with your programming doing some other work (eg.
-training a model). See [`examples/async_dataloading.py`](examples/async_dataloading.py).
+My recommendation is to run the video loader in a single background thread (**note:** using more than one thread
+can cause a deadlock). This enables background loading of video frames in parallel with your programming
+doing some other work (eg. training a model). See [`examples/async_dataloading.py`](examples/async_dataloading.py).
 
 
 ### Backends
