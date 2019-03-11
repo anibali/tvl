@@ -76,15 +76,19 @@ class VideoLoader:
     def n_frames(self):
         return self.backend.n_frames
 
-    def read_all_frames(self):
-        """Iterate over all frames in the video."""
-        self.seek_to_frame(0)
+    def remaining_frames(self):
+        """Iterate sequentially over remaining frames in the video."""
         more_frames = True
         while more_frames:
             try:
                 yield self.read_frame()
             except EOFError:
                 more_frames = False
+
+    def read_all_frames(self):
+        """Iterate over all frames in the video."""
+        self.seek_to_frame(0)
+        return self.remaining_frames()
 
     def select_frames(self, frame_indices, skip_threshold=3):
         """Iterate over frames selected by frame index.

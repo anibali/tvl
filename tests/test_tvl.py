@@ -8,9 +8,15 @@ def test_vl_read_frame(dummy_backend):
     assert vl.read_frame() == dummy_backend.frames[0]
 
 
-def test_vl_read_frames(dummy_backend):
+def test_vl_read_all_frames(dummy_backend):
     vl = tvl.VideoLoader('', dummy_backend.device)
     assert list(vl.read_all_frames()) == dummy_backend.frames
+
+
+def test_vl_remaining_frames(dummy_backend):
+    vl = tvl.VideoLoader('', dummy_backend.device)
+    vl.read_frame()
+    assert list(vl.remaining_frames()) == dummy_backend.frames[1:]
 
 
 def test_vl_select_frames_sequental(dummy_backend, mocker):
