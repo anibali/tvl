@@ -35,5 +35,5 @@ class OpenCvBackend(Backend):
 
 
 class OpenCvBackendFactory(BackendFactory):
-    def create(self, filename, device) -> OpenCvBackend:
+    def create(self, filename, device, backend_opts=None) -> OpenCvBackend:
         return OpenCvBackend(filename, device)

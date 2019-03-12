@@ -55,13 +55,20 @@ def nv12_to_rgb(planar_yuv, h, w):
 
 
 class NvdecBackend(Backend):
-    def __init__(self, filename, device):
+    def __init__(self, filename, device, resize=None):
         device = torch.device(device)
         mem_manager = TorchMemManager(device)
         mem_manager.__disown__()
         self.mem_manager = mem_manager
 
-        self.frame_reader = tvlnv.TvlnvFrameReader(mem_manager, filename, device.index)
+        if resize:
+            out_height, out_width = resize
+        else:
+            out_height = 0
+            out_width = 0
+
+        self.frame_reader = tvlnv.TvlnvFrameReader(mem_manager, filename, device.index,
+                                                   out_width, out_height)
 
     @property
     def duration(self):
@@ -91,5 +98,7 @@ class NvdecBackend(Backend):
 
 
 class NvdecBackendFactory(BackendFactory):
-    def create(self, filename, device) -> NvdecBackend:
-        return NvdecBackend(filename, device)
+    def create(self, filename, device, backend_opts=None) -> NvdecBackend:
+        if backend_opts is None:
+            backend_opts = {}
+        return NvdecBackend(filename, device, **backend_opts)

@@ -11,7 +11,8 @@
 class TvlnvFrameReader
 {
 public:
-    TvlnvFrameReader(MemManager* mem_manager, std::string video_file_path, int gpu_index);
+    TvlnvFrameReader(MemManager* mem_manager, std::string video_file_path, int gpu_index,
+                     int out_width=0, int out_height=0);
     ~TvlnvFrameReader();
 
     std::string get_filename();
@@ -25,6 +26,12 @@ public:
     uint8_t* read_frame();
 
 private:
+    void _init_decoder() {
+        _decoder = new NvDecoder(_cu_context, _demuxer->GetWidth(), _demuxer->GetHeight(),
+                                 _mem_manager, FFmpeg2NvCodecId(_demuxer->GetVideoCodec()),
+                                 NULL, false, NULL, _resize_dim);
+    }
+
     CUdevice _cu_device;
     MemManager* _mem_manager;
     std::string _filename;
@@ -33,4 +40,5 @@ private:
     NvDecoder* _decoder;
     std::queue<uint8_t*> frame_buf;
     int64_t _seek_pts = AV_NOPTS_VALUE;
+    Dim* _resize_dim = NULL;
 };

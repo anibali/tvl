@@ -46,5 +46,5 @@ class PyAvBackend(Backend):
 
 
 class PyAvBackendFactory(BackendFactory):
-    def create(self, filename, device) -> PyAvBackend:
+    def create(self, filename, device, backend_opts=None) -> PyAvBackend:
         return PyAvBackend(filename, device)

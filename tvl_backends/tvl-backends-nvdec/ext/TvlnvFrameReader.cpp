@@ -6,7 +6,8 @@
 simplelogger::Logger *logger = simplelogger::LoggerFactory::CreateConsoleLogger();
 
 
-TvlnvFrameReader::TvlnvFrameReader(MemManager* mem_manager, std::string filename, int gpu_index)
+TvlnvFrameReader::TvlnvFrameReader(MemManager* mem_manager, std::string filename, int gpu_index,
+                                   int out_width, int out_height)
     : _mem_manager(mem_manager), _filename(filename)
 {
     CheckInputFile(filename.c_str());
@@ -22,14 +23,23 @@ TvlnvFrameReader::TvlnvFrameReader(MemManager* mem_manager, std::string filename
     _mem_manager->cu_context = _cu_context;
 
     _demuxer = new FFmpegDemuxer(_filename.c_str());
-    _decoder = new NvDecoder(_cu_context, _demuxer->GetWidth(), _demuxer->GetHeight(),
-                             _mem_manager, FFmpeg2NvCodecId(_demuxer->GetVideoCodec()));
+
+    if(out_width > 0 || out_height > 0) {
+        _resize_dim = new Dim;
+        _resize_dim->w = out_width;
+        _resize_dim->h = out_height;
+    }
+
+    _init_decoder();
 }
 
 TvlnvFrameReader::~TvlnvFrameReader() {
     delete _decoder;
     delete _demuxer;
     _mem_manager->cu_context = NULL;
+    if(_resize_dim != NULL) {
+        delete _resize_dim;
+    }
     delete _mem_manager;
     cuDevicePrimaryCtxRelease(_cu_device);
 }
@@ -70,9 +80,9 @@ void TvlnvFrameReader::seek(float time_secs) {
         frame_buf.pop();
     }
     // Reset the decoder.
+    // TODO: This is very slow. Need to find a way to reuse the same decoder.
     delete _decoder;
-    _decoder = new NvDecoder(_cu_context, _demuxer->GetWidth(), _demuxer->GetHeight(),
-                             _mem_manager, FFmpeg2NvCodecId(_demuxer->GetVideoCodec()));
+    _init_decoder();
 }
 
 uint8_t* TvlnvFrameReader::read_frame() {

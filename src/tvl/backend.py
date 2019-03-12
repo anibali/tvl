@@ -28,5 +28,5 @@ class Backend(ABC):
 
 class BackendFactory(ABC):
     @abstractmethod
-    def create(self, filename, device) -> Backend:
+    def create(self, filename, device, backend_opts=None) -> Backend:
         pass

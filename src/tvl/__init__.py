@@ -50,10 +50,10 @@ def get_backend_factory(device_type) -> BackendFactory:
 
 
 class VideoLoader:
-    def __init__(self, filename, device):
+    def __init__(self, filename, device, backend_opts=None):
         if isinstance(device, str):
             device = torch.device(device)
-        self.backend = get_backend_factory(device.type).create(filename, device)
+        self.backend = get_backend_factory(device.type).create(filename, device, backend_opts)
 
     def seek(self, time_secs):
         self.backend.seek(time_secs)
