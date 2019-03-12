@@ -73,16 +73,19 @@ def resize(tensor, size, mode='bilinear'):
     Returns:
         Tensor: The resized image tensor.
     """
-    is_unbatched = tensor.ndimension() == 3
-    if is_unbatched:
+    assert len(size) == 2
+    out_shape = (*tensor.shape[:-2], *size)
+    if tensor.ndimension() < 3:
+        raise Exception('tensor must be at least 2D')
+    elif tensor.ndimension() == 3:
         tensor = tensor.unsqueeze(0)
+    elif tensor.ndimension() > 4:
+        tensor = tensor.view(-1, *tensor.shape[-3:])
     align_corners = None
     if mode in {'linear', 'bilinear', 'trilinear'}:
         align_corners = False
     resized = interpolate(tensor, size=size, mode=mode, align_corners=align_corners)
-    if is_unbatched:
-        resized = resized.squeeze(0)
-    return resized
+    return resized.view(*out_shape)
 
 
 def crop(tensor, t, l, h, w, padding_mode='constant', fill=0):

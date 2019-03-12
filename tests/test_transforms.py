@@ -58,6 +58,21 @@ def test_resize():
     assert_allclose(actual, expected)
 
 
+def test_resize_5d():
+    inp = torch.FloatTensor([[[[
+        [1, 0],
+        [0, 1],
+    ]]]])
+    expected = torch.FloatTensor([[[[
+        [1, 1, 0, 0],
+        [1, 1, 0, 0],
+        [0, 0, 1, 1],
+        [0, 0, 1, 1],
+    ]]]])
+    actual = resize(inp, (4, 4), mode='nearest')
+    assert_allclose(actual, expected)
+
+
 def test_crop():
     inp = torch.FloatTensor([[
         [1, 1, 0, 0],
