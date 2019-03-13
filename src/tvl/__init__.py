@@ -50,19 +50,22 @@ def get_backend_factory(device_type) -> BackendFactory:
 
 
 class VideoLoader:
-    def __init__(self, filename, device, backend_opts=None):
+    def __init__(self, filename, device, dtype=torch.float32, backend_opts=None):
         if isinstance(device, str):
             device = torch.device(device)
-        self.backend = get_backend_factory(device.type).create(filename, device, backend_opts)
+        self.backend = get_backend_factory(device.type).create(filename, device, dtype, backend_opts)
 
     def seek(self, time_secs):
         self.backend.seek(time_secs)
 
     def seek_to_frame(self, frame_index):
-        self.seek(frame_index / self.backend.frame_rate)
+        self.backend.seek_to_frame(frame_index)
 
     def read_frame(self):
         return self.backend.read_frame()
+
+    def read_frames(self, n):
+        return self.backend.read_frames(n)
 
     @property
     def duration(self):
@@ -106,15 +109,26 @@ class VideoLoader:
         sorted_frame_indices = list(sorted(set(frame_indices)))
 
         pos = -(skip_threshold + 1)
+        seq_len = 0
+        seq_keepers = []
         for frame_index in sorted_frame_indices:
             if frame_index - pos > skip_threshold:
                 # Skip to desired location by seeking.
                 self.seek_to_frame(frame_index)
+                frames = self.backend.read_frames(seq_len)
+                for i in seq_keepers:
+                    yield frames[i]
+                seq_keepers.clear()
+                seq_len = 0
             else:
                 # Skip to desired location by reading and discarding intermediate frames.
                 while pos < frame_index:
-                    self.read_frame()
+                    seq_len += 1
                     pos += 1
             # Read the frame that we care about.
-            yield self.read_frame()
+            seq_keepers.append(seq_len)
+            seq_len += 1
             pos = frame_index + 1
+        frames = self.read_frames(seq_len)
+        for i in seq_keepers:
+            yield frames[i]

@@ -55,7 +55,7 @@ def nv12_to_rgb(planar_yuv, h, w):
 
 
 class NvdecBackend(Backend):
-    def __init__(self, filename, device, resize=None):
+    def __init__(self, filename, device, dtype, resize=None):
         device = torch.device(device)
         mem_manager = TorchMemManager(device)
         mem_manager.__disown__()
@@ -69,6 +69,7 @@ class NvdecBackend(Backend):
 
         self.frame_reader = tvlnv.TvlnvFrameReader(mem_manager, filename, device.index,
                                                    out_width, out_height)
+        self.dtype = dtype
 
     @property
     def duration(self):
@@ -94,11 +95,15 @@ class NvdecBackend(Backend):
         width = self.frame_reader.get_width()
         height = self.frame_reader.get_height()
         rgb = nv12_to_rgb(planar_yuv, height, width)
-        return rgb
+        if self.dtype == torch.float32:
+            return rgb
+        elif self.dtype == torch.uint8:
+            return (rgb * 255).round_().byte()
+        raise NotImplementedError(f'Unsupported dtype: {self.dtype}')
 
 
 class NvdecBackendFactory(BackendFactory):
-    def create(self, filename, device, backend_opts=None) -> NvdecBackend:
+    def create(self, filename, device, dtype, backend_opts=None) -> NvdecBackend:
         if backend_opts is None:
             backend_opts = {}
-        return NvdecBackend(filename, device, **backend_opts)
+        return NvdecBackend(filename, device, dtype, **backend_opts)

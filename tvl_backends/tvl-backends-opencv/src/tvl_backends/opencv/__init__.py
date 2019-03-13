@@ -5,10 +5,11 @@ from tvl.backend import Backend, BackendFactory
 
 
 class OpenCvBackend(Backend):
-    def __init__(self, filename, device):
+    def __init__(self, filename, device, dtype):
         device = torch.device(device)
         assert device.type == 'cpu'
         self.cap = cv2.VideoCapture(filename)
+        self.dtype = dtype
 
     @property
     def duration(self):
@@ -29,11 +30,16 @@ class OpenCvBackend(Backend):
         ret, frame = self.cap.read()
         if ret:
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            return torch.from_numpy(frame).permute(2, 0, 1).float().div_(255)
+            rgb = torch.from_numpy(frame).permute(2, 0, 1).float().div_(255)
+            if self.dtype == torch.float32:
+                return rgb
+            elif self.dtype == torch.uint8:
+                return (rgb * 255).round_().byte()
+            raise NotImplementedError(f'Unsupported dtype: {self.dtype}')
         else:
             raise EOFError()
 
 
 class OpenCvBackendFactory(BackendFactory):
-    def create(self, filename, device, backend_opts=None) -> OpenCvBackend:
-        return OpenCvBackend(filename, device)
+    def create(self, filename, device, dtype, backend_opts=None) -> OpenCvBackend:
+        return OpenCvBackend(filename, device, dtype)
