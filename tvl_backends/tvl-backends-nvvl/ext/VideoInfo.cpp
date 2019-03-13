@@ -7,8 +7,6 @@ extern "C" {
 
 
 VideoInfo::VideoInfo(std::string filename) {
-    av_register_all();
-
     AVFormatContext* fmt_ctx = nullptr;
     auto ret = avformat_open_input(&fmt_ctx, filename.c_str(), NULL, NULL);
     if (ret < 0) {

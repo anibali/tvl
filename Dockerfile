@@ -1,11 +1,11 @@
-FROM nvidia/cuda:10.0-devel-ubuntu14.04 as ffmpeg-builder
+FROM nvidia/cuda:10.0-devel-ubuntu16.04 as ffmpeg-builder
 
 RUN apt-get update \
  && apt-get install -y curl git pkg-config yasm libx264-dev checkinstall \
  && rm -rf /var/lib/apt/lists/*
 
 # Build FFmpeg, enabling only selected features
-ARG FFMPEG_VERSION=3.4.5
+ARG FFMPEG_VERSION=4.1.1
 RUN cd /tmp && curl -sO http://ffmpeg.org/releases/ffmpeg-$FFMPEG_VERSION.tar.bz2 \
  && tar xf ffmpeg-$FFMPEG_VERSION.tar.bz2 \
  && rm ffmpeg-$FFMPEG_VERSION.tar.bz2 \
@@ -19,7 +19,6 @@ RUN cd /tmp && curl -sO http://ffmpeg.org/releases/ffmpeg-$FFMPEG_VERSION.tar.bz
     --disable-ffplay \
     --enable-shared \
     --enable-gpl \
-    --enable-cuda \
     --enable-libx264 \
     --enable-decoder=h264 \
     --enable-protocol=file \
@@ -35,7 +34,7 @@ RUN cd /tmp && curl -sO http://ffmpeg.org/releases/ffmpeg-$FFMPEG_VERSION.tar.bz
 ################################################################################
 
 
-FROM nvidia/cuda:10.0-devel-ubuntu14.04 as tvl-builder
+FROM nvidia/cuda:10.0-devel-ubuntu16.04 as tvl-builder
 
 RUN apt-get update \
  && apt-get install -y curl git \
@@ -67,15 +66,27 @@ COPY --from=ffmpeg-builder /ffmpeg.deb /tmp/ffmpeg.deb
 RUN dpkg -i /tmp/ffmpeg.deb && rm /tmp/ffmpeg.deb
 
 # Install Swig
-RUN conda install -y swig=3.0.10 && conda clean -ya
+RUN conda install -y swig=3.0.12 && conda clean -ya
 
-# Add a stub version of libnvcuvid.so for building.
+# Add a stub version of libnvcuvid.so for building (required for CUDA backends).
 # This library is provided by nvidia-docker at runtime when the environment variable
 # NVIDIA_DRIVER_CAPABILITIES includes "video".
 RUN curl -so /usr/lib/x86_64-linux-gnu/libnvcuvid.so.1 \
     https://raw.githubusercontent.com/NVIDIA/nvvl/bde20830cf171af8d10ef8222449237382b178ef/pytorch/test/docker/libnvcuvid.so \
  && ln -s /usr/local/nvidia/lib64/libnvcuvid.so.1 /usr/local/lib/libnvcuvid.so \
  && ln -s libnvcuvid.so.1 /usr/lib/x86_64-linux-gnu/libnvcuvid.so
+
+# Install nvvl
+RUN pip install cmake==3.13.3
+RUN cd /tmp \
+ && git clone https://github.com/NVIDIA/nvvl.git \
+ && cd nvvl \
+ && git checkout 14b660c87b4c5a86d95da04a50be70674e68e625 \
+ && mkdir build \
+ && cd build \
+ && cmake .. \
+ && make -j8 \
+ && make install
 
 RUN mkdir /app
 WORKDIR /app
@@ -87,7 +98,7 @@ RUN make dist
 ################################################################################
 
 
-FROM nvidia/cuda:10.0-devel-ubuntu14.04
+FROM nvidia/cuda:10.0-devel-ubuntu16.04
 
 RUN apt-get update \
  && apt-get install -y curl git \
@@ -130,10 +141,12 @@ COPY requirements.txt /app
 RUN pip install -r requirements.txt
 
 # Install tvl
+COPY --from=tvl-builder /usr/local/lib/libnvvl.so /usr/local/lib/
 COPY --from=tvl-builder /app/dist/tvl*.whl /tmp/
 RUN pip install -f /tmp \
     tvl \
     tvl-backends-nvdec \
+    tvl-backends-nvvl \
     tvl-backends-opencv \
     tvl-backends-pyav \
   && rm /tmp/tvl*.whl

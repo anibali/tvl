@@ -96,8 +96,6 @@ private:
     }
 
     AVFormatContext *CreateFormatContext(DataProvider *pDataProvider) {
-        av_register_all();
-
         AVFormatContext *ctx = NULL;
         if (!(ctx = avformat_alloc_context())) {
             LOG(ERROR) << "FFmpeg error: " << __FILE__ << " " << __LINE__;
@@ -124,7 +122,6 @@ private:
     }
 
     AVFormatContext *CreateFormatContext(const char *szFilePath) {
-        av_register_all();
         avformat_network_init();
 
         AVFormatContext *ctx = NULL;
@@ -181,7 +178,7 @@ public:
         return (int64_t)floor(time_secs / time_base);
     }
     void Seek(int64_t pts) {
-        ck(av_seek_frame(fmtc, iVideoStream, pts, AVSEEK_FLAG_BACKWARD));
+        ck(avformat_seek_file(fmtc, iVideoStream, 0, pts, pts, 0));
     }
     bool Demux(uint8_t **ppVideo, int *pnVideoBytes) {
         if (!fmtc) {

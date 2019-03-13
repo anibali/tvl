@@ -18,7 +18,7 @@ list_of_rgb_tensors = list(generator_of_rgb_tensors)
 
 ## Requirements
 
-* ffmpeg 3.4
+* ffmpeg 4
 * SWIG 3
 * NVIDIA drivers >= 396.24
 

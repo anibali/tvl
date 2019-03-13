@@ -1,4 +1,4 @@
-numpy==1.14.6
+numpy==1.16.2
 Pillow==5.2.0
-pytest==3.8.2
+pytest==4.3.0
 torch==1.0.0
