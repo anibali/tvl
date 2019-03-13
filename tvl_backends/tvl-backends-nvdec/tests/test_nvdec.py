@@ -55,3 +55,8 @@ def test_nvdec_duration(video_filename):
 def test_nvdec_frame_rate(video_filename):
     backend = NvdecBackendFactory().create(video_filename, 'cuda:0', torch.float32)
     assert backend.frame_rate == 25
+
+
+def test_nvdec_n_frames(video_filename):
+    backend = NvdecBackendFactory().create(video_filename, 'cuda:0', torch.float32)
+    assert backend.n_frames == 50

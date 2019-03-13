@@ -73,3 +73,8 @@ def test_nvvl_duration(video_filename):
 def test_nvvl_frame_rate(video_filename):
     backend = NvvlBackendFactory().create(video_filename, 'cuda:0', torch.float32)
     assert backend.frame_rate == 25
+
+
+def test_nvvl_n_frames(video_filename):
+    backend = NvvlBackendFactory().create(video_filename, 'cuda:0', torch.float32)
+    assert backend.n_frames == 50

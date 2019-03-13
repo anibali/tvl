@@ -66,9 +66,15 @@ private:
         if (fmtc->streams[iVideoStream]->codecpar->format == AV_PIX_FMT_YUV420P12LE)
             nBitDepth = 12;
 
-        durationSecs = fmtc->duration / (double)AV_TIME_BASE;
-        frameRate = av_q2d(av_guess_frame_rate(fmtc, fmtc->streams[iVideoStream], NULL));
+        AVRational duration_q = av_make_q(fmtc->duration, AV_TIME_BASE);
+        AVRational frame_rate_q = av_guess_frame_rate(fmtc, fmtc->streams[iVideoStream], NULL);
+
+        durationSecs = av_q2d(duration_q);
+        frameRate = av_q2d(frame_rate_q);
         nFrames = fmtc->streams[iVideoStream]->nb_frames;
+        if(nFrames <= 0) {
+            nFrames = (int64_t)av_q2d(av_mul_q(duration_q, frame_rate_q));
+        }
 
         bMp4H264 = eVideoCodec == AV_CODEC_ID_H264 && (
                 !strcmp(fmtc->iformat->long_name, "QuickTime / MOV") 
@@ -168,10 +174,7 @@ public:
         return frameRate;
     }
     int64_t GetNumberOfFrames() {
-        if(nFrames > 0) {
-            return nFrames;
-        }
-        return (int64_t)(GetDuration() * GetFrameRate());
+        return nFrames;
     }
     int64_t SecsToPts(float time_secs) {
         float time_base = av_q2d(fmtc->streams[iVideoStream]->time_base);

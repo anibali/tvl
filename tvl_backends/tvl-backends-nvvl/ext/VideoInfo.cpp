@@ -28,13 +28,16 @@ VideoInfo::VideoInfo(std::string filename) {
 
     auto stream = fmt_ctx->streams[vid_stream_idx_];
 
+    AVRational duration_q = av_make_q(fmt_ctx->duration, AV_TIME_BASE);
+    AVRational frame_rate_q = av_guess_frame_rate(fmt_ctx, stream, NULL);
+
     _width = stream->codecpar->width;
     _height = stream->codecpar->height;
-    _duration = fmt_ctx->duration / (double)AV_TIME_BASE;
-    _frame_rate = av_q2d(av_guess_frame_rate(fmt_ctx, stream, NULL));
+    _duration = av_q2d(duration_q);
+    _frame_rate = av_q2d(frame_rate_q);
     _n_frames = stream->nb_frames;
     if(_n_frames <= 0) {
-        _n_frames = (int64_t)(_duration * _frame_rate);
+        _n_frames = (int64_t)av_q2d(av_mul_q(duration_q, frame_rate_q));
     }
 
     avformat_close_input(&fmt_ctx);
