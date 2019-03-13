@@ -103,10 +103,12 @@ class NvvlBackend(Backend):
         device = torch.device(device)
         assert device.type == 'cuda'
 
+        self.info = tvlnvvl.VideoInfo(filename)
+
         self.filename = filename
         self.device = device
-        size = tvlnvvl.nvvl_video_size_from_file(filename)
-        self.loader = NvvlVideoLoader(3, size.height, size.width, self.device, dtype=dtype)
+        self.loader = NvvlVideoLoader(3, self.info.get_height(), self.info.get_width(),
+                                      self.device, dtype=dtype)
         self.dtype = dtype
 
         self.cur_frame_index = 0
@@ -114,18 +116,18 @@ class NvvlBackend(Backend):
 
     @property
     def duration(self):
-        raise NotImplementedError()
+        return self.info.get_duration()
 
     @property
     def frame_rate(self):
-        raise NotImplementedError()
+        return self.info.get_frame_rate()
 
     @property
     def n_frames(self):
-        raise NotImplementedError()
+        return self.info.get_number_of_frames()
 
     def seek(self, time_secs):
-        raise NotImplementedError()
+        self.seek_to_frame(round(time_secs * self.frame_rate))
 
     def seek_to_frame(self, frame_index):
         self.cur_frame_index = frame_index
@@ -138,6 +140,8 @@ class NvvlBackend(Backend):
     def read_frames(self, n):
         if n == 0:
             return []
+        if self.cur_frame_index + n > self.n_frames:
+            raise EOFError()
         tensor = self.loader.load_sequence(self.filename, self.cur_frame_index, n, scale=self.scale)
         if self.dtype.is_floating_point:
             tensor.div_(255)

@@ -499,6 +499,42 @@ class VideoLoader(_object):
 VideoLoader_swigregister = _tvlnvvl.VideoLoader_swigregister
 VideoLoader_swigregister(VideoLoader)
 
+class VideoInfo(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, VideoInfo, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, VideoInfo, name)
+    __repr__ = _swig_repr
+
+    def __init__(self, filename):
+        this = _tvlnvvl.new_VideoInfo(filename)
+        try:
+            self.this.append(this)
+        except __builtin__.Exception:
+            self.this = this
+
+    def get_filename(self):
+        return _tvlnvvl.VideoInfo_get_filename(self)
+
+    def get_width(self):
+        return _tvlnvvl.VideoInfo_get_width(self)
+
+    def get_height(self):
+        return _tvlnvvl.VideoInfo_get_height(self)
+
+    def get_duration(self):
+        return _tvlnvvl.VideoInfo_get_duration(self)
+
+    def get_frame_rate(self):
+        return _tvlnvvl.VideoInfo_get_frame_rate(self)
+
+    def get_number_of_frames(self):
+        return _tvlnvvl.VideoInfo_get_number_of_frames(self)
+    __swig_destroy__ = _tvlnvvl.delete_VideoInfo
+    __del__ = lambda self: None
+VideoInfo_swigregister = _tvlnvvl.VideoInfo_swigregister
+VideoInfo_swigregister(VideoInfo)
+
 # This file is compatible with both classic and new-style classes.
 
 

@@ -3457,15 +3457,16 @@ namespace Swig {
 #define SWIGTYPE_p_NVVL__PictureSequence swig_types[6]
 #define SWIGTYPE_p_NVVL__VideoLoader swig_types[7]
 #define SWIGTYPE_p_Size swig_types[8]
-#define SWIGTYPE_p_VideoLoaderStats swig_types[9]
-#define SWIGTYPE_p_char swig_types[10]
-#define SWIGTYPE_p_cudaStream_t swig_types[11]
-#define SWIGTYPE_p_int swig_types[12]
-#define SWIGTYPE_p_uint16_t swig_types[13]
-#define SWIGTYPE_p_uint64_t swig_types[14]
-#define SWIGTYPE_p_uint8_t swig_types[15]
-static swig_type_info *swig_types[17];
-static swig_module_info swig_module = {swig_types, 16, 0, 0, 0, 0};
+#define SWIGTYPE_p_VideoInfo swig_types[9]
+#define SWIGTYPE_p_VideoLoaderStats swig_types[10]
+#define SWIGTYPE_p_char swig_types[11]
+#define SWIGTYPE_p_cudaStream_t swig_types[12]
+#define SWIGTYPE_p_int swig_types[13]
+#define SWIGTYPE_p_uint16_t swig_types[14]
+#define SWIGTYPE_p_uint64_t swig_types[15]
+#define SWIGTYPE_p_uint8_t swig_types[16]
+static swig_type_info *swig_types[18];
+static swig_module_info swig_module = {swig_types, 17, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -3572,6 +3573,7 @@ namespace swig {
 
 #include "PictureSequence.h"
 #include "VideoLoader.h"
+#include "VideoInfo.h"
 
 
 #include <string>
@@ -4102,6 +4104,16 @@ SWIG_AsPtr_std_string (PyObject * obj, std::string **val)
   }
   return SWIG_ERROR;
 }
+
+
+SWIGINTERNINLINE PyObject *
+SWIG_From_std_string  (const std::string& s)
+{
+  return SWIG_FromCharPtrAndSize(s.data(), s.size());
+}
+
+
+  #define SWIG_From_double   PyFloat_FromDouble 
 
 
 
@@ -7471,6 +7483,192 @@ SWIGINTERN PyObject *VideoLoader_swigregister(PyObject *SWIGUNUSEDPARM(self), Py
   return SWIG_Py_Void();
 }
 
+SWIGINTERN PyObject *_wrap_new_VideoInfo(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::string arg1 ;
+  PyObject * obj0 = 0 ;
+  VideoInfo *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:new_VideoInfo",&obj0)) SWIG_fail;
+  {
+    std::string *ptr = (std::string *)0;
+    int res = SWIG_AsPtr_std_string(obj0, &ptr);
+    if (!SWIG_IsOK(res) || !ptr) {
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "new_VideoInfo" "', argument " "1"" of type '" "std::string""'"); 
+    }
+    arg1 = *ptr;
+    if (SWIG_IsNewObj(res)) delete ptr;
+  }
+  result = (VideoInfo *)new VideoInfo(arg1);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_VideoInfo, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VideoInfo_get_filename(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  VideoInfo *arg1 = (VideoInfo *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::string result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:VideoInfo_get_filename",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_VideoInfo, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VideoInfo_get_filename" "', argument " "1"" of type '" "VideoInfo *""'"); 
+  }
+  arg1 = reinterpret_cast< VideoInfo * >(argp1);
+  result = (arg1)->get_filename();
+  resultobj = SWIG_From_std_string(static_cast< std::string >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VideoInfo_get_width(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  VideoInfo *arg1 = (VideoInfo *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:VideoInfo_get_width",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_VideoInfo, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VideoInfo_get_width" "', argument " "1"" of type '" "VideoInfo *""'"); 
+  }
+  arg1 = reinterpret_cast< VideoInfo * >(argp1);
+  result = (int)(arg1)->get_width();
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VideoInfo_get_height(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  VideoInfo *arg1 = (VideoInfo *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:VideoInfo_get_height",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_VideoInfo, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VideoInfo_get_height" "', argument " "1"" of type '" "VideoInfo *""'"); 
+  }
+  arg1 = reinterpret_cast< VideoInfo * >(argp1);
+  result = (int)(arg1)->get_height();
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VideoInfo_get_duration(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  VideoInfo *arg1 = (VideoInfo *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:VideoInfo_get_duration",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_VideoInfo, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VideoInfo_get_duration" "', argument " "1"" of type '" "VideoInfo *""'"); 
+  }
+  arg1 = reinterpret_cast< VideoInfo * >(argp1);
+  result = (double)(arg1)->get_duration();
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VideoInfo_get_frame_rate(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  VideoInfo *arg1 = (VideoInfo *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:VideoInfo_get_frame_rate",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_VideoInfo, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VideoInfo_get_frame_rate" "', argument " "1"" of type '" "VideoInfo *""'"); 
+  }
+  arg1 = reinterpret_cast< VideoInfo * >(argp1);
+  result = (double)(arg1)->get_frame_rate();
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VideoInfo_get_number_of_frames(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  VideoInfo *arg1 = (VideoInfo *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int64_t result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:VideoInfo_get_number_of_frames",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_VideoInfo, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VideoInfo_get_number_of_frames" "', argument " "1"" of type '" "VideoInfo *""'"); 
+  }
+  arg1 = reinterpret_cast< VideoInfo * >(argp1);
+  result = (arg1)->get_number_of_frames();
+  {
+    resultobj = PyInt_FromLong(result);
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_VideoInfo(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  VideoInfo *arg1 = (VideoInfo *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:delete_VideoInfo",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_VideoInfo, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_VideoInfo" "', argument " "1"" of type '" "VideoInfo *""'"); 
+  }
+  arg1 = reinterpret_cast< VideoInfo * >(argp1);
+  delete arg1;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *VideoInfo_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj;
+  if (!PyArg_ParseTuple(args,(char *)"O:swigregister", &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_VideoInfo, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
 static PyMethodDef SwigMethods[] = {
 	 { (char *)"SWIG_PyInstanceMethod_New", (PyCFunction)SWIG_PyInstanceMethod_New, METH_O, NULL},
 	 { (char *)"NVVL_Strides_x_set", _wrap_NVVL_Strides_x_set, METH_VARARGS, NULL},
@@ -7591,6 +7789,15 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"delete_VideoLoader", _wrap_delete_VideoLoader, METH_VARARGS, NULL},
 	 { (char *)"new_VideoLoader", _wrap_new_VideoLoader, METH_VARARGS, NULL},
 	 { (char *)"VideoLoader_swigregister", VideoLoader_swigregister, METH_VARARGS, NULL},
+	 { (char *)"new_VideoInfo", _wrap_new_VideoInfo, METH_VARARGS, NULL},
+	 { (char *)"VideoInfo_get_filename", _wrap_VideoInfo_get_filename, METH_VARARGS, NULL},
+	 { (char *)"VideoInfo_get_width", _wrap_VideoInfo_get_width, METH_VARARGS, NULL},
+	 { (char *)"VideoInfo_get_height", _wrap_VideoInfo_get_height, METH_VARARGS, NULL},
+	 { (char *)"VideoInfo_get_duration", _wrap_VideoInfo_get_duration, METH_VARARGS, NULL},
+	 { (char *)"VideoInfo_get_frame_rate", _wrap_VideoInfo_get_frame_rate, METH_VARARGS, NULL},
+	 { (char *)"VideoInfo_get_number_of_frames", _wrap_VideoInfo_get_number_of_frames, METH_VARARGS, NULL},
+	 { (char *)"delete_VideoInfo", _wrap_delete_VideoInfo, METH_VARARGS, NULL},
+	 { (char *)"VideoInfo_swigregister", VideoInfo_swigregister, METH_VARARGS, NULL},
 	 { NULL, NULL, 0, NULL }
 };
 
@@ -7606,6 +7813,7 @@ static swig_type_info _swigt__p_NVVL_Strides = {"_p_NVVL_Strides", "NVVL_Strides
 static swig_type_info _swigt__p_NVVL__PictureSequence = {"_p_NVVL__PictureSequence", "NVVL::PictureSequence *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_NVVL__VideoLoader = {"_p_NVVL__VideoLoader", "NVVL::VideoLoader *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_Size = {"_p_Size", "Size *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_VideoInfo = {"_p_VideoInfo", "VideoInfo *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_VideoLoaderStats = {"_p_VideoLoaderStats", "VideoLoaderStats *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_char = {"_p_char", "char *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_cudaStream_t = {"_p_cudaStream_t", "cudaStream_t *", 0, 0, (void*)0, 0};
@@ -7624,6 +7832,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_NVVL__PictureSequence,
   &_swigt__p_NVVL__VideoLoader,
   &_swigt__p_Size,
+  &_swigt__p_VideoInfo,
   &_swigt__p_VideoLoaderStats,
   &_swigt__p_char,
   &_swigt__p_cudaStream_t,
@@ -7642,6 +7851,7 @@ static swig_cast_info _swigc__p_NVVL_Strides[] = {  {&_swigt__p_NVVL_Strides, 0,
 static swig_cast_info _swigc__p_NVVL__PictureSequence[] = {  {&_swigt__p_NVVL__PictureSequence, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_NVVL__VideoLoader[] = {  {&_swigt__p_NVVL__VideoLoader, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Size[] = {  {&_swigt__p_Size, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_VideoInfo[] = {  {&_swigt__p_VideoInfo, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_VideoLoaderStats[] = {  {&_swigt__p_VideoLoaderStats, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_char[] = {  {&_swigt__p_char, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_cudaStream_t[] = {  {&_swigt__p_cudaStream_t, 0, 0, 0},{0, 0, 0, 0}};
@@ -7660,6 +7870,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_NVVL__PictureSequence,
   _swigc__p_NVVL__VideoLoader,
   _swigc__p_Size,
+  _swigc__p_VideoInfo,
   _swigc__p_VideoLoaderStats,
   _swigc__p_char,
   _swigc__p_cudaStream_t,

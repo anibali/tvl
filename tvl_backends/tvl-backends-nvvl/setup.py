@@ -28,7 +28,7 @@ setup(
     ext_modules=[
         Extension(
             '_tvlnvvl',
-            sources=['ext/tvlnvvl.i'],
+            sources=['ext/tvlnvvl.i', 'ext/VideoInfo.cpp'],
             swig_opts=['-c++'],
             extra_compile_args=['-std=c++11'],
             include_dirs=['ext', 'ext/nvvl', '/usr/local/cuda/include'],

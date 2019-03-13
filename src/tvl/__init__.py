@@ -113,13 +113,15 @@ class VideoLoader:
         seq_keepers = []
         for frame_index in sorted_frame_indices:
             if frame_index - pos > skip_threshold:
+                # Read previous sequence
+                if seq_len > 0:
+                    frames = self.read_frames(seq_len)
+                    for i in seq_keepers:
+                        yield frames[i]
+                    seq_keepers.clear()
+                    seq_len = 0
                 # Skip to desired location by seeking.
                 self.seek_to_frame(frame_index)
-                frames = self.backend.read_frames(seq_len)
-                for i in seq_keepers:
-                    yield frames[i]
-                seq_keepers.clear()
-                seq_len = 0
             else:
                 # Skip to desired location by reading and discarding intermediate frames.
                 while pos < frame_index:
@@ -129,6 +131,7 @@ class VideoLoader:
             seq_keepers.append(seq_len)
             seq_len += 1
             pos = frame_index + 1
-        frames = self.read_frames(seq_len)
-        for i in seq_keepers:
-            yield frames[i]
+        if seq_len > 0:
+            frames = self.read_frames(seq_len)
+            for i in seq_keepers:
+                yield frames[i]
