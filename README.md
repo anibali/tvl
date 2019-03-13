@@ -69,6 +69,7 @@ doing some other work (eg. training a model). See [`examples/async_dataloading.p
 | Backend class | Supported devices |
 |---------------|-------------------|
 | NvdecBackend  | cuda              |
+| NvvlBackend   | cuda              |
 | PyAvBackend   | cpu               |
 | OpenCvBackend | cpu               |
 

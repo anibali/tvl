@@ -1,12 +1,13 @@
 import PIL.Image
 import numpy as np
 import pytest
+import torch
 
 from tvl_backends.pyav import PyAvBackendFactory
 
 
 def test_pyav_read_frame(video_filename, first_frame_image):
-    backend = PyAvBackendFactory().create(video_filename, 'cpu')
+    backend = PyAvBackendFactory().create(video_filename, 'cpu', torch.float32)
     rgb = backend.read_frame()
 
     assert(rgb.size() == (3, 720, 1280))
@@ -18,14 +19,14 @@ def test_pyav_read_frame(video_filename, first_frame_image):
 
 
 def test_pyav_eof(video_filename):
-    backend = PyAvBackendFactory().create(video_filename, 'cpu')
+    backend = PyAvBackendFactory().create(video_filename, 'cpu', torch.float32)
     backend.seek(2.0)
     with pytest.raises(EOFError):
         backend.read_frame()
 
 
 def test_pyav_read_all_frames(video_filename):
-    backend = PyAvBackendFactory().create(video_filename, 'cpu')
+    backend = PyAvBackendFactory().create(video_filename, 'cpu', torch.float32)
 
     n_read = 0
     for i in range(1000):
@@ -38,7 +39,7 @@ def test_pyav_read_all_frames(video_filename):
 
 
 def test_pyav_seek(video_filename, mid_frame_image):
-    backend = PyAvBackendFactory().create(video_filename, 'cpu')
+    backend = PyAvBackendFactory().create(video_filename, 'cpu', torch.float32)
     backend.seek(1.0)
     rgb = backend.read_frame()
     rgb_bytes = (rgb * 255).round_().byte().cpu()
@@ -47,10 +48,10 @@ def test_pyav_seek(video_filename, mid_frame_image):
 
 
 def test_pyav_duration(video_filename):
-    backend = PyAvBackendFactory().create(video_filename, 'cpu')
+    backend = PyAvBackendFactory().create(video_filename, 'cpu', torch.float32)
     assert backend.duration == 2.0
 
 
 def test_pyav_frame_rate(video_filename):
-    backend = PyAvBackendFactory().create(video_filename, 'cpu')
+    backend = PyAvBackendFactory().create(video_filename, 'cpu', torch.float32)
     assert backend.frame_rate == 25
