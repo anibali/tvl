@@ -17,6 +17,7 @@ _known_backends = {
     ],
     'cuda': [
         'tvl_backends.nvdec.NvdecBackendFactory',   # PyPI package: tvl-backends-nvdec
+        'tvl_backends.nvvl.NvvlBackendFactory',     # PyPI package: tvl-backends-nvvl
     ],
 }
 

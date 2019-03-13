@@ -20,6 +20,7 @@ setup(
     ],
     extras_require={
         'NvdecBackend': ['tvl-backends-nvdec==' + version],
+        'NvvlBackend': ['tvl-backends-nvvl==' + version],
         'PyAvBackend': ['tvl-backends-pyav==' + version],
         'OpenCvBackend': ['tvl-backends-opencv==' + version],
     },
