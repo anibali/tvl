@@ -83,6 +83,14 @@ class NvdecBackend(Backend):
     def n_frames(self):
         return self.frame_reader.get_number_of_frames()
 
+    @property
+    def width(self):
+        return self.frame_reader.get_width()
+
+    @property
+    def height(self):
+        return self.frame_reader.get_height()
+
     def seek(self, time_secs):
         self.frame_reader.seek(time_secs)
 

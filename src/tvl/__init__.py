@@ -80,6 +80,14 @@ class VideoLoader:
     def n_frames(self):
         return self.backend.n_frames
 
+    @property
+    def width(self):
+        return self.backend.width
+
+    @property
+    def height(self):
+        return self.backend.height
+
     def remaining_frames(self):
         """Iterate sequentially over remaining frames in the video."""
         more_frames = True

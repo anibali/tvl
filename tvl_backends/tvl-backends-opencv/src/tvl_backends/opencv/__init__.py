@@ -23,6 +23,14 @@ class OpenCvBackend(Backend):
     def n_frames(self):
         return self.cap.get(cv2.CAP_PROP_FRAME_COUNT)
 
+    @property
+    def width(self):
+        return int(round(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)))
+
+    @property
+    def height(self):
+        return int(round(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+
     def seek(self, time_secs):
         self.cap.set(cv2.CAP_PROP_POS_FRAMES, round(time_secs * self.frame_rate))
 

@@ -126,6 +126,14 @@ class NvvlBackend(Backend):
     def n_frames(self):
         return self.info.get_number_of_frames()
 
+    @property
+    def width(self):
+        return self.info.get_width()
+
+    @property
+    def height(self):
+        return self.info.get_height()
+
     def seek(self, time_secs):
         self.seek_to_frame(round(time_secs * self.frame_rate))
 

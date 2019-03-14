@@ -17,6 +17,16 @@ class Backend(ABC):
     def n_frames(self):
         """The number of frames in the video."""
 
+    @property
+    @abstractmethod
+    def width(self):
+        """The width of the image."""
+
+    @property
+    @abstractmethod
+    def height(self):
+        """The height of the image."""
+
     @abstractmethod
     def seek(self, time_secs):
         """Seek to the specified time in the video file."""

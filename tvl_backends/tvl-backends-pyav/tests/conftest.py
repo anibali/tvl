@@ -2,6 +2,9 @@ from pathlib import Path
 
 import PIL.Image
 import pytest
+import torch
+
+from tvl_backends.pyav import PyAvBackendFactory
 
 data_dir = Path(__file__).parent.parent.parent.parent.joinpath('data')
 
@@ -19,3 +22,8 @@ def first_frame_image():
 @pytest.fixture
 def mid_frame_image():
     return PIL.Image.open(data_dir.joinpath('board_game_mid.jpg'), 'r')
+
+
+@pytest.fixture
+def backend(video_filename):
+    return PyAvBackendFactory().create(video_filename, 'cpu', torch.float32)

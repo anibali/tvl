@@ -33,6 +33,14 @@ def dummy_backend():
             return 10
 
         @property
+        def width(self):
+            return 800
+
+        @property
+        def height(self):
+            return 600
+
+        @property
         def n_frames(self):
             return int(self.duration * self.frame_rate)
 

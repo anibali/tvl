@@ -49,11 +49,19 @@ std::string TvlnvFrameReader::get_filename() {
 }
 
 int TvlnvFrameReader::get_width() {
-    return _decoder->GetWidth();
+    int width = _decoder->GetWidth();
+    if(width <= 0) {
+        return _demuxer->GetWidth();
+    }
+    return width;
 }
 
 int TvlnvFrameReader::get_height() {
-    return _decoder->GetHeight();
+    int height = _decoder->GetHeight();
+    if(height <= 0) {
+        return _demuxer->GetHeight();
+    }
+    return height;
 }
 
 int TvlnvFrameReader::get_frame_size() {
