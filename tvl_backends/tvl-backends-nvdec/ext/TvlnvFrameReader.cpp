@@ -88,9 +88,7 @@ void TvlnvFrameReader::seek(float time_secs) {
         frame_buf.pop();
     }
     // Reset the decoder.
-    // TODO: This is very slow. Need to find a way to reuse the same decoder.
-    delete _decoder;
-    _init_decoder();
+    _decoder->Decode(nullptr, 0, nullptr, nullptr, 0, nullptr, 0);
 }
 
 uint8_t* TvlnvFrameReader::read_frame() {
