@@ -117,6 +117,11 @@ uint8_t* TvlnvFrameReader::read_frame() {
             if(pTimestamp[i] >= _seek_pts) {
                 seeking = false;
             }
+            if(seeking && pTimestamp[i] == AV_NOPTS_VALUE) {
+                // TODO: Find the PTS using other means
+                LOG(WARNING) << "Could not read packet timestamp, seek is likely incorrect.";
+                seeking = false;
+            }
         }
     } while(nVideoBytes && (seeking || nFrameReturned < 1));
 
@@ -125,7 +130,7 @@ uint8_t* TvlnvFrameReader::read_frame() {
     }
 
     for(int i = 0; i < nFrameReturned; ++i) {
-        if(pTimestamp[i] >= _seek_pts) {
+        if(pTimestamp[i] >= _seek_pts || pTimestamp[i] == AV_NOPTS_VALUE) {
             frame_buf.push(ppFrame[i]);
         }
     }
