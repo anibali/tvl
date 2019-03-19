@@ -3,5 +3,5 @@ numpy==1.16.2
 pytest-mock==1.10.1
 pytest==4.3.0
 torch==1.0.0
-torchgeometry==0.1.1
+torchgeometry==0.1.2
 Pillow==5.2.0
