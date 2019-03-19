@@ -14,7 +14,7 @@ from typing import Sequence
 
 import torch
 from torch.nn.functional import interpolate
-from torchgeometry.imgwarp import warp_affine
+from torchgeometry import warp_affine
 
 
 def normalise(tensor, mean, stddev, inplace=False):
@@ -198,8 +198,8 @@ def rotate(tensor, degrees):
     x = (w - 1) / 2
     y = (h - 1) / 2
     # Transformation matrix for clockwise rotation about the centre of the image.
-    matrix = torch.tensor([
+    matrix = torch.tensor([[
         [ c, s, -c * x - s * y + x],
         [-s, c,  s * x - c * y + y],
-    ], dtype=torch.float32, device=tensor.device)
+    ]], dtype=torch.float32, device=tensor.device)
     return affine(tensor, matrix)

@@ -16,7 +16,7 @@ setup(
     install_requires=[
         'numpy',
         'torch',
-        'torchgeometry',
+        'torchgeometry>=0.1.2',
     ],
     extras_require={
         'NvdecBackend': ['tvl-backends-nvdec==' + version],
