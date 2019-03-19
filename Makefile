@@ -10,6 +10,12 @@ clean:
 		pushd $$dir && $(PYTHON) $(SETUP) clean --all && popd || break; \
 	done
 
+clean-dist: clean
+	rm -rf dist
+	for dir in $(SUBDIRS); do \
+		pushd $$dir && rm -rf dist && popd || break; \
+	done
+
 build:
 	$(PYTHON) $(SETUP) build_ext --inplace
 	for dir in $(SUBDIRS); do \
