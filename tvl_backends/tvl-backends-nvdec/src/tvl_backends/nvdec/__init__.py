@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 import torch
 
 import tvlnv
@@ -27,6 +29,13 @@ class TorchMemManager(tvlnv.MemManager):
         return ptr
 
 
+@lru_cache(8)
+def _nv12_conv_consts(device):
+    const1 = torch.tensor([6.258931e-3, -1.536320e-3, 7.910723e-3], device=device).view(3, 1, 1)
+    const2 = torch.tensor([-0.8742, 0.5316706, -1.0856313], device=device).view(3, 1, 1)
+    return const1, const2
+
+
 def nv12_to_rgb(planar_yuv, h, w):
     """Converts planar YUV pixel data in NV12 format to RGB.
 
@@ -47,10 +56,12 @@ def nv12_to_rgb(planar_yuv, h, w):
     u.copy_(planar_yuv[w*h::2].view(h//2, 1, w//2, 1).expand(h//2, 2, w//2, 2).contiguous().view(h, w))
     v.copy_(planar_yuv[w*h+1::2].view(h//2, 1, w//2, 1).expand(h//2, 2, w//2, 2).contiguous().view(h, w))
     # YUV [0, 255] to RGB [0, 1]
-    y.mul_(4.566207e-3)
-    torch.add(u, 2.075161, v, out=rgb[1]).mul_(-1.536320e-3).add_(y).add_(0.5316706)  # Green
-    v.mul_(6.258931e-3).add_(y).add_(-0.8742)  # Red
-    u.mul_(7.910723e-3).add_(y).add_(-1.0856313)  # Blue
+    torch.add(u, 2.075161, v, out=rgb[1])
+    const1, const2 = _nv12_conv_consts(str(rgb.device))
+    rgb.mul_(const1)
+    torch.add(rgb, 4.566207e-3, y, out=rgb)
+    rgb.add_(const2)
+
     return rgb.clamp_(0, 1)
 
 
