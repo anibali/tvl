@@ -6,7 +6,7 @@ import torch
 from torch.utils.data import Dataset
 
 from tvl import VideoLoader
-from tvl.async import AsyncDataset, BatchDataLoader
+from tvl.dataset import AsyncDataset, BatchDataLoader
 
 
 data_dir = Path(__file__).parent.parent.joinpath('data')
