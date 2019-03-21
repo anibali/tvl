@@ -37,7 +37,7 @@ class PyAvBackend(Backend):
         return self.container.streams.video[0].height
 
     def seek(self, time_secs):
-        self.container.seek(round(time_secs * av.time_base))
+        self.container.seek(int(round(time_secs * av.time_base)))
         self.seek_time = time_secs
         self.generator = None
 

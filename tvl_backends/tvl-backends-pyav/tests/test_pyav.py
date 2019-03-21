@@ -36,6 +36,14 @@ def test_seek(backend, mid_frame_image):
     np.testing.assert_allclose(img, mid_frame_image, rtol=0, atol=50)
 
 
+def test_seek_numpy(backend, mid_frame_image):
+    backend.seek(np.float64(1.0))
+    rgb = backend.read_frame()
+    rgb_bytes = (rgb * 255).round_().byte().cpu()
+    img = PIL.Image.fromarray(rgb_bytes.permute(1, 2, 0).numpy(), 'RGB')
+    np.testing.assert_allclose(img, mid_frame_image, rtol=0, atol=50)
+
+
 def test_duration(backend):
     assert backend.duration == 2.0
 
