@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 import torch
 
 from tvl.backend import Backend, BackendFactory
@@ -31,18 +32,21 @@ class OpenCvBackend(Backend):
     def height(self):
         return int(round(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
 
+    def seek_to_frame(self, frame_index):
+        self.cap.set(cv2.CAP_PROP_POS_FRAMES, frame_index)
+
     def seek(self, time_secs):
-        self.cap.set(cv2.CAP_PROP_POS_FRAMES, round(time_secs * self.frame_rate))
+        self.seek_to_frame(int(round(time_secs * self.frame_rate)))
 
     def read_frame(self):
         ret, frame = self.cap.read()
         if ret:
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            rgb = torch.from_numpy(frame).permute(2, 0, 1).float().div_(255)
+            rgb_bytes = torch.from_numpy(np.moveaxis(frame, -1, 0))
             if self.dtype == torch.float32:
-                return rgb
+                return rgb_bytes.float().div_(255)
             elif self.dtype == torch.uint8:
-                return (rgb * 255).round_().byte()
+                return rgb_bytes
             raise NotImplementedError(f'Unsupported dtype: {self.dtype}')
         else:
             raise EOFError()
