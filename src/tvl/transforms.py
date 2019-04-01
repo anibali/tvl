@@ -108,7 +108,8 @@ def crop(tensor, t, l, h, w, padding_mode='constant', fill=0):
         return tensor[..., t:t+h, l:l+w]
 
     if padding_mode == 'constant':
-        result = torch.full((*tensor.size()[:-2], h, w), fill)
+        result = torch.full((*tensor.size()[:-2], h, w), fill,
+                            device=tensor.device, dtype=tensor.dtype)
     else:
         raise Exception('crop only supports "constant" padding currently.')
 

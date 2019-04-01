@@ -104,6 +104,21 @@ def test_crop_padded():
     assert_allclose(actual, expected)
 
 
+def test_crop_cuda():
+    inp = torch.cuda.FloatTensor([[
+        [1, 1, 0, 0],
+        [1, 1, 0, 0],
+        [0, 0, 1, 1],
+        [0, 0, 1, 1],
+    ]])
+    expected = torch.cuda.FloatTensor([[
+        [2, 2, 2, 2, 2],
+        [1, 0, 0, 2, 2],
+    ]])
+    actual = crop(inp, -1, 1, 2, 5, padding_mode='constant', fill=2)
+    assert_allclose(actual, expected)
+
+
 @hypothesis.given(
     data=arrays(np.float32, array_shapes(min_dims=2, max_dims=4)),
     horizontal=booleans(),
