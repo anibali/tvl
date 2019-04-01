@@ -4,7 +4,7 @@ import hypothesis
 import numpy as np
 import torch
 from hypothesis.extra.numpy import arrays, array_shapes
-from hypothesis.strategies import booleans, one_of, just
+from hypothesis.strategies import booleans, one_of, just, integers
 from torch.testing import assert_allclose
 
 from tvl.transforms import normalise, denormalise, resize, crop, flip, rotate
@@ -87,6 +87,20 @@ def test_crop():
     ]])
     actual = crop(inp, 1, 1, 3, 2)
     assert_allclose(actual, expected)
+
+
+@hypothesis.given(
+    data=arrays(np.float32, array_shapes(min_dims=3, max_dims=3, min_side=1)),
+    t=integers(min_value=-10, max_value=20),
+    l=integers(min_value=-10, max_value=20),
+    w=integers(min_value=1, max_value=10),
+    h=integers(min_value=1, max_value=10),
+    device=one_of(just(torch.device(e)) for e in ['cpu', 'cuda:0'])
+)
+def test_crop_random(data, t, l, w, h, device):
+    inp = torch.from_numpy(data).to(device)
+    actual = crop(inp, t, l, h, w)
+    assert actual.shape == (data.shape[0], h, w)
 
 
 def test_crop_padded():

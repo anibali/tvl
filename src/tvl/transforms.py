@@ -104,7 +104,7 @@ def crop(tensor, t, l, h, w, padding_mode='constant', fill=0):
         Tensor: The cropped image tensor.
     """
     # If the crop region is wholly within the image, simply narrow the tensor.
-    if t >= 0 and l >= 0 and h <= tensor.size(-2) and w <= tensor.size(-1):
+    if t >= 0 and l >= 0 and t + h <= tensor.size(-2) and l + w <= tensor.size(-1):
         return tensor[..., t:t+h, l:l+w]
 
     if padding_mode == 'constant':
