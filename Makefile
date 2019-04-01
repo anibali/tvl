@@ -35,7 +35,7 @@ install-dev:
 	done
 
 uninstall:
-	pip uninstall tvl tvl-backends-nvdec tvl-backends-opencv tvl-backends-pyav
+	pip uninstall tvl tvl-backends-nvdec tvl-backends-nvvl tvl-backends-opencv tvl-backends-pyav
 
 test: build
 	pytest -s tests
