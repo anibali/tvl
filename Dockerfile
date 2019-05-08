@@ -4,6 +4,14 @@ RUN apt-get update \
  && apt-get install -y curl git pkg-config yasm libx264-dev checkinstall \
  && rm -rf /var/lib/apt/lists/*
 
+# Install nv-codec-headers for FFmpeg NVIDIA hardware acceleration
+RUN cd /tmp \
+ && git clone --branch n9.0.18.1 --single-branch --depth 1 \
+    https://git.videolan.org/git/ffmpeg/nv-codec-headers.git \
+ && cd nv-codec-headers \
+ && make && make install \
+ && rm -rf /tmp/nv-codec-headers
+
 # Build FFmpeg, enabling only selected features
 ARG FFMPEG_VERSION=4.1.1
 RUN cd /tmp && curl -sO http://ffmpeg.org/releases/ffmpeg-$FFMPEG_VERSION.tar.bz2 \
@@ -25,6 +33,8 @@ RUN cd /tmp && curl -sO http://ffmpeg.org/releases/ffmpeg-$FFMPEG_VERSION.tar.bz
     --enable-demuxer=mov,matroska,mxf \
     --enable-bsf=h264_mp4toannexb,hevc_mp4toannexb \
     --enable-filter=scale \
+    --enable-ffnvcodec \
+    --enable-nvenc \
  && make -j8 \
  && checkinstall -y --nodoc --install=no \
  && mv ffmpeg_$FFMPEG_VERSION-1_amd64.deb /ffmpeg.deb \
