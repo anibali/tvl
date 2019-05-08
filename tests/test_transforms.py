@@ -7,7 +7,7 @@ from hypothesis.extra.numpy import arrays, array_shapes
 from hypothesis.strategies import booleans, one_of, just, integers
 from torch.testing import assert_allclose
 
-from tvl.transforms import normalise, denormalise, resize, crop, flip, rotate
+from tvl.transforms import normalise, denormalise, resize, crop, flip, rotate, fit
 
 DENORMALISED_IMAGE = torch.tensor([math.sqrt(3), -math.sqrt(3)]).add_(5).repeat(3, 2, 1)
 MEAN = [5.0, 5.0, 5.0]
@@ -203,4 +203,55 @@ def test_rotate_cuda():
         [0, 0],
     ]])
     actual = rotate(inp, 90)
+    assert_allclose(actual, expected)
+
+
+def test_fit_fill():
+    inp = torch.as_tensor([[
+        [2, 1, 1, 2],
+        [2, 1, 1, 2],
+        [2, 1, 1, 2],
+        [2, 1, 1, 2],
+    ]], dtype=torch.float32)
+    expected = torch.as_tensor([[
+        [1.5, 1.5],
+        [1.5, 1.5],
+        [1.5, 1.5],
+        [1.5, 1.5],
+    ]], dtype=torch.float32)
+    actual = fit(inp, (4, 2), fit_mode='fill', resize_mode='bilinear')
+    assert_allclose(actual, expected)
+
+
+def test_fit_contain():
+    inp = torch.as_tensor([[
+        [2, 1, 1, 2],
+        [2, 1, 1, 2],
+        [2, 1, 1, 2],
+        [2, 1, 1, 2],
+    ]], dtype=torch.float32)
+    expected = torch.as_tensor([[
+        [0.0, 0.0],
+        [1.5, 1.5],
+        [1.5, 1.5],
+        [0.0, 0.0],
+    ]], dtype=torch.float32)
+    actual = fit(inp, (4, 2), fit_mode='contain', resize_mode='bilinear')
+    assert_allclose(actual, expected)
+
+
+def test_fit_cover():
+    inp = torch.as_tensor([[
+        [2, 1, 1, 2],
+        [2, 1, 1, 2],
+        [2, 1, 1, 2],
+        [2, 1, 1, 2],
+    ]], dtype=torch.float32)
+    expected = torch.as_tensor([[
+        [1, 1],
+        [1, 1],
+        [1, 1],
+        [1, 1],
+    ]], dtype=torch.float32)
+    actual = fit(inp, (4, 2), fit_mode='cover', resize_mode='bilinear')
     assert_allclose(actual, expected)

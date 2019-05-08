@@ -21,7 +21,7 @@ def normalise(tensor, mean, stddev, inplace=False):
     """Normalise the image with channel-wise mean and standard deviation.
 
     Args:
-        tensor (Tensor): The image tensor to be normalised.
+        tensor (torch.Tensor): The image tensor to be normalised.
         mean (Sequence of float): Means for each channel.
         stddev (Sequence of float): Standard deviations for each channel.
         inplace (bool): Perform normalisation in-place.
@@ -45,7 +45,7 @@ def denormalise(tensor, mean, stddev, inplace=False):
     """Denormalise the image with channel-wise mean and standard deviation.
 
     Args:
-        tensor (Tensor): The image tensor to be denormalised.
+        tensor (torch.Tensor): The image tensor to be denormalised.
         mean (Sequence of float): Means for each channel.
         stddev (Sequence of float): Standard deviations for each channel.
         inplace (bool): Perform denormalisation in-place.
@@ -66,7 +66,7 @@ def resize(tensor, size, mode='bilinear'):
     """Resize the image.
 
     Args:
-        tensor (Tensor): The image tensor to be resized.
+        tensor (torch.Tensor): The image tensor to be resized.
         size (tuple of int): Size of the resized image (height, width).
         mode (str): The pixel sampling interpolation mode to be used.
 
@@ -92,7 +92,7 @@ def crop(tensor, t, l, h, w, padding_mode='constant', fill=0):
     """Crop the image, padding out-of-bounds regions.
 
     Args:
-        tensor (Tensor): The image tensor to be cropped.
+        tensor (torch.Tensor): The image tensor to be cropped.
         t (int): Top pixel coordinate.
         l (int): Left pixel coordinate.
         h (int): Height of the cropped image.
@@ -149,7 +149,7 @@ def flip(tensor, horizontal=False, vertical=False):
     """Flip the image.
 
     Args:
-        tensor (Tensor): The image tensor to be flipped.
+        tensor (torch.Tensor): The image tensor to be flipped.
         horizontal: Flip horizontally.
         vertical: Flip vertically.
 
@@ -167,8 +167,8 @@ def affine(tensor, matrix):
     """Apply an affine transformation to the image.
 
     Args:
-        tensor (Tensor): The image tensor to be warped.
-        matrix (Tensor): The 2x3 affine transformation matrix.
+        tensor (torch.Tensor): The image tensor to be warped.
+        matrix (torch.Tensor): The 2x3 affine transformation matrix.
 
     Returns:
         Tensor: The warped image.
@@ -186,7 +186,7 @@ def rotate(tensor, degrees):
     """Rotate the image anti-clockwise about the centre.
 
     Args:
-        tensor (Tensor): The image tensor to be rotated.
+        tensor (torch.Tensor): The image tensor to be rotated.
         degrees (float): The angle through which to rotate.
 
     Returns:
@@ -204,3 +204,46 @@ def rotate(tensor, degrees):
         [-s, c,  s * x - c * y + y],
     ]], dtype=torch.float32, device=tensor.device)
     return affine(tensor, matrix)
+
+
+def fit(tensor, size, fit_mode='cover', resize_mode='bilinear', *, fill=0):
+    """Fit the image within the given spatial dimensions.
+
+    Args:
+        tensor (torch.Tensor): The image tensor to be fit.
+        size (tuple of int): Size of the output (height, width).
+        fit_mode (str): 'fill', 'contain', or 'cover'. These behave in the same way as CSS's
+                        `object-fit` property.
+        fill (float): padding value (only applicable in 'contain' mode).
+
+    Returns:
+        Tensor: The resized image tensor.
+    """
+    # Modes are named after CSS object-fit values.
+    assert fit_mode in {'fill', 'contain', 'cover'}
+
+    if fit_mode == 'fill':
+        return resize(tensor, size, mode=resize_mode)
+    elif fit_mode == 'contain':
+        ih, iw = tensor.shape[-2:]
+        k = min(size[-1] / iw, size[-2] / ih)
+        oh = round(k * ih)
+        ow = round(k * iw)
+        resized = resize(tensor, (oh, ow), mode=resize_mode)
+        result = tensor.new_full((*tensor.size()[:-2], *size), fill)
+        y_off = (size[-2] - oh) // 2
+        x_off = (size[-1] - ow) // 2
+        result[..., y_off:y_off + oh, x_off:x_off + ow] = resized
+        return result
+    elif fit_mode == 'cover':
+        ih, iw = tensor.shape[-2:]
+        k = max(size[-1] / iw, size[-2] / ih)
+        oh = round(k * ih)
+        ow = round(k * iw)
+        resized = resize(tensor, (oh, ow), mode=resize_mode)
+        y_trim = (oh - size[-2]) // 2
+        x_trim = (ow - size[-1]) // 2
+        result = crop(resized, y_trim, x_trim, size[-2], size[-1])
+        return result
+
+    raise Exception('This code should not be reached.')
