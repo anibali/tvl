@@ -126,9 +126,8 @@ RUN curl -so ~/miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-4.5.4
 
 # Install PyTorch with CUDA support
 RUN conda install -y -c pytorch \
-    cuda100=1.0 \
-    magma-cuda100=2.4.0 \
-    "pytorch=1.0.0=py3.6_cuda10.0.130_cudnn7.4.1_1" \
+    cudatoolkit=10.0 \
+    "pytorch=1.1.0=py3.6_cuda10.0.130_cudnn7.5.1_0" \
  && conda clean -ya
 
 RUN apt-get update \
