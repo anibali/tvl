@@ -7,40 +7,46 @@ SUBDIRS := $(wildcard tvl_backends/*/.)
 clean:
 	$(PYTHON) $(SETUP) clean --all
 	for dir in $(SUBDIRS); do \
-		pushd $$dir && $(PYTHON) $(SETUP) clean --all && popd || break; \
+		pushd $$dir && $(PYTHON) $(SETUP) clean --all && popd || exit 1; \
 	done
 
 clean-dist: clean
 	rm -rf dist
 	for dir in $(SUBDIRS); do \
-		pushd $$dir && rm -rf dist && popd || break; \
+		pushd $$dir && rm -rf dist && popd || exit 1; \
 	done
 
 build:
 	$(PYTHON) $(SETUP) build_ext --inplace
 	for dir in $(SUBDIRS); do \
-		pushd $$dir && $(PYTHON) $(SETUP) build_ext --inplace && popd || break; \
+		pushd $$dir && $(PYTHON) $(SETUP) build_ext --inplace && popd || exit 1; \
 	done
 
 dist: build
 	$(PYTHON) $(SETUP) sdist bdist_wheel
 	for dir in $(SUBDIRS); do \
-		pushd $$dir && $(PYTHON) $(SETUP) sdist bdist_wheel && cp dist/* ../../dist/ && popd || break; \
+		pushd $$dir \
+		&& $(PYTHON) $(SETUP) sdist \
+		&& $(PYTHON) $(SETUP) bdist_wheel \
+		&& cp dist/* ../../dist/ \
+		&& popd \
+		|| exit 1; \
 	done
 
 install-dev:
 	pip install -e .
 	for dir in $(SUBDIRS); do \
-		pushd $$dir && pip install -e . && popd || break; \
+		pushd $$dir && pip install -e . && popd || exit 1; \
 	done
+	# TODO: Also need to set up symlinks for build outputs (eg. tvlnv.py, _tvlnv.*.so)
 
 uninstall:
 	pip uninstall tvl tvl-backends-nvdec tvl-backends-nvvl tvl-backends-opencv tvl-backends-pyav
 
-test: build
+test:
 	pytest -s tests
 	for dir in $(SUBDIRS); do \
-		pushd $$dir && pytest -s tests && popd || break; \
+		pushd $$dir && pytest -s tests && popd || exit 1; \
 	done
 
 .PHONY: clean build dist install-dev uninstall test
