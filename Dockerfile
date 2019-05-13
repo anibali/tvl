@@ -98,6 +98,9 @@ RUN cd /tmp \
  && make -j8 \
  && make install
 
+# Install scikit-build
+RUN pip install scikit-build==0.9.0
+
 RUN mkdir /app
 WORKDIR /app
 

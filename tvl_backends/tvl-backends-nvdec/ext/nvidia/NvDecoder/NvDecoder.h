@@ -117,12 +117,12 @@ public:
     /**
     *  @brief  This function is used to get the current decode width.
     */
-    int GetWidth() { assert(m_nWidth); return m_nWidth; }
+    int GetWidth() { return m_nWidth; }
 
     /**
     *  @brief  This function is used to get the current decode height.
     */
-    int GetHeight() { assert(m_nHeight); return m_nHeight; }
+    int GetHeight() { return m_nHeight; }
 
     /**
     *   @brief  This function is used to get the current frame size based on pixel format.
