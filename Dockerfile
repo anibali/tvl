@@ -1,4 +1,4 @@
-FROM nvidia/cuda:10.0-devel-ubuntu16.04 as ffmpeg-builder
+FROM nvidia/cuda:10.0-devel-ubuntu18.04 as ffmpeg-builder
 
 RUN apt-get update \
  && apt-get install -y curl git pkg-config yasm libx264-dev checkinstall \
@@ -34,7 +34,9 @@ RUN cd /tmp && curl -sO http://ffmpeg.org/releases/ffmpeg-$FFMPEG_VERSION.tar.bz
     --enable-bsf=h264_mp4toannexb,hevc_mp4toannexb \
     --enable-filter=scale \
     --enable-ffnvcodec \
-    --enable-nvenc \
+    --enable-nvdec \
+    --enable-cuda \
+    --enable-hwaccel=h264_nvdec \
  && make -j8 \
  && checkinstall -y --nodoc --install=no \
  && mv ffmpeg_$FFMPEG_VERSION-1_amd64.deb /ffmpeg.deb \
@@ -44,7 +46,7 @@ RUN cd /tmp && curl -sO http://ffmpeg.org/releases/ffmpeg-$FFMPEG_VERSION.tar.bz
 ################################################################################
 
 
-FROM nvidia/cuda:10.0-devel-ubuntu16.04 as tvl-builder
+FROM nvidia/cuda:10.0-devel-ubuntu18.04 as tvl-builder
 
 RUN apt-get update \
  && apt-get install -y curl git \
@@ -111,7 +113,7 @@ RUN make dist
 ################################################################################
 
 
-FROM nvidia/cuda:10.0-devel-ubuntu16.04
+FROM nvidia/cuda:10.0-devel-ubuntu18.04
 
 RUN apt-get update \
  && apt-get install -y curl git \
@@ -161,6 +163,7 @@ RUN pip install -f /tmp \
     tvl-backends-nvvl \
     tvl-backends-opencv \
     tvl-backends-pyav \
+    tvl-backends-fffr \
   && rm /tmp/tvl*.whl
 
 COPY . /app
