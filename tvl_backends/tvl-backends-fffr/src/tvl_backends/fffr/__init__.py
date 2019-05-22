@@ -42,7 +42,11 @@ class FffrBackend(Backend):
         self.frame_reader.seek(time_secs)
 
     def read_frame(self):
-        raise NotImplementedError()
+        ptr = self.frame_reader.read_frame()
+        if ptr == 0:
+            raise EOFError()
+        # TODO: Actually return the frame in a usable form
+        return None
 
 
 class FffrBackendFactory(BackendFactory):

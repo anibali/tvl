@@ -28,6 +28,12 @@ def test_get_height(video_filename):
     assert fr.get_height() == 720
 
 
+@pytest.mark.skip('This test currently fails, awaiting fix in FFFrameReader')
+def test_seek_eof(video_filename):
+    fr = pyfffr.TvFFFrameReader(None, video_filename, -1)
+    fr.seek(2.0)
+
+
 @pytest.mark.skip('This test currently fails (https://github.com/Sibras/FFFrameReader/issues/3)')
 def test_two_decoders(video_filename):
     print()

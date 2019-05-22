@@ -9,6 +9,17 @@ import pytest
 #         backend.read_frame()
 
 
+def test_read_all_frames(backend):
+    n_read = 0
+    for i in range(1000):
+        try:
+            backend.read_frame()
+            n_read += 1
+        except EOFError:
+            break
+    assert n_read == 50
+
+
 def test_duration(backend):
     assert backend.duration == 2.0
 
