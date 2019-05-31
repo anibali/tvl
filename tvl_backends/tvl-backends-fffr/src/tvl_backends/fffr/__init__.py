@@ -8,14 +8,19 @@ from tvl_backends.fffr.memory import TorchMemManager
 class FffrBackend(Backend):
     def __init__(self, filename, device, dtype):
         device = torch.device(device)
-        mem_manager = TorchMemManager(device)
-        mem_manager.__disown__()
-        self.mem_manager = mem_manager
         if device.type == 'cuda':
             device_index = device.index
         else:
             device_index = -1
-        self.frame_reader = pyfffr.TvFFFrameReader(mem_manager, filename, device_index)
+
+        mem_manager = TorchMemManager(device)
+        frame_reader = pyfffr.TvFFFrameReader(mem_manager, filename, device_index)
+        # We need to hold a reference to mem_manager for at least as long as the TvFFFrameReader
+        # that uses it is around, since we retain ownership of the TorchMemManager object.
+        setattr(frame_reader, '__mem_manager_ref', mem_manager)
+
+        self.mem_manager = mem_manager
+        self.frame_reader = frame_reader
         self.dtype = dtype
 
     @property
@@ -47,15 +52,18 @@ class FffrBackend(Backend):
             raise EOFError()
 
         brg = self.mem_manager.tensor(int(ptr), self.frame_reader.get_frame_size())
+        self.mem_manager.free(int(ptr))  # Release reference held by the memory manager.
         brg = brg.view(3, self.height, self.width)
-        # TODO: If we need to shuffle the planes, might as well do the type conversion at the
-        #       same time for better efficiency.
-        rgb = brg[[1, 2, 0], ...]
+
+        rgb = torch.empty(brg.shape, dtype=self.dtype, device=self.mem_manager.device)
+        rgb[0] = brg[1]
+        rgb[1] = brg[2]
+        rgb[2] = brg[0]
 
         if self.dtype == torch.float32:
-            return rgb.float().div_(255)
+            return rgb.div_(255)
         elif self.dtype == torch.uint8:
-            return (rgb * 255).round_().byte()
+            return rgb
         raise NotImplementedError(f'Unsupported dtype: {self.dtype}')
 
 

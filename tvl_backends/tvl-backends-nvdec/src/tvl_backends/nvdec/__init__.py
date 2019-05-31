@@ -69,8 +69,8 @@ class NvdecBackend(Backend):
     def __init__(self, filename, device, dtype, resize=None):
         device = torch.device(device)
         mem_manager = TorchMemManager(device)
-        mem_manager.__disown__()
-        self.mem_manager = mem_manager
+        # Disown mem_manager, since TvlnvFrameReader will be responsible for deleting it.
+        mem_manager = mem_manager.__disown__()
 
         if resize:
             out_height, out_width = resize
@@ -78,6 +78,7 @@ class NvdecBackend(Backend):
             out_height = 0
             out_width = 0
 
+        self.mem_manager = mem_manager
         self.frame_reader = tvlnv.TvlnvFrameReader(mem_manager, filename, device.index,
                                                    out_width, out_height)
         self.dtype = dtype

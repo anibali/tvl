@@ -1,5 +1,6 @@
 import PIL.Image
 import numpy as np
+import torch
 import pytest
 
 
@@ -55,3 +56,18 @@ def test_width(backend):
 
 def test_height(backend):
     assert backend.height == 720
+
+
+def test_memory_leakage(backend):
+    """Check that the memory manager is not leaking memory."""
+    device = backend.mem_manager.device
+    if device.type == 'cuda':
+        start_mem = torch.cuda.memory_allocated(device.index)
+        for _ in range(5):
+            backend.read_frame()
+        end_mem = torch.cuda.memory_allocated(device.index)
+        assert end_mem == start_mem
+    else:
+        for _ in range(5):
+            backend.read_frame()
+    assert len(backend.mem_manager.chunks) == 0

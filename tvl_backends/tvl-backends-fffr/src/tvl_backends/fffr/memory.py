@@ -42,11 +42,11 @@ class TorchMemManager(pyfffr.MemManager):
         return address
 
     def free(self, address):
-        """Free an allocated memory chunk."""
+        """Release reference to an allocated memory chunk."""
         del self.chunks[self._find_chunk_index(address)]
 
     def clear(self):
-        """Free all allocated memory chunks."""
+        """Release references to all allocated memory chunks."""
         self.chunks.clear()
 
     def _find_chunk_index(self, address):
