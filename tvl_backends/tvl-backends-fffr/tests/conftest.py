@@ -28,11 +28,7 @@ def mid_frame_image():
     return PIL.Image.open(data_dir.joinpath('board_game_mid.jpg'), 'r')
 
 
-@pytest.fixture
-def backend(video_filename):
-    return FffrBackendFactory().create(video_filename, 'cuda:0', torch.float32)
-
-
-@pytest.fixture
-def cpu_backend(video_filename):
-    return FffrBackendFactory().create(video_filename, 'cpu', torch.float32)
+@pytest.fixture(params=['cpu', 'cuda:0'])
+def backend(request, video_filename):
+    device = request.param
+    return FffrBackendFactory().create(video_filename, device, torch.float32)

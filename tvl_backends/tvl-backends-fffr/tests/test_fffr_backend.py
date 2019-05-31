@@ -1,19 +1,21 @@
 import PIL.Image
 import numpy as np
+import pytest
 
 
-def test_cpu_read_frame(cpu_backend, first_frame_image):
-    rgb = cpu_backend.read_frame()
+def test_read_frame(backend, first_frame_image):
+    rgb = backend.read_frame()
     assert(rgb.size() == (3, 720, 1280))
     rgb_bytes = (rgb * 255).round_().byte().cpu()
     img = PIL.Image.fromarray(rgb_bytes.permute(1, 2, 0).numpy(), 'RGB')
     np.testing.assert_allclose(img, first_frame_image, rtol=0, atol=50)
 
 
-# def test_eof(backend):
-#     backend.seek(2.0)
-#     with pytest.raises(EOFError):
-#         backend.read_frame()
+@pytest.mark.skip('This test currently crashes with SIGABRT.')
+def test_eof(backend):
+    backend.seek(2.0)
+    with pytest.raises(EOFError):
+        backend.read_frame()
 
 
 def test_read_all_frames(backend):
@@ -27,20 +29,9 @@ def test_read_all_frames(backend):
     assert n_read == 50
 
 
-def test_cpu_read_all_frames(cpu_backend):
-    n_read = 0
-    for i in range(1000):
-        try:
-            cpu_backend.read_frame()
-            n_read += 1
-        except EOFError:
-            break
-    assert n_read == 50
-
-
-def test_cpu_seek(cpu_backend, mid_frame_image):
-    cpu_backend.seek(1.0)
-    rgb = cpu_backend.read_frame()
+def test_seek(backend, mid_frame_image):
+    backend.seek(1.0)
+    rgb = backend.read_frame()
     rgb_bytes = (rgb * 255).round_().byte().cpu()
     img = PIL.Image.fromarray(rgb_bytes.permute(1, 2, 0).numpy(), 'RGB')
     np.testing.assert_allclose(img, mid_frame_image, rtol=0, atol=50)
