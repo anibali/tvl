@@ -11,10 +11,6 @@
     $result = (uint8_t*)PyInt_AsLong($1);
 %}
 
-%typemap(out) uint8_t* const* TvFFFrameReader::read_frame %{
-    $result = PyInt_FromLong((size_t)$1);
-%}
-
 %typemap(out) int64_t %{
     $result = PyInt_FromLong($1);
 %}

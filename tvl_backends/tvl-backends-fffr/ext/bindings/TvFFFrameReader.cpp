@@ -1,52 +1,29 @@
 #include "TvFFFrameReader.h"
 
 #include <libavutil/avutil.h>
+#include <memory>
 
-std::mutex TvFFFrameReader::_mutex;
-std::map<FfFrameReader::DecoderContext::DecoderOptions, std::shared_ptr<FfFrameReader::DecoderContext>> TvFFFrameReader::_decoders;
-
-std::variant<bool, std::shared_ptr<FfFrameReader::Stream>> TvFFFrameReader::getStream(
-    const std::string& filename, const FfFrameReader::DecoderContext::DecoderOptions& options) noexcept
-{
-    try {
-        std::lock_guard<std::mutex> lock(TvFFFrameReader::_mutex);
-        // Check if a manager already registered for type
-        const auto foundManager = _decoders.find(options);
-        std::shared_ptr<FfFrameReader::DecoderContext> found;
-        if (foundManager == _decoders.end()) {
-            _decoders.emplace(options, std::make_shared<FfFrameReader::DecoderContext>(options));
-            found = _decoders.find(options)->second;
-        } else {
-            found = foundManager->second;
-        }
-
-        // Create a new stream using the requested manager
-        const auto newStream = found->getStream(filename);
-        if (newStream.index() != 0) {
-            return std::get<1>(newStream);
-        }
-    } catch (...) {
-    }
-    return false;
-}
-
-TvFFFrameReader::TvFFFrameReader(
-    MemManager* mem_manager, const std::string filename, const int gpu_index, const int out_width, const int out_height)
+TvFFFrameReader::TvFFFrameReader(MemManager* mem_manager, const std::string& filename, const int gpu_index,
+    const int out_width, const int out_height)
     : _mem_manager(mem_manager)
     , _filename(filename)
 {
-    FfFrameReader::DecoderContext::DecodeType decode_type = FfFrameReader::DecoderContext::DecodeType::Software;
-    if(gpu_index >= 0) {
-        decode_type = FfFrameReader::DecoderContext::DecodeType::Nvdec;
+    // Set up decoding options
+    Ffr::DecoderOptions options;
+    if (gpu_index >= 0) {
+        options.m_type = Ffr::DecodeType::Cuda;
+        options.m_device = gpu_index;
+        options.m_outputHost = false;
+        options.m_format = Ffr::PixelFormat::Auto; // Keep pixel format the same
+    } else {
+        // Use inbuilt software conversion
+        options.m_format = Ffr::PixelFormat::GBR8P;
     }
+    options.m_scale.m_width = out_width;
+    options.m_scale.m_height = out_height;
 
-    FfFrameReader::DecoderContext::DecoderOptions options(decode_type);
-    options.m_device = gpu_index;
-    const std::function<uint8_t*(uint32_t)> allocator =
-        std::bind(&TvFFFrameReader::allocate, this, std::placeholders::_1);
-    const std::function<void(uint8_t*)> free = std::bind(&TvFFFrameReader::free, this, std::placeholders::_1);
-    options.m_allocator = std::optional<FfFrameReader::DecoderContext::DecoderOptions::Allocator>({allocator, free});
-    const auto ret = getStream(filename, options);
+    // Create a decoding stream
+    const auto ret = Ffr::Stream::getStream(filename, options);
     if (ret.index() == 0) {
         throw;
     }
@@ -75,7 +52,7 @@ int TvFFFrameReader::get_frame_size()
 
 double TvFFFrameReader::get_duration()
 {
-    return _stream->getDuration() / (double)AV_TIME_BASE;
+    return static_cast<double>(_stream->getDuration()) / static_cast<double>(AV_TIME_BASE);
 }
 
 double TvFFFrameReader::get_frame_rate()
@@ -96,22 +73,55 @@ void TvFFFrameReader::seek(const float time_secs)
     }
 }
 
-uint8_t* const* TvFFFrameReader::read_frame()
+uint8_t* TvFFFrameReader::read_frame()
 {
+    // Get next frame
     const auto ret = _stream->getNextFrame();
     if (ret.index() == 0) {
         return nullptr;
     }
     const auto frame = std::get<1>(ret);
-    return frame->getFrameData();
-}
 
-uint8_t* TvFFFrameReader::allocate(const uint32_t size)
-{
-    return _mem_manager->allocate(size);
-}
+    // Check if known pixel format
+    if (frame->getPixelFormat() == Ffr::PixelFormat::Auto) {
+        return nullptr;
+    }
 
-void TvFFFrameReader::free(uint8_t* data)
-{
-    _mem_manager->free(data);
+    // Allocate new memory to store frame data
+    const auto outFrameSize = Ffr::getImageSize(Ffr::PixelFormat::GBR8P, frame->getWidth(), frame->getHeight());
+    const auto newData = _mem_manager->allocate(outFrameSize + 128);
+    if (newData == nullptr) {
+        return nullptr;
+    }
+
+    // Calculate memory locations for each plane
+    void* outPlanes[3];
+    size_t ignored;
+    outPlanes[0] = newData;
+    std::align(32, outFrameSize, outPlanes[0], ignored);
+    for (int32_t i = 1; i < 3; i++) {
+        const auto planeData = frame->getFrameData(i);
+        const uint32_t planeSize = planeData.second * frame->getHeight();
+        outPlanes[i] = reinterpret_cast<uint8_t*>(outPlanes[i - 1]) + planeSize;
+        std::align(32, outFrameSize, outPlanes[i], ignored);
+    }
+    // Swap output planes to match PixelFormat::GBR8P
+    const auto backup = outPlanes[0];
+    outPlanes[0] = outPlanes[2];
+    outPlanes[2] = outPlanes[1];
+    outPlanes[1] = backup;
+
+    // Copy/Convert image data into output
+    if (frame->getDataType() == Ffr::DecodeType::Cuda) {
+        if (!Ffr::convertFormat(frame, reinterpret_cast<uint8_t**>(outPlanes), Ffr::PixelFormat::GBR8P)) {
+            _mem_manager->free(newData);
+            return nullptr;
+        }
+    } else {
+        for (int32_t i = 0; i < 3; i++) {
+            const auto planeData = frame->getFrameData(i);
+            memcpy(outPlanes[i], planeData.first, planeData.second * frame->getHeight());
+        }
+    }
+    return newData;
 }

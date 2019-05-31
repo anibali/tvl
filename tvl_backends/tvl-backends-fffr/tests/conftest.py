@@ -31,3 +31,8 @@ def mid_frame_image():
 @pytest.fixture
 def backend(video_filename):
     return FffrBackendFactory().create(video_filename, 'cuda:0', torch.float32)
+
+
+@pytest.fixture
+def cpu_backend(video_filename):
+    return FffrBackendFactory().create(video_filename, 'cpu', torch.float32)

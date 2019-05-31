@@ -33,6 +33,7 @@ RUN cd /tmp && curl -sO http://ffmpeg.org/releases/ffmpeg-$FFMPEG_VERSION.tar.bz
     --enable-demuxer=mov,matroska,mxf \
     --enable-bsf=h264_mp4toannexb,hevc_mp4toannexb \
     --enable-filter=scale \
+    --enable-postproc \
     --enable-ffnvcodec \
     --enable-nvdec \
     --enable-cuda \

@@ -43,10 +43,20 @@ class FffrBackend(Backend):
 
     def read_frame(self):
         ptr = self.frame_reader.read_frame()
-        if ptr == 0:
+        if not ptr:
             raise EOFError()
-        # TODO: Actually return the frame in a usable form
-        return None
+
+        brg = self.mem_manager.tensor(int(ptr), self.frame_reader.get_frame_size())
+        brg = brg.view(3, self.height, self.width)
+        # TODO: If we need to shuffle the planes, might as well do the type conversion at the
+        #       same time for better efficiency.
+        rgb = brg[[1, 2, 0], ...]
+
+        if self.dtype == torch.float32:
+            return rgb.float().div_(255)
+        elif self.dtype == torch.uint8:
+            return (rgb * 255).round_().byte()
+        raise NotImplementedError(f'Unsupported dtype: {self.dtype}')
 
 
 class FffrBackendFactory(BackendFactory):

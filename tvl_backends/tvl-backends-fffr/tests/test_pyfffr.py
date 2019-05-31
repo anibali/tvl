@@ -1,6 +1,8 @@
 import pyfffr
 import pytest
 from tvl_backends.fffr.memory import TorchMemManager
+import PIL.Image
+from numpy.testing import assert_allclose
 
 
 def test_duration(video_filename):
@@ -28,30 +30,44 @@ def test_get_height(video_filename):
     assert fr.get_height() == 720
 
 
-@pytest.mark.skip('This test currently fails, awaiting fix in FFFrameReader')
+@pytest.mark.skip('This test currently crashes with SIGABRT.')
 def test_seek_eof(video_filename):
     fr = pyfffr.TvFFFrameReader(None, video_filename, -1)
     fr.seek(2.0)
 
 
-@pytest.mark.skip('This test currently fails (https://github.com/Sibras/FFFrameReader/issues/3)')
 def test_two_decoders(video_filename):
-    print()
     fr1 = pyfffr.TvFFFrameReader(None, video_filename, 0)
     fr2 = pyfffr.TvFFFrameReader(None, video_filename, 0)
+    fr1.read_frame()
     fr2.read_frame()
 
 
-@pytest.mark.skip('This test is a work in progress.')
-def test_gpu_read_frame(video_filename):
-    mm = TorchMemManager('cuda:0')
-    fr = pyfffr.TvFFFrameReader(mm, video_filename, 0)
-    yuv422 = fr.read_frame()
+def test_cpu_read_frame(video_filename, first_frame_image):
+    mm = TorchMemManager('cpu')
+    fr = pyfffr.TvFFFrameReader(mm, video_filename, -1)
+    ptr = fr.read_frame()
+    assert ptr is not None
     # We expect for some memory to have been allocated via the MemManager
     assert len(mm.chunks) > 0
+    rgb_frame = mm.tensor(int(ptr), fr.get_frame_size())
+    rgb_frame = rgb_frame.view(3, fr.get_height(), fr.get_width())
+    rgb_frame = rgb_frame[[1, 2, 0], ...]
+    actual = PIL.Image.fromarray(rgb_frame.cpu().permute(1, 2, 0).numpy(), 'RGB')
+    assert_allclose(actual, first_frame_image, atol=50)
 
-    # TODO: Assert checking that the read frame is good
-    # yuv422_ctype = ctypes.cast(yuv422, ctypes.POINTER(ctypes.c_size_t))
-    # y = mm.find_containing_chunk(yuv422_ctype[0])
-    # u = mm.find_containing_chunk(yuv422_ctype[1])
-    # v = mm.find_containing_chunk(yuv422_ctype[2])
+
+@pytest.mark.skip('This test currently crashes with SIGSEGV.')
+def test_gpu_read_frame(video_filename, first_frame_image):
+    mm = TorchMemManager('cuda:0')
+    fr = pyfffr.TvFFFrameReader(mm, video_filename, -1)
+    ptr = fr.read_frame()
+    assert ptr is not None
+    # We expect for some memory to have been allocated via the MemManager
+    assert len(mm.chunks) > 0
+    rgb_frame = mm.tensor(int(ptr), fr.get_frame_size())
+    rgb_frame = rgb_frame.view(3, fr.get_height(), fr.get_width())
+    rgb_frame = rgb_frame[[1, 2, 0], ...]
+    actual = PIL.Image.fromarray(rgb_frame.cpu().permute(1, 2, 0).numpy(), 'RGB')
+    actual.save('something.png')
+    assert_allclose(actual, first_frame_image, atol=50)
