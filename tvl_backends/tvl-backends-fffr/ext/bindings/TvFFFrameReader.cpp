@@ -8,6 +8,8 @@ TvFFFrameReader::TvFFFrameReader(MemManager* mem_manager, const std::string& fil
     : _mem_manager(mem_manager)
     , _filename(filename)
 {
+    // Quiet the log
+    Ffr::setLogLevel(Ffr::LogLevel::Quiet);
     // Set up decoding options
     Ffr::DecoderOptions options;
     if (gpu_index >= 0) {
