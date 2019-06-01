@@ -10,6 +10,7 @@ TvFFFrameReader::TvFFFrameReader(MemManager* mem_manager, const std::string& fil
 {
     // Quiet the log
     Ffr::setLogLevel(Ffr::LogLevel::Quiet);
+
     // Set up decoding options
     Ffr::DecoderOptions options;
     if (gpu_index >= 0) {
@@ -109,9 +110,9 @@ uint8_t* TvFFFrameReader::read_frame()
     }
     // Swap output planes to match PixelFormat::GBR8P
     const auto backup = outPlanes[0];
-    outPlanes[0] = outPlanes[2];
-    outPlanes[2] = outPlanes[1];
-    outPlanes[1] = backup;
+    outPlanes[0] = outPlanes[1];
+    outPlanes[1] = outPlanes[2];
+    outPlanes[2] = backup;
 
     // Copy/Convert image data into output
     if (frame->getDataType() == Ffr::DecodeType::Cuda) {
