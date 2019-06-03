@@ -20,24 +20,11 @@ RUN cd /tmp && curl -sO http://ffmpeg.org/releases/ffmpeg-$FFMPEG_VERSION.tar.bz
  && cd ffmpeg-$FFMPEG_VERSION \
  && ./configure --prefix=/usr/local \
     --disable-static \
-    --disable-everything \
-    --disable-autodetect \
+    --enable-shared \
+    --enable-gpl \
     --disable-iconv \
     --disable-doc \
     --disable-ffplay \
-    --enable-shared \
-    --enable-gpl \
-    --enable-libx264 \
-    --enable-decoder=h264 \
-    --enable-protocol=file \
-    --enable-demuxer=mov,matroska,mxf \
-    --enable-bsf=h264_mp4toannexb,hevc_mp4toannexb \
-    --enable-filter=scale \
-    --enable-postproc \
-    --enable-ffnvcodec \
-    --enable-nvdec \
-    --enable-cuda \
-    --enable-hwaccel=h264_nvdec \
  && make -j8 \
  && checkinstall -y --nodoc --install=no \
  && mv ffmpeg_$FFMPEG_VERSION-1_amd64.deb /ffmpeg.deb \
