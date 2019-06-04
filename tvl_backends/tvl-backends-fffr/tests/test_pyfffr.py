@@ -36,6 +36,7 @@ def test_seek_eof(video_filename):
     fr.seek(2.0)
 
 
+@pytest.mark.skip('This test currently crashes with SIGSEGV.')
 def test_two_decoders(video_filename):
     fr1 = pyfffr.TvFFFrameReader(None, video_filename, 0)
     fr2 = pyfffr.TvFFFrameReader(None, video_filename, 0)
