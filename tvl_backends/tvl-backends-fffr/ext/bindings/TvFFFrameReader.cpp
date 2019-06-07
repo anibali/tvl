@@ -81,7 +81,11 @@ uint8_t* TvFFFrameReader::read_frame()
     // Get next frame
     const auto ret = _stream->getNextFrame();
     if (ret.index() == 0) {
-        return nullptr;
+        if (std::get<0>(ret) == true) {
+            //This is an EOF error
+            return nullptr;
+        }
+        throw;
     }
     const auto frame = std::get<1>(ret);
 
