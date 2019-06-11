@@ -1,8 +1,9 @@
+import PIL.Image
 import pyfffr
 import pytest
-from tvl_backends.fffr.memory import TorchMemManager
-import PIL.Image
 from numpy.testing import assert_allclose
+
+from tvl_backends.fffr.memory import TorchMemManager
 
 
 def test_duration(video_filename):
@@ -36,11 +37,12 @@ def test_seek_eof(video_filename):
     fr.seek(2.0)
 
 
-@pytest.mark.skip('This test currently crashes with SIGSEGV.')
+@pytest.mark.skip('This test currently crashes with SIGABRT.')
 def test_two_decoders(video_filename):
-    fr1 = pyfffr.TvFFFrameReader(None, video_filename, 0)
-    fr2 = pyfffr.TvFFFrameReader(None, video_filename, 0)
+    mm = TorchMemManager('cuda:0')
+    fr1 = pyfffr.TvFFFrameReader(mm, video_filename, mm.device.index)
     fr1.read_frame()
+    fr2 = pyfffr.TvFFFrameReader(mm, video_filename, mm.device.index)
     fr2.read_frame()
 
 
