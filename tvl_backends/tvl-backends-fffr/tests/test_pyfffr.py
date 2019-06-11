@@ -1,6 +1,7 @@
 import PIL.Image
 import pyfffr
 import pytest
+import torch
 from numpy.testing import assert_allclose
 
 from tvl_backends.fffr.memory import TorchMemManager
@@ -46,31 +47,28 @@ def test_two_decoders(video_filename):
     fr2.read_frame()
 
 
-def test_cpu_read_frame(video_filename, first_frame_image):
-    mm = TorchMemManager('cpu')
-    fr = pyfffr.TvFFFrameReader(mm, video_filename, -1)
+def test_device_works_after_reading_frame(device, video_filename):
+    mm = TorchMemManager(device)
+    cuda_tensor = torch.zeros(1, device=mm.device)
+    assert cuda_tensor.item() == 0
+    gpu_index = mm.device.index if mm.device.type == 'cuda' else -1
+    fr = pyfffr.TvFFFrameReader(mm, video_filename, gpu_index)
+    fr.read_frame()
+    assert cuda_tensor.item() == 0
+
+
+def test_read_frame(device, video_filename, first_frame_image):
+    mm = TorchMemManager(device)
+    gpu_index = mm.device.index if mm.device.type == 'cuda' else -1
+    fr = pyfffr.TvFFFrameReader(mm, video_filename, gpu_index)
     ptr = fr.read_frame()
     assert ptr is not None
     # We expect for some memory to have been allocated via the MemManager
     assert len(mm.chunks) > 0
-    rgb_frame = mm.tensor(int(ptr), fr.get_frame_size())
+    expected_frame_size = 3 * 1280 * 720
+    assert len(mm.find_containing_chunk(int(ptr))) >= expected_frame_size
+    rgb_frame = mm.tensor(int(ptr), expected_frame_size)
     rgb_frame = rgb_frame.view(3, fr.get_height(), fr.get_width())
     rgb_frame = rgb_frame[[1, 2, 0], ...]
     actual = PIL.Image.fromarray(rgb_frame.cpu().permute(1, 2, 0).numpy(), 'RGB')
-    assert_allclose(actual, first_frame_image, atol=50)
-
-
-@pytest.mark.skip('This test currently crashes with SIGSEGV.')
-def test_gpu_read_frame(video_filename, first_frame_image):
-    mm = TorchMemManager('cuda:0')
-    fr = pyfffr.TvFFFrameReader(mm, video_filename, -1)
-    ptr = fr.read_frame()
-    assert ptr is not None
-    # We expect for some memory to have been allocated via the MemManager
-    assert len(mm.chunks) > 0
-    rgb_frame = mm.tensor(int(ptr), fr.get_frame_size())
-    rgb_frame = rgb_frame.view(3, fr.get_height(), fr.get_width())
-    rgb_frame = rgb_frame[[1, 2, 0], ...]
-    actual = PIL.Image.fromarray(rgb_frame.cpu().permute(1, 2, 0).numpy(), 'RGB')
-    actual.save('something.png')
     assert_allclose(actual, first_frame_image, atol=50)

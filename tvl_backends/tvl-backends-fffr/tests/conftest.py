@@ -29,6 +29,10 @@ def mid_frame_image():
 
 
 @pytest.fixture(params=['cpu', 'cuda:0'])
-def backend(request, video_filename):
-    device = request.param
+def device(request):
+    return request.param
+
+
+@pytest.fixture
+def backend(device, video_filename):
     return FffrBackendFactory().create(video_filename, device, torch.float32)

@@ -43,6 +43,10 @@ class FffrBackend(Backend):
     def height(self):
         return self.frame_reader.get_height()
 
+    @property
+    def frame_size(self):
+        return self.frame_reader.get_frame_size()
+
     def seek(self, time_secs):
         self.frame_reader.seek(time_secs)
 
