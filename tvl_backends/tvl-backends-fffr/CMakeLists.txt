@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.13.0)
 
 project(tvl_backends_fffr
-    LANGUAGES CXX
+    LANGUAGES CXX CUDA
 )
 
 set(CMAKE_CXX_STANDARD 17)
