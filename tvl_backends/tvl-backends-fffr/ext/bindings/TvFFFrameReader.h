@@ -17,7 +17,6 @@ public:
     std::string get_filename();
     int get_width();
     int get_height();
-    int get_frame_size();
     double get_duration();
     double get_frame_rate();
     int64_t get_number_of_frames();

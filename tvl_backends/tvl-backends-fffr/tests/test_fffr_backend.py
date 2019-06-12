@@ -24,10 +24,6 @@ def test_height(backend):
     assert backend.height == 720
 
 
-def test_frame_size(backend):
-    assert backend.frame_size == 3 * 720 * 1280
-
-
 def test_read_frame(backend, first_frame_image):
     rgb = backend.read_frame()
     assert(rgb.size() == (3, 720, 1280))

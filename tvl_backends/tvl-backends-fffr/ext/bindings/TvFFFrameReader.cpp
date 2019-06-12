@@ -63,11 +63,6 @@ int TvFFFrameReader::get_height()
     return _stream->getHeight();
 }
 
-int TvFFFrameReader::get_frame_size()
-{
-    return _stream->getFrameSize();
-}
-
 double TvFFFrameReader::get_duration()
 {
     return static_cast<double>(_stream->getDuration()) / static_cast<double>(AV_TIME_BASE);
