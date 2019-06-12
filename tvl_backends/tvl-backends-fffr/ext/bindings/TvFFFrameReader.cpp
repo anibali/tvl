@@ -41,11 +41,10 @@ TvFFFrameReader::TvFFFrameReader(ImageAllocator* image_allocator, const std::str
     options.m_scale.m_height = out_height;
 
     // Create a decoding stream
-    const auto ret = Ffr::Stream::getStream(filename, options);
-    if (ret.index() == 0) {
+    _stream = Ffr::Stream::getStream(filename, options);
+    if (_stream == nullptr) {
         throw;
     }
-    _stream = std::get<1>(ret);
 }
 
 std::string TvFFFrameReader::get_filename()
@@ -89,15 +88,14 @@ void TvFFFrameReader::seek(const float time_secs)
 uint8_t* TvFFFrameReader::read_frame()
 {
     // Get next frame
-    const auto ret = _stream->getNextFrame();
-    if (ret.index() == 0) {
-        if (std::get<0>(ret) == true) {
+    const auto frame = _stream->getNextFrame();
+    if (frame == nullptr) {
+        if (_stream->isEndOfFile()) {
             //This is an EOF error
             return nullptr;
         }
         throw std::runtime_error("Failed to get the next frame.");
     }
-    const auto frame = std::get<1>(ret);
 
     // Check if known pixel format
     if (frame->getPixelFormat() == Ffr::PixelFormat::Auto) {
