@@ -8,33 +8,39 @@ from tvl_backends.fffr.memory import TorchImageAllocator
 
 
 def test_duration(video_filename):
-    fr = pyfffr.TvFFFrameReader(None, video_filename, -1)
+    allocator = TorchImageAllocator('cpu', torch.uint8)
+    fr = pyfffr.TvFFFrameReader(allocator, video_filename, -1)
     assert fr.get_duration() == 2.0
 
 
 def test_frame_rate(video_filename):
-    fr = pyfffr.TvFFFrameReader(None, video_filename, -1)
+    allocator = TorchImageAllocator('cpu', torch.uint8)
+    fr = pyfffr.TvFFFrameReader(allocator, video_filename, -1)
     assert fr.get_frame_rate() == 25
 
 
 def test_n_frames(video_filename):
-    fr = pyfffr.TvFFFrameReader(None, video_filename, -1)
+    allocator = TorchImageAllocator('cpu', torch.uint8)
+    fr = pyfffr.TvFFFrameReader(allocator, video_filename, -1)
     assert fr.get_number_of_frames() == 50
 
 
 def test_get_width(video_filename):
-    fr = pyfffr.TvFFFrameReader(None, video_filename, -1)
+    allocator = TorchImageAllocator('cpu', torch.uint8)
+    fr = pyfffr.TvFFFrameReader(allocator, video_filename, -1)
     assert fr.get_width() == 1280
 
 
 def test_get_height(video_filename):
-    fr = pyfffr.TvFFFrameReader(None, video_filename, -1)
+    allocator = TorchImageAllocator('cpu', torch.uint8)
+    fr = pyfffr.TvFFFrameReader(allocator, video_filename, -1)
     assert fr.get_height() == 720
 
 
 @pytest.mark.skip('This test currently crashes with SIGABRT.')
 def test_seek_eof(video_filename):
-    fr = pyfffr.TvFFFrameReader(None, video_filename, -1)
+    allocator = TorchImageAllocator('cpu', torch.uint8)
+    fr = pyfffr.TvFFFrameReader(allocator, video_filename, -1)
     fr.seek(2.0)
 
 
