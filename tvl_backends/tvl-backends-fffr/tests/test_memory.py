@@ -1,56 +1,51 @@
 import torch
 import pytest
 
-from tvl_backends.fffr.memory import TorchMemManager
+import pyfffr
+from tvl_backends.fffr.memory import TorchImageAllocator
 
 
-ALL_DEVICES = ['cpu']
-# Add available GPU devices.
-ALL_DEVICES.extend(f'cuda:{i}' for i in range(torch.cuda.device_count()))
+@pytest.mark.parametrize('dtype', ['float32', 'uint8'])
+def test_allocate_frame(device, dtype):
+    dtype = getattr(torch, dtype)
+    mm = TorchImageAllocator(device, dtype)
+    address = mm.allocate_frame(16, 9, 16)
+    assert address
+    tensor = mm.get_frame_tensor(address)
+    assert tensor.shape == (3, 9, 16)
+    assert tensor.device == torch.device(device)
+    assert tensor.dtype == dtype
+    assert tensor.data_ptr() == address
 
 
-@pytest.mark.parametrize('device', ALL_DEVICES)
-def test_allocate(device):
-    mm = TorchMemManager(device)
-    address = mm.allocate(7)
-    assert len(mm.chunks) == 1
-    assert mm[address].device == torch.device(device)
-    assert len(mm[address]) == 7
-    assert mm[address].data_ptr() == address
+@pytest.mark.parametrize('dtype,data_type_enum_value', [
+    ('float32', pyfffr.ImageAllocator.FLOAT32),
+    ('uint8', pyfffr.ImageAllocator.UINT8),
+])
+def test_get_data_type(device, dtype, data_type_enum_value):
+    dtype = getattr(torch, dtype)
+    allocator = TorchImageAllocator(device, dtype)
+    assert allocator.get_data_type() == data_type_enum_value
 
 
-@pytest.mark.parametrize('device', ALL_DEVICES)
-def test_clear(device):
-    mm = TorchMemManager(device)
-    mm.allocate(7)
-    assert len(mm.chunks) == 1
-    mm.clear()
-    assert len(mm.chunks) == 0
+def test_free_frame(device):
+    mm = TorchImageAllocator(device, torch.uint8)
+    addr1 = mm.allocate_frame(16, 9, 16)
+    addr2 = mm.allocate_frame(16, 9, 16)
+    assert len(mm.tensors) == 2
+    mm.free_frame(addr1)
+    assert len(mm.tensors) == 1
+    assert mm.get_frame_tensor(addr2) is not None
 
 
-@pytest.mark.parametrize('device', ALL_DEVICES)
-def test_free(device):
-    mm = TorchMemManager(device)
-    addr1 = mm.allocate(4)
-    addr2 = mm.allocate(4)
-    assert len(mm.chunks) == 2
-    mm.free(addr1)
-    assert len(mm.chunks) == 1
-    assert mm[addr2]
-
-
-@pytest.mark.parametrize('device', ALL_DEVICES)
-def test_find_containing_chunk(device):
-    mm = TorchMemManager(device)
-    addresses = [mm.allocate(8) for _ in range(16)]
-    address = addresses[5]
-    assert mm.find_containing_chunk(address + 3) == mm[address]
-
-
-@pytest.mark.parametrize('device', ALL_DEVICES)
-def test_tensor(device):
-    mm = TorchMemManager(device)
-    addresses = [mm.allocate(8) for _ in range(16)]
-    address = addresses[5]
-    tensor = mm.tensor(address + 3)
-    assert tensor.shape == (5,)
+def test_allocation_alignment(device):
+    dtype = torch.float32
+    allocator = TorchImageAllocator(device, dtype)
+    addr = allocator.allocate_frame(1, 1, 1)
+    tensor = allocator.get_frame_tensor(addr)
+    tensor.storage().fill_(0)
+    tensor.fill_(1)
+    storage = tensor.storage()
+    for i in range(3):
+        index = tensor.storage_offset() + i * 8
+        assert storage[index] == 1

@@ -4,7 +4,7 @@ import pytest
 import torch
 from numpy.testing import assert_allclose
 
-from tvl_backends.fffr.memory import TorchMemManager
+from tvl_backends.fffr.memory import TorchImageAllocator
 
 
 def test_duration(video_filename):
@@ -40,35 +40,42 @@ def test_seek_eof(video_filename):
 
 @pytest.mark.skip('This test currently crashes with SIGABRT.')
 def test_two_decoders(video_filename):
-    mm = TorchMemManager('cuda:0')
-    fr1 = pyfffr.TvFFFrameReader(mm, video_filename, mm.device.index)
+    allocator = TorchImageAllocator('cuda:0', torch.uint8)
+    fr1 = pyfffr.TvFFFrameReader(allocator, video_filename, allocator.device.index)
     fr1.read_frame()
-    fr2 = pyfffr.TvFFFrameReader(mm, video_filename, mm.device.index)
+    fr2 = pyfffr.TvFFFrameReader(allocator, video_filename, allocator.device.index)
     fr2.read_frame()
 
 
 def test_device_works_after_reading_frame(device, video_filename):
-    mm = TorchMemManager(device)
-    cuda_tensor = torch.zeros(1, device=mm.device)
+    allocator = TorchImageAllocator(device, torch.uint8)
+    cuda_tensor = torch.zeros(1, device=allocator.device)
     assert cuda_tensor.item() == 0
-    gpu_index = mm.device.index if mm.device.type == 'cuda' else -1
-    fr = pyfffr.TvFFFrameReader(mm, video_filename, gpu_index)
+    gpu_index = allocator.device.index if allocator.device.type == 'cuda' else -1
+    fr = pyfffr.TvFFFrameReader(allocator, video_filename, gpu_index)
     fr.read_frame()
     assert cuda_tensor.item() == 0
 
 
 def test_read_frame(device, video_filename, first_frame_image):
-    mm = TorchMemManager(device)
-    gpu_index = mm.device.index if mm.device.type == 'cuda' else -1
-    fr = pyfffr.TvFFFrameReader(mm, video_filename, gpu_index)
+    allocator = TorchImageAllocator(device, torch.uint8)
+    gpu_index = allocator.device.index if allocator.device.type == 'cuda' else -1
+    fr = pyfffr.TvFFFrameReader(allocator, video_filename, gpu_index)
     ptr = fr.read_frame()
     assert ptr is not None
-    # We expect for some memory to have been allocated via the MemManager
-    assert len(mm.chunks) > 0
-    expected_frame_size = 3 * 1280 * 720
-    assert len(mm.find_containing_chunk(int(ptr))) >= expected_frame_size
-    rgb_frame = mm.tensor(int(ptr), expected_frame_size)
-    rgb_frame = rgb_frame.view(3, fr.get_height(), fr.get_width())
-    rgb_frame = rgb_frame[[1, 2, 0], ...]
+    rgb_frame = allocator.get_frame_tensor(int(ptr))
+    assert rgb_frame.shape == (3, 720, 1280)
     actual = PIL.Image.fromarray(rgb_frame.cpu().permute(1, 2, 0).numpy(), 'RGB')
     assert_allclose(actual, first_frame_image, atol=50)
+
+
+def test_read_frame_cropped(device, cropped_video_filename, cropped_first_frame_image):
+    allocator = TorchImageAllocator(device, torch.uint8)
+    gpu_index = allocator.device.index if allocator.device.type == 'cuda' else -1
+    fr = pyfffr.TvFFFrameReader(allocator, cropped_video_filename, gpu_index)
+    ptr = fr.read_frame()
+    assert ptr is not None
+    rgb_frame = allocator.get_frame_tensor(int(ptr))
+    assert rgb_frame.shape == (3, 28, 52)
+    actual = PIL.Image.fromarray(rgb_frame.cpu().permute(1, 2, 0).numpy(), 'RGB')
+    assert_allclose(actual, cropped_first_frame_image, atol=50)

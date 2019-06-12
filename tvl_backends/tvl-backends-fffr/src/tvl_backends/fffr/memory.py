@@ -1,80 +1,57 @@
 import pyfffr
 import torch
-from bisect import bisect_right, bisect_left
 
 
-class _LazyDerivedList:
-    def __init__(self, base_list: list, derive_value):
-        self.base_list = base_list
-        self.derive_value = derive_value
-
-    def __getitem__(self, i):
-        return self.derive_value(self.base_list[i])
-
-    def __len__(self):
-        return len(self.base_list)
+def _dtype_bytes(dtype):
+    info = torch.finfo(dtype) if dtype.is_floating_point else torch.iinfo(dtype)
+    assert info.bits % 8 == 0
+    return info.bits // 8
 
 
-class TorchMemManager(pyfffr.MemManager):
-    """MemManager implementation which allocates Torch storage."""
-
-    def __init__(self, device):
+class TorchImageAllocator(pyfffr.ImageAllocator):
+    def __init__(self, device, dtype):
         super().__init__()
         if isinstance(device, str):
             device = torch.device(device)
         self.device = device
-        self.chunks = []
-        self.chunk_addresses = _LazyDerivedList(self.chunks, lambda e: e.data_ptr())
+        self.dtype = dtype
+        self.tensors = {}
 
-    def allocate(self, size):
-        """Allocate a new chunk of memory.
+    def allocate_frame(self, width, height, line_size):
+        """Allocate memory for an image frame.
 
-        Args:
-            size (int): The size (in bytes) of the memory chunk to allocate.
-
-        Returns:
-            int: The starting address of the allocated memory chunk.
+        The allocated memory shall have each plane aligned to 32-byte boundaries.
         """
-        storage = torch.empty(size, dtype=torch.uint8, device=self.device).storage()
-        address = storage.data_ptr()
-        index = bisect_right(self.chunk_addresses, address)
-        self.chunks.insert(index, storage)
+        align_bytes = 32
+        elem_size = _dtype_bytes(self.dtype)
+        assert align_bytes % elem_size == 0
+
+        n_padded_elems = 3 * (height * line_size + align_bytes // elem_size)
+        storage = torch.empty(n_padded_elems, device=self.device, dtype=self.dtype).storage()
+        ptr = storage.data_ptr()
+        assert ptr % elem_size == 0
+        aligned_ptr = (((ptr - 1) // align_bytes) * align_bytes + (align_bytes - ptr % align_bytes))
+        storage_offset = (aligned_ptr - ptr) // elem_size
+        plane_stride_bytes = (((height * line_size * elem_size - 1) // align_bytes) + 1) * align_bytes
+        plane_stride = plane_stride_bytes // elem_size
+
+        tensor = torch.empty((0,), device=self.device, dtype=self.dtype)
+        tensor.set_(storage, storage_offset=storage_offset, size=(3, height, width),
+                    stride=(plane_stride, line_size, 1))
+        address = tensor.data_ptr()
+
+        self.tensors[address] = tensor
         return address
 
-    def free(self, address):
-        """Release reference to an allocated memory chunk."""
-        address = int(address)
-        del self.chunks[self._find_chunk_index(address)]
+    def free_frame(self, address):
+        del self.tensors[address]
 
-    def clear(self):
-        """Release references to all allocated memory chunks."""
-        self.chunks.clear()
+    def get_data_type(self):
+        if self.dtype == torch.uint8:
+            return pyfffr.ImageAllocator.UINT8
+        if self.dtype == torch.float32:
+            return pyfffr.ImageAllocator.FLOAT32
+        raise Exception(f'unsupported dtype: {self.dtype}')
 
-    def _find_chunk_index(self, address):
-        index = bisect_left(self.chunk_addresses, address)
-        if index >= len(self.chunks) or self.chunk_addresses[index] != address:
-            raise KeyError(f'no chunk starts at address 0x{address:08x}')
-        return index
-
-    def find_containing_chunk(self, address):
-        index = bisect_right(self.chunk_addresses, address)
-        if index > 0:
-            chunk = self.chunks[index - 1]
-            if 0 <= address - chunk.data_ptr() < len(chunk):
-                return chunk
-        raise KeyError(f'no chunk contains address 0x{address:08x}')
-
-    def tensor(self, address, length=None):
-        chunk = self.find_containing_chunk(address)
-        offset = address - chunk.data_ptr()
-        max_length = len(chunk) - offset
-        if length is None:
-            length = max_length
-        if length > max_length:
-            raise IndexError('specified length extends beyond chunk boundary')
-        tensor = torch.empty((0,), dtype=torch.uint8, device=chunk.device)
-        tensor.set_(chunk, offset, (length,))
-        return tensor
-
-    def __getitem__(self, address):
-        return self.chunks[self._find_chunk_index(address)]
+    def get_frame_tensor(self, address):
+        return self.tensors[address]

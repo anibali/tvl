@@ -1,7 +1,7 @@
 #pragma once
 
 #include "FFFrameReader.h"
-#include "MemManager.h"
+#include "ImageAllocator.h"
 
 #include <memory>
 #include <string>
@@ -10,7 +10,8 @@ class TvFFFrameReader
 {
 public:
     TvFFFrameReader(
-        MemManager* mem_manager, const std::string& filename, int gpu_index, int out_width = 0, int out_height = 0);
+        ImageAllocator* image_allocator, const std::string& filename, int gpu_index,
+        int out_width = 0, int out_height = 0);
     ~TvFFFrameReader() = default;
 
     std::string get_filename();
@@ -26,6 +27,6 @@ public:
 
 private:
     std::shared_ptr<Ffr::Stream> _stream = nullptr;
-    MemManager* _mem_manager = nullptr;
+    ImageAllocator* _image_allocator = nullptr;
     std::string _filename;
 };

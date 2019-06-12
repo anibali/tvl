@@ -2,13 +2,13 @@
 
 %{
 #include "TvFFFrameReader.h"
-#include "MemManager.h"
+#include "ImageAllocator.h"
 %}
 
-%feature("director") MemManager;
+%feature("director") ImageAllocator;
 
-%typemap(directorout) uint8_t* MemManager::allocate %{
-    $result = (uint8_t*)PyInt_AsLong($1);
+%typemap(directorout) void* ImageAllocator::allocate_frame %{
+    $result = (void*)PyInt_AsLong($1);
 %}
 
 %typemap(out) int64_t %{
@@ -33,4 +33,4 @@
 
 %include <std_string.i>
 %include "TvFFFrameReader.h"
-%include "MemManager.h"
+%include "ImageAllocator.h"

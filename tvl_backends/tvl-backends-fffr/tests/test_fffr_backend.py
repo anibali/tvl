@@ -64,7 +64,7 @@ def test_seek(backend, mid_frame_image):
 
 def test_memory_leakage(backend):
     """Check that the memory manager is not leaking memory."""
-    device = backend.mem_manager.device
+    device = backend.image_allocator.device
     if device.type == 'cuda':
         start_mem = torch.cuda.memory_allocated(device.index)
         for _ in range(5):
@@ -74,4 +74,4 @@ def test_memory_leakage(backend):
     else:
         for _ in range(5):
             backend.read_frame()
-    assert len(backend.mem_manager.chunks) == 0
+    assert len(backend.image_allocator.tensors) == 0

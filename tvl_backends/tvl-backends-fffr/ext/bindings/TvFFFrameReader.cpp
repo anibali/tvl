@@ -3,9 +3,9 @@
 #include <libavutil/avutil.h>
 #include <memory>
 
-TvFFFrameReader::TvFFFrameReader(MemManager* mem_manager, const std::string& filename, const int gpu_index,
-    const int out_width, const int out_height)
-    : _mem_manager(mem_manager)
+TvFFFrameReader::TvFFFrameReader(ImageAllocator* image_allocator, const std::string& filename,
+    const int gpu_index, const int out_width, const int out_height)
+    : _image_allocator(image_allocator)
     , _filename(filename)
 {
     // Set up decoding options
@@ -87,9 +87,15 @@ uint8_t* TvFFFrameReader::read_frame()
         return nullptr;
     }
 
+    // Get frame dimensions
+    const int width = frame->getWidth();
+    const int height = frame->getHeight();
+    const int lineSize = frame->getFrameData(0).second;
+
     // Allocate new memory to store frame data
-    const auto outFrameSize = Ffr::getImageSize(Ffr::PixelFormat::GBR8P, frame->getWidth(), frame->getHeight());
-    const auto newData = _mem_manager->allocate(outFrameSize + 128);
+    const auto outFrameSize = Ffr::getImageSize(Ffr::PixelFormat::GBR8P, width, height);
+    const auto newData = reinterpret_cast<uint8_t*>(
+        _image_allocator->allocate_frame(width, height, lineSize));
     if (newData == nullptr) {
         return nullptr;
     }
@@ -107,14 +113,14 @@ uint8_t* TvFFFrameReader::read_frame()
     }
     // Swap output planes to match PixelFormat::GBR8P
     const auto backup = outPlanes[0];
-    outPlanes[0] = outPlanes[2];
-    outPlanes[2] = outPlanes[1];
-    outPlanes[1] = backup;
+    outPlanes[0] = outPlanes[1];
+    outPlanes[1] = outPlanes[2];
+    outPlanes[2] = backup;
 
     // Copy/Convert image data into output
     if (frame->getDataType() == Ffr::DecodeType::Cuda) {
         if (!Ffr::convertFormat(frame, reinterpret_cast<uint8_t**>(outPlanes), Ffr::PixelFormat::GBR8P)) {
-            _mem_manager->free(newData);
+            _image_allocator->free_frame(newData);
             return nullptr;
         }
     } else {

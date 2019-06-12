@@ -28,6 +28,16 @@ def mid_frame_image():
     return PIL.Image.open(data_dir.joinpath('board_game_mid.jpg'), 'r')
 
 
+@pytest.fixture
+def cropped_video_filename():
+    return str(data_dir.joinpath('board_game-h264-cropped.mkv'))
+
+
+@pytest.fixture
+def cropped_first_frame_image():
+    return PIL.Image.open(data_dir.joinpath('board_game_first-cropped.jpg'), 'r')
+
+
 @pytest.fixture(params=['cpu', 'cuda:0'])
 def device(request):
     return request.param

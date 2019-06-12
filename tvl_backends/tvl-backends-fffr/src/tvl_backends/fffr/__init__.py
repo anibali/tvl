@@ -2,7 +2,7 @@ import torch
 
 import pyfffr
 from tvl.backend import Backend, BackendFactory
-from tvl_backends.fffr.memory import TorchMemManager
+from tvl_backends.fffr.memory import TorchImageAllocator
 
 
 class FffrBackend(Backend):
@@ -13,13 +13,14 @@ class FffrBackend(Backend):
         else:
             device_index = -1
 
-        mem_manager = TorchMemManager(device)
-        frame_reader = pyfffr.TvFFFrameReader(mem_manager, filename, device_index)
-        # We need to hold a reference to mem_manager for at least as long as the TvFFFrameReader
-        # that uses it is around, since we retain ownership of the TorchMemManager object.
-        setattr(frame_reader, '__mem_manager_ref', mem_manager)
+        # TODO: Pass dtype to TorchImageAllocator once float32 is supported.
+        image_allocator = TorchImageAllocator(device, dtype=torch.uint8)
+        frame_reader = pyfffr.TvFFFrameReader(image_allocator, filename, device_index)
+        # We need to hold a reference to image_allocator for at least as long as the
+        # TvFFFrameReader that uses it is around, since we retain ownership of image_allocator.
+        setattr(frame_reader, '__image_allocator_ref', image_allocator)
 
-        self.mem_manager = mem_manager
+        self.image_allocator = image_allocator
         self.frame_reader = frame_reader
         self.dtype = dtype
 
@@ -55,19 +56,13 @@ class FffrBackend(Backend):
         if not ptr:
             raise EOFError()
 
-        brg = self.mem_manager.tensor(int(ptr), self.frame_reader.get_frame_size())
-        self.mem_manager.free(int(ptr))  # Release reference held by the memory manager.
-        brg = brg.view(3, self.height, self.width)
-
-        rgb = torch.empty(brg.shape, dtype=self.dtype, device=self.mem_manager.device)
-        rgb[0] = brg[1]
-        rgb[1] = brg[2]
-        rgb[2] = brg[0]
+        rgb_tensor = self.image_allocator.get_frame_tensor(int(ptr))
+        self.image_allocator.free_frame(int(ptr))  # Release reference held by the memory manager.
 
         if self.dtype == torch.float32:
-            return rgb.div_(255)
+            return rgb_tensor.float().div_(255)
         elif self.dtype == torch.uint8:
-            return rgb
+            return rgb_tensor
         raise NotImplementedError(f'Unsupported dtype: {self.dtype}')
 
 
