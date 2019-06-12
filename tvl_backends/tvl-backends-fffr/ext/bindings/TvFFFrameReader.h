@@ -29,4 +29,5 @@ private:
     std::shared_ptr<Ffr::Stream> _stream = nullptr;
     ImageAllocator* _image_allocator = nullptr;
     std::string _filename;
+    Ffr::PixelFormat _pixel_format;
 };

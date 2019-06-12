@@ -45,4 +45,4 @@ def device(request):
 
 @pytest.fixture
 def backend(device, video_filename):
-    return FffrBackendFactory().create(video_filename, device, torch.float32)
+    return FffrBackendFactory().create(video_filename, device, torch.uint8)

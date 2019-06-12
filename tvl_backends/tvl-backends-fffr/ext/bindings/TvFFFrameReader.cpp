@@ -2,12 +2,27 @@
 
 #include <libavutil/avutil.h>
 #include <memory>
+#include <stdexcept>
 
 TvFFFrameReader::TvFFFrameReader(ImageAllocator* image_allocator, const std::string& filename,
     const int gpu_index, const int out_width, const int out_height)
     : _image_allocator(image_allocator)
     , _filename(filename)
 {
+    switch (image_allocator->get_data_type()) {
+        case ImageAllocator::UINT8: {
+            _pixel_format = Ffr::PixelFormat::GBR8P;
+            break;
+        }
+        case ImageAllocator::FLOAT32: {
+            _pixel_format = Ffr::PixelFormat::GBR32FP;
+            break;
+        }
+        default: {
+            throw std::runtime_error("Unsupported data type.");
+        }
+    }
+
     // Set up decoding options
     Ffr::DecoderOptions options;
     if (gpu_index >= 0) {
@@ -17,7 +32,7 @@ TvFFFrameReader::TvFFFrameReader(ImageAllocator* image_allocator, const std::str
         options.m_format = Ffr::PixelFormat::Auto; // Keep pixel format the same
     } else {
         // Use inbuilt software conversion
-        options.m_format = Ffr::PixelFormat::GBR8P;
+        options.m_format = _pixel_format;
     }
     options.m_scale.m_width = out_width;
     options.m_scale.m_height = out_height;
@@ -93,7 +108,7 @@ uint8_t* TvFFFrameReader::read_frame()
     const int lineSize = frame->getFrameData(0).second;
 
     // Allocate new memory to store frame data
-    const auto outFrameSize = Ffr::getImageSize(Ffr::PixelFormat::GBR8P, width, height);
+    const auto outFrameSize = Ffr::getImageSize(_pixel_format, width, height);
     const auto newData = reinterpret_cast<uint8_t*>(
         _image_allocator->allocate_frame(width, height, lineSize));
     if (newData == nullptr) {
@@ -111,7 +126,7 @@ uint8_t* TvFFFrameReader::read_frame()
         outPlanes[i] = reinterpret_cast<uint8_t*>(outPlanes[i - 1]) + planeSize;
         std::align(32, outFrameSize, outPlanes[i], ignored);
     }
-    // Swap output planes to match PixelFormat::GBR8P
+    // Swap output planes to match GBR ordering
     const auto backup = outPlanes[0];
     outPlanes[0] = outPlanes[1];
     outPlanes[1] = outPlanes[2];
@@ -119,7 +134,7 @@ uint8_t* TvFFFrameReader::read_frame()
 
     // Copy/Convert image data into output
     if (frame->getDataType() == Ffr::DecodeType::Cuda) {
-        if (!Ffr::convertFormat(frame, reinterpret_cast<uint8_t**>(outPlanes), Ffr::PixelFormat::GBR8P)) {
+        if (!Ffr::convertFormat(frame, reinterpret_cast<uint8_t**>(outPlanes), _pixel_format)) {
             _image_allocator->free_frame(newData);
             return nullptr;
         }

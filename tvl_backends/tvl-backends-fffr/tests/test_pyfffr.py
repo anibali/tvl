@@ -57,7 +57,7 @@ def test_device_works_after_reading_frame(device, video_filename):
     assert cuda_tensor.item() == 0
 
 
-def test_read_frame(device, video_filename, first_frame_image):
+def test_read_frame_uint8(device, video_filename, first_frame_image):
     allocator = TorchImageAllocator(device, torch.uint8)
     gpu_index = allocator.device.index if allocator.device.type == 'cuda' else -1
     fr = pyfffr.TvFFFrameReader(allocator, video_filename, gpu_index)
@@ -66,6 +66,18 @@ def test_read_frame(device, video_filename, first_frame_image):
     rgb_frame = allocator.get_frame_tensor(int(ptr))
     assert rgb_frame.shape == (3, 720, 1280)
     actual = PIL.Image.fromarray(rgb_frame.cpu().permute(1, 2, 0).numpy(), 'RGB')
+    assert_allclose(actual, first_frame_image, atol=50)
+
+
+def test_read_frame_float32(device, video_filename, first_frame_image):
+    allocator = TorchImageAllocator(device, torch.float32)
+    gpu_index = allocator.device.index if allocator.device.type == 'cuda' else -1
+    fr = pyfffr.TvFFFrameReader(allocator, video_filename, gpu_index)
+    ptr = fr.read_frame()
+    assert ptr is not None
+    rgb_frame = allocator.get_frame_tensor(int(ptr))
+    assert rgb_frame.shape == (3, 720, 1280)
+    actual = PIL.Image.fromarray((rgb_frame.cpu() * 255).byte().permute(1, 2, 0).numpy(), 'RGB')
     assert_allclose(actual, first_frame_image, atol=50)
 
 

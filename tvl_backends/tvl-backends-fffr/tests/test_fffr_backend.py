@@ -31,8 +31,7 @@ def test_frame_size(backend):
 def test_read_frame(backend, first_frame_image):
     rgb = backend.read_frame()
     assert(rgb.size() == (3, 720, 1280))
-    rgb_bytes = (rgb * 255).round_().byte().cpu()
-    img = PIL.Image.fromarray(rgb_bytes.permute(1, 2, 0).numpy(), 'RGB')
+    img = PIL.Image.fromarray(rgb.cpu().permute(1, 2, 0).numpy(), 'RGB')
     np.testing.assert_allclose(img, first_frame_image, rtol=0, atol=50)
 
 
@@ -57,8 +56,7 @@ def test_read_all_frames(backend):
 def test_seek(backend, mid_frame_image):
     backend.seek(1.0)
     rgb = backend.read_frame()
-    rgb_bytes = (rgb * 255).round_().byte().cpu()
-    img = PIL.Image.fromarray(rgb_bytes.permute(1, 2, 0).numpy(), 'RGB')
+    img = PIL.Image.fromarray(rgb.cpu().permute(1, 2, 0).numpy(), 'RGB')
     np.testing.assert_allclose(img, mid_frame_image, rtol=0, atol=50)
 
 
