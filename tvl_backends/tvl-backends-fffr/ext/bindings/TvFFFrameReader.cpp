@@ -9,6 +9,9 @@ TvFFFrameReader::TvFFFrameReader(ImageAllocator* image_allocator, const std::str
     : _image_allocator(image_allocator)
     , _filename(filename)
 {
+    // Quiet the log
+    Ffr::setLogLevel(Ffr::LogLevel::Quiet);
+
     switch (image_allocator->get_data_type()) {
         case ImageAllocator::UINT8: {
             _pixel_format = Ffr::PixelFormat::GBR8P;
@@ -93,13 +96,17 @@ uint8_t* TvFFFrameReader::read_frame()
     // Get next frame
     const auto ret = _stream->getNextFrame();
     if (ret.index() == 0) {
-        return nullptr;
+        if (std::get<0>(ret) == true) {
+            //This is an EOF error
+            return nullptr;
+        }
+        throw std::runtime_error("Failed to get the next frame.");
     }
     const auto frame = std::get<1>(ret);
 
     // Check if known pixel format
     if (frame->getPixelFormat() == Ffr::PixelFormat::Auto) {
-        return nullptr;
+        throw std::runtime_error("Unknown pixel format.");
     }
 
     // Get frame dimensions
@@ -112,7 +119,7 @@ uint8_t* TvFFFrameReader::read_frame()
     const auto newData = reinterpret_cast<uint8_t*>(
         _image_allocator->allocate_frame(width, height, lineSize));
     if (newData == nullptr) {
-        return nullptr;
+        throw std::runtime_error("Memory allocation for frame image failed.");
     }
 
     // Calculate memory locations for each plane
@@ -136,7 +143,7 @@ uint8_t* TvFFFrameReader::read_frame()
     if (frame->getDataType() == Ffr::DecodeType::Cuda) {
         if (!Ffr::convertFormat(frame, reinterpret_cast<uint8_t**>(outPlanes), _pixel_format)) {
             _image_allocator->free_frame(newData);
-            return nullptr;
+            throw std::runtime_error("Pixel format conversion failed.");
         }
     } else {
         for (int32_t i = 0; i < 3; i++) {
