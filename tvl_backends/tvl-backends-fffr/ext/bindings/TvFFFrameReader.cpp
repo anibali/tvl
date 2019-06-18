@@ -1,11 +1,11 @@
 #include "TvFFFrameReader.h"
 
-#include <libavutil/avutil.h>
+#include <cstring>
 #include <memory>
 #include <stdexcept>
 
-TvFFFrameReader::TvFFFrameReader(ImageAllocator* image_allocator, const std::string& filename,
-    const int gpu_index, const int out_width, const int out_height)
+TvFFFrameReader::TvFFFrameReader(ImageAllocator* image_allocator, const std::string& filename, const int gpu_index,
+    const int out_width, const int out_height)
     : _image_allocator(image_allocator)
     , _filename(filename)
 {
@@ -14,11 +14,11 @@ TvFFFrameReader::TvFFFrameReader(ImageAllocator* image_allocator, const std::str
 
     switch (image_allocator->get_data_type()) {
         case ImageAllocator::UINT8: {
-            _pixel_format = Ffr::PixelFormat::GBR8P;
+            _pixel_format = Ffr::PixelFormat::RGB8P;
             break;
         }
         case ImageAllocator::FLOAT32: {
-            _pixel_format = Ffr::PixelFormat::GBR32FP;
+            _pixel_format = Ffr::PixelFormat::RGB32FP;
             break;
         }
         default: {
@@ -47,39 +47,40 @@ TvFFFrameReader::TvFFFrameReader(ImageAllocator* image_allocator, const std::str
     }
 }
 
-std::string TvFFFrameReader::get_filename()
+std::string TvFFFrameReader::get_filename() const
 {
     return _filename;
 }
 
-int TvFFFrameReader::get_width()
+int TvFFFrameReader::get_width() const
 {
     return _stream->getWidth();
 }
 
-int TvFFFrameReader::get_height()
+int TvFFFrameReader::get_height() const
 {
     return _stream->getHeight();
 }
 
-double TvFFFrameReader::get_duration()
+double TvFFFrameReader::get_duration() const
 {
-    return static_cast<double>(_stream->getDuration()) / static_cast<double>(AV_TIME_BASE);
+    return static_cast<double>(_stream->getDuration()) / 1000000.0;
 }
 
-double TvFFFrameReader::get_frame_rate()
+double TvFFFrameReader::get_frame_rate() const
 {
     return _stream->getFrameRate();
 }
 
-int64_t TvFFFrameReader::get_number_of_frames()
+int64_t TvFFFrameReader::get_number_of_frames() const
 {
     return _stream->getTotalFrames();
 }
 
 void TvFFFrameReader::seek(const float time_secs)
 {
-    const bool ret = _stream->seek(time_secs * AV_TIME_BASE);
+    const auto time = static_cast<int64_t>(time_secs * 1000000.0f);
+    const bool ret = _stream->seek(time);
     if (!ret) {
         throw;
     }
@@ -91,7 +92,7 @@ uint8_t* TvFFFrameReader::read_frame()
     const auto frame = _stream->getNextFrame();
     if (frame == nullptr) {
         if (_stream->isEndOfFile()) {
-            //This is an EOF error
+            // This is an EOF error
             return nullptr;
         }
         throw std::runtime_error("Failed to get the next frame.");
@@ -108,40 +109,24 @@ uint8_t* TvFFFrameReader::read_frame()
     const int lineSize = frame->getFrameData(0).second;
 
     // Allocate new memory to store frame data
-    const auto outFrameSize = Ffr::getImageSize(_pixel_format, width, height);
-    const auto newData = reinterpret_cast<uint8_t*>(
-        _image_allocator->allocate_frame(width, height, lineSize));
+    const auto newData = reinterpret_cast<uint8_t*>(_image_allocator->allocate_frame(width, height, lineSize));
     if (newData == nullptr) {
         throw std::runtime_error("Memory allocation for frame image failed.");
     }
 
-    // Calculate memory locations for each plane
-    void* outPlanes[3];
-    size_t ignored;
-    outPlanes[0] = newData;
-    std::align(32, outFrameSize, outPlanes[0], ignored);
-    for (int32_t i = 1; i < 3; i++) {
-        const auto planeData = frame->getFrameData(i);
-        const uint32_t planeSize = planeData.second * frame->getHeight();
-        outPlanes[i] = reinterpret_cast<uint8_t*>(outPlanes[i - 1]) + planeSize;
-        std::align(32, outFrameSize, outPlanes[i], ignored);
-    }
-    // Swap output planes to match GBR ordering
-    const auto backup = outPlanes[0];
-    outPlanes[0] = outPlanes[1];
-    outPlanes[1] = outPlanes[2];
-    outPlanes[2] = backup;
-
     // Copy/Convert image data into output
     if (frame->getDataType() == Ffr::DecodeType::Cuda) {
-        if (!Ffr::convertFormat(frame, reinterpret_cast<uint8_t**>(outPlanes), _pixel_format)) {
+        if (!Ffr::convertFormat(frame, newData, _pixel_format)) {
             _image_allocator->free_frame(newData);
             throw std::runtime_error("Pixel format conversion failed.");
         }
     } else {
+        auto plane = newData;
         for (int32_t i = 0; i < 3; i++) {
             const auto planeData = frame->getFrameData(i);
-            memcpy(outPlanes[i], planeData.first, planeData.second * frame->getHeight());
+            const auto size = planeData.second * frame->getHeight();
+            std::memcpy(plane, planeData.first, size);
+            plane += size;
         }
     }
     return newData;

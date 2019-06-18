@@ -14,12 +14,12 @@ public:
         int out_width = 0, int out_height = 0);
     ~TvFFFrameReader() = default;
 
-    std::string get_filename();
-    int get_width();
-    int get_height();
-    double get_duration();
-    double get_frame_rate();
-    int64_t get_number_of_frames();
+    std::string get_filename() const;
+    int get_width() const;
+    int get_height() const;
+    double get_duration() const;
+    double get_frame_rate() const;
+    int64_t get_number_of_frames() const;
     void seek(float time_secs);
 
     uint8_t* read_frame();
