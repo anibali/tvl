@@ -59,7 +59,7 @@ TvFFFrameReader::TvFFFrameReader(ImageAllocator* image_allocator, const std::str
     if (gpu_index >= 0) {
         if (_context.get() == nullptr) {
             if (!init_context(gpu_index)) {
-                throw;
+                throw std::runtime_error("CUDA context creation failed.");
             }
         }
 
@@ -77,7 +77,7 @@ TvFFFrameReader::TvFFFrameReader(ImageAllocator* image_allocator, const std::str
     // Create a decoding stream
     _stream = Ffr::Stream::getStream(filename, options);
     if (_stream == nullptr) {
-        throw;
+        throw std::runtime_error("Stream creation failed.");
     }
 }
 
@@ -116,7 +116,7 @@ void TvFFFrameReader::seek(const float time_secs)
     const auto time = static_cast<int64_t>(time_secs * 1000000.0f);
     const bool ret = _stream->seek(time);
     if (!ret) {
-        throw;
+        throw std::runtime_error("Seek failed.");
     }
 }
 
