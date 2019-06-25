@@ -4,6 +4,34 @@
 #include <memory>
 #include <stdexcept>
 
+std::shared_ptr<std::remove_pointer<CUcontext>::type> TvFFFrameReader::_context = nullptr;
+
+bool TvFFFrameReader::init_context(const int gpu_index)
+{
+    // Detect shared context with runtime api
+    if (cuInit(0) != CUDA_SUCCESS) {
+        return false;
+    }
+    CUcontext context = nullptr;
+    if (cuCtxGetCurrent(&context) != CUDA_SUCCESS) {
+        return false;
+    }
+    if (context == nullptr) {
+        CUdevice dev;
+        if (cuDeviceGet(&dev, gpu_index) != CUDA_SUCCESS) {
+            return false;
+        }
+        if (cuDevicePrimaryCtxRetain(&context, dev) != CUDA_SUCCESS) {
+            return false;
+        }
+        _context = std::shared_ptr<std::remove_pointer<CUcontext>::type>(
+            context, [dev](CUcontext) { cuDevicePrimaryCtxRelease(dev); });
+    } else {
+        _context = std::shared_ptr<std::remove_pointer<CUcontext>::type>(context, [](CUcontext) {});
+    }
+    return true;
+}
+
 TvFFFrameReader::TvFFFrameReader(ImageAllocator* image_allocator, const std::string& filename, const int gpu_index,
     const int out_width, const int out_height)
     : _image_allocator(image_allocator)
@@ -29,10 +57,16 @@ TvFFFrameReader::TvFFFrameReader(ImageAllocator* image_allocator, const std::str
     // Set up decoding options
     Ffr::DecoderOptions options;
     if (gpu_index >= 0) {
+        if (_context.get() == nullptr) {
+            if (!init_context(gpu_index)) {
+                throw;
+            }
+        }
+
         options.m_type = Ffr::DecodeType::Cuda;
-        options.m_device = gpu_index;
         options.m_outputHost = false;
         options.m_format = Ffr::PixelFormat::Auto; // Keep pixel format the same
+        options.m_context = _context.get();
     } else {
         // Use inbuilt software conversion
         options.m_format = _pixel_format;
