@@ -10,13 +10,11 @@ target_link_directories(pyfffr
     tvl_backends_fffr::FfFrameReader
 )
 
-find_path(AVUTIL_INCLUDE_DIR NAMES libavutil/avutil.h)
-
 target_include_directories(pyfffr
     PRIVATE
-    ${AVUTIL_INCLUDE_DIR}
     .
     ../FFFrameReader/include
+    ${CUDA_INCLUDE_DIRS}
 )
 
 # Build SWIG bindings.
