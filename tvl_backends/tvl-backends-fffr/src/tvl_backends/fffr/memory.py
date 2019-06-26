@@ -21,27 +21,42 @@ class TorchImageAllocator(pyfffr.ImageAllocator):
         """Allocate memory for an image frame.
 
         The allocated memory shall have each plane aligned to 32-byte boundaries.
-        """
-        align_bytes = 32
-        elem_size = _dtype_bytes(self.dtype)
-        assert align_bytes % elem_size == 0
 
-        n_padded_elems = 3 * (height * line_size + align_bytes // elem_size)
+        Args:
+            width (int): Width of the image in pixels.
+            height (int): Height of the image in pixels.
+            line_size (int): Size of a row of image pixels in bytes. The pixel data is expected
+              to be left-aligned within this area.
+
+        Returns:
+            Address of the allocated memory.
+        """
+        align_bytes = 32  # Align memory to 32-byte boundaries.
+        elem_size = _dtype_bytes(self.dtype)  # Size of a pixel channel element.
+        assert align_bytes % elem_size == 0, 'alignment must be a multiple of element size'
+
+        # Convert some sizes from bytes to element counts.
+        line_elems = line_size // elem_size
+        align_elems = align_bytes // elem_size
+
+        # Allocate memory with extra space for planar alignment.
+        n_padded_elems = 3 * (height * line_elems + align_elems)
         storage = torch.empty(n_padded_elems, device=self.device, dtype=self.dtype).storage()
+
+        # Calculate memory offset and stride.
         ptr = storage.data_ptr()
         assert ptr % elem_size == 0
         aligned_ptr = (((ptr - 1) // align_bytes) * align_bytes + (align_bytes - ptr % align_bytes))
         storage_offset = (aligned_ptr - ptr) // elem_size
-        plane_stride_bytes = (((height * line_size * elem_size - 1) // align_bytes) + 1) * align_bytes
-        plane_stride = plane_stride_bytes // elem_size
+        plane_stride = ((height * line_elems - 1) // align_elems + 1) * align_elems
 
+        # Create a tensor for viewing the allocated memory.
         tensor = torch.empty((0,), device=self.device, dtype=self.dtype)
         tensor.set_(storage, storage_offset=storage_offset, size=(3, height, width),
-                    stride=(plane_stride, line_size, 1))
-        address = tensor.data_ptr()
+                    stride=(plane_stride, line_elems, 1))
+        self.tensors[ptr] = tensor
 
-        self.tensors[address] = tensor
-        return address
+        return ptr
 
     def free_frame(self, address):
         del self.tensors[address]

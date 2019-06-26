@@ -41,7 +41,7 @@ def test_free_frame(device):
 def test_allocation_alignment(device):
     dtype = torch.float32
     allocator = TorchImageAllocator(device, dtype)
-    addr = allocator.allocate_frame(1, 1, 1)
+    addr = allocator.allocate_frame(1, 1, 4)
     tensor = allocator.get_frame_tensor(addr)
     tensor.storage().fill_(0)
     tensor.fill_(1)
