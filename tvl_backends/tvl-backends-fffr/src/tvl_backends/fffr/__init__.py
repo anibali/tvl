@@ -28,6 +28,7 @@ class FffrBackend(Backend):
         self.image_allocator = image_allocator
         self.frame_reader = frame_reader
         self.dtype = dtype
+        self._at_eof = False
 
     @property
     def duration(self):
@@ -50,9 +51,18 @@ class FffrBackend(Backend):
         return self.frame_reader.get_height()
 
     def seek(self, time_secs):
-        self.frame_reader.seek(time_secs)
+        try:
+            self.frame_reader.seek(time_secs)
+            self._at_eof = False
+        except RuntimeError:
+            if time_secs < self.duration - (1.0 / self.frame_rate + 1e-9):
+                raise
+            self._at_eof = True
 
     def read_frame(self):
+        if self._at_eof:
+            raise EOFError()
+
         ptr = self.frame_reader.read_frame()
         if not ptr:
             raise EOFError()

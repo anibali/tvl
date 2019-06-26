@@ -37,10 +37,17 @@ def test_get_height(video_filename):
     assert fr.get_height() == 720
 
 
-def test_seek_eof(video_filename):
+def test_seek_out_of_bounds(video_filename):
     allocator = TorchImageAllocator('cpu', torch.uint8)
     fr = pyfffr.TvFFFrameReader(allocator, video_filename, -1)
-    fr.seek(2.0)
+    # Try seeking to a time after the end of the video.
+    with pytest.raises(RuntimeError):
+        fr.seek(2.0)
+    # Try seeking to a time before the start of the video.
+    with pytest.raises(RuntimeError):
+        fr.seek(-1.0)
+    # Check that seeking within bounds is still OK.
+    fr.seek(1.0)
 
 
 def test_two_decoders(video_filename):
