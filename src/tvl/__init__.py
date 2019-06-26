@@ -12,12 +12,13 @@ _device_backends: Dict[str, BackendFactory] = {}
 # set explicitly.
 _known_backends = {
     'cpu': [
+        'tvl_backends.fffr.FffrBackendFactory',     # PyPI package: tvl-backends-fffr
         'tvl_backends.pyav.PyAvBackendFactory',     # PyPI package: tvl-backends-pyav
         'tvl_backends.opencv.OpenCvBackendFactory', # PyPI package: tvl-backends-opencv
     ],
     'cuda': [
+        'tvl_backends.fffr.FffrBackendFactory',     # PyPI package: tvl-backends-fffr
         'tvl_backends.nvdec.NvdecBackendFactory',   # PyPI package: tvl-backends-nvdec
-        'tvl_backends.nvvl.NvvlBackendFactory',     # PyPI package: tvl-backends-nvvl
     ],
 }
 

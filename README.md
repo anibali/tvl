@@ -68,16 +68,16 @@ doing some other work (eg. training a model). See [`examples/async_dataloading.p
 
 | Backend class | Supported devices |
 |---------------|-------------------|
+| FffrBackend   | cpu,cuda          |
 | NvdecBackend  | cuda              |
-| NvvlBackend   | cuda              |
 | PyAvBackend   | cpu               |
 | OpenCvBackend | cpu               |
 
-If you wanted to install `tvl` with support for the NVDEC and PyAV backends you would install the
+If you wanted to install `tvl` with support for the FFFR backend you would install the
 package like so:
 
 ```bash
-$ pip install "tvl[NvdecBackend,PyAvBackend]"
+$ pip install "tvl[FffrBackend]"
 ```
 
 

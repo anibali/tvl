@@ -75,17 +75,8 @@ RUN curl -so /usr/lib/x86_64-linux-gnu/libnvcuvid.so.1 \
  && ln -s /usr/local/nvidia/lib64/libnvcuvid.so.1 /usr/local/lib/libnvcuvid.so \
  && ln -s libnvcuvid.so.1 /usr/lib/x86_64-linux-gnu/libnvcuvid.so
 
-# Install nvvl
+# Install CMake
 RUN pip install cmake==3.13.3
-RUN cd /tmp \
- && git clone https://github.com/NVIDIA/nvvl.git \
- && cd nvvl \
- && git checkout 14b660c87b4c5a86d95da04a50be70674e68e625 \
- && mkdir build \
- && cd build \
- && cmake .. \
- && make -j8 \
- && make install
 
 # Install scikit-build
 RUN pip install scikit-build==0.9.0
@@ -142,12 +133,10 @@ COPY requirements.txt /app
 RUN pip install -r requirements.txt
 
 # Install tvl
-COPY --from=tvl-builder /usr/local/lib/libnvvl.so /usr/local/lib/
 COPY --from=tvl-builder /app/dist/tvl*.whl /tmp/
 RUN pip install -f /tmp \
     tvl \
     tvl-backends-nvdec \
-    tvl-backends-nvvl \
     tvl-backends-opencv \
     tvl-backends-pyav \
     tvl-backends-fffr \
