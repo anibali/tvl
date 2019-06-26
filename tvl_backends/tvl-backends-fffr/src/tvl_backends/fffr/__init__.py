@@ -13,7 +13,13 @@ class FffrBackend(Backend):
         else:
             device_index = -1
 
-        image_allocator = TorchImageAllocator(device, dtype)
+        allocator_dtype = dtype
+        # The FFFR backend does not currently support direct conversion to float32 for software
+        # decoding, so we will read as uint8 and do the data type conversion afterwards.
+        if device.type == 'cpu' and dtype != torch.uint8:
+            allocator_dtype = torch.uint8
+
+        image_allocator = TorchImageAllocator(device, allocator_dtype)
         frame_reader = pyfffr.TvFFFrameReader(image_allocator, filename, device_index)
         # We need to hold a reference to image_allocator for at least as long as the
         # TvFFFrameReader that uses it is around, since we retain ownership of image_allocator.
@@ -55,6 +61,8 @@ class FffrBackend(Backend):
         self.image_allocator.free_frame(int(ptr))  # Release reference held by the memory manager.
 
         if self.dtype == torch.float32:
+            if self.image_allocator.dtype != torch.float32:
+                return rgb_tensor.to(self.dtype).div_(255)
             return rgb_tensor
         elif self.dtype == torch.uint8:
             return rgb_tensor

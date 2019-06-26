@@ -37,14 +37,12 @@ def test_get_height(video_filename):
     assert fr.get_height() == 720
 
 
-@pytest.mark.skip('This test currently crashes with SIGABRT.')
 def test_seek_eof(video_filename):
     allocator = TorchImageAllocator('cpu', torch.uint8)
     fr = pyfffr.TvFFFrameReader(allocator, video_filename, -1)
     fr.seek(2.0)
 
 
-@pytest.mark.skip('This test currently crashes with SIGABRT.')
 def test_two_decoders(video_filename):
     allocator = TorchImageAllocator('cuda:0', torch.uint8)
     fr1 = pyfffr.TvFFFrameReader(allocator, video_filename, allocator.device.index)
@@ -76,6 +74,9 @@ def test_read_frame_uint8(device, video_filename, first_frame_image):
 
 
 def test_read_frame_float32(device, video_filename, first_frame_image):
+    if device == 'cpu':
+        pytest.skip('Software decoding does not support float32 output directly')
+
     allocator = TorchImageAllocator(device, torch.float32)
     gpu_index = allocator.device.index if allocator.device.type == 'cuda' else -1
     fr = pyfffr.TvFFFrameReader(allocator, video_filename, gpu_index)

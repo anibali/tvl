@@ -1,7 +1,9 @@
 import PIL.Image
-import numpy as np
-import torch
 import pytest
+import torch
+from numpy.testing import assert_allclose
+
+from tvl_backends.fffr import FffrBackendFactory
 
 
 def test_duration(backend):
@@ -28,10 +30,9 @@ def test_read_frame(backend, first_frame_image):
     rgb = backend.read_frame()
     assert(rgb.size() == (3, 720, 1280))
     img = PIL.Image.fromarray(rgb.cpu().permute(1, 2, 0).numpy(), 'RGB')
-    np.testing.assert_allclose(img, first_frame_image, rtol=0, atol=50)
+    assert_allclose(img, first_frame_image, rtol=0, atol=50)
 
 
-@pytest.mark.skip('This test currently crashes with SIGABRT.')
 def test_eof(backend):
     backend.seek(2.0)
     with pytest.raises(EOFError):
@@ -53,7 +54,7 @@ def test_seek(backend, mid_frame_image):
     backend.seek(1.0)
     rgb = backend.read_frame()
     img = PIL.Image.fromarray(rgb.cpu().permute(1, 2, 0).numpy(), 'RGB')
-    np.testing.assert_allclose(img, mid_frame_image, rtol=0, atol=50)
+    assert_allclose(img, mid_frame_image, rtol=0, atol=50)
 
 
 def test_memory_leakage(backend):
@@ -69,3 +70,11 @@ def test_memory_leakage(backend):
         for _ in range(5):
             backend.read_frame()
     assert len(backend.image_allocator.tensors) == 0
+
+
+def test_read_frame_float32_cpu(video_filename, first_frame_image):
+    backend = FffrBackendFactory().create(video_filename, 'cpu', torch.float32)
+    rgb_frame = backend.read_frame()
+    assert rgb_frame.shape == (3, 720, 1280)
+    actual = PIL.Image.fromarray((rgb_frame * 255).byte().permute(1, 2, 0).numpy(), 'RGB')
+    assert_allclose(actual, first_frame_image, atol=50)
