@@ -143,7 +143,7 @@ uint8_t* TvFFFrameReader::read_frame()
     const int lineSize = Ffr::getImageLineStep(_pixel_format, width, 0);
 
     // Allocate new memory to store frame data
-    const auto newData = reinterpret_cast<uint8_t*>(_image_allocator->allocate_frame(width, height, lineSize));
+    const auto newData = reinterpret_cast<uint8_t*>(_image_allocator->allocate_frame(width, height, lineSize, 32));
     if (newData == nullptr) {
         throw std::runtime_error("Memory allocation for frame image failed.");
     }

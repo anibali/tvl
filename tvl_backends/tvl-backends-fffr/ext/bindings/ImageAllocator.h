@@ -15,7 +15,7 @@ public:
     /**
      * Allocate memory for a 3-plane image with 32-byte alignment for each plane.
      */
-    virtual void* allocate_frame(int width, int height, int line_size) = 0;
+    virtual void* allocate_frame(int width, int height, int line_size, int alignment) = 0;
     /**
      * Free (or release reference to) previously allocated frame memory.
      */
