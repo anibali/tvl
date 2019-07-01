@@ -103,7 +103,7 @@ class VideoLoader:
         self.seek_to_frame(0)
         return self.remaining_frames()
 
-    def select_frames(self, frame_indices, skip_threshold=3):
+    def select_frames(self, frame_indices, seek_hint=3):
         """Iterate over frames selected by frame index.
 
         Frames will be yielded in ascending order of frame index, regardless of the way
@@ -111,37 +111,8 @@ class VideoLoader:
 
         Args:
             frame_indices (Sequence of int): Indices of frames to read.
-            skip_threshold (int, optional): Sequential reading threshold used to predict when
-                multiple reads will be faster than seeking. Setting this value close to the video's
-                GOP size should be a reasonable choice.
+            seek_hint (int, optional): Hint for predicting when seeking to the next target frame
+                would be faster than reading and discarding intermediate frames. Setting this value
+                close to the video's GOP size should be a reasonable choice.
         """
-        # We will be loading unique frames in ascending index order.
-        sorted_frame_indices = list(sorted(set(frame_indices)))
-
-        pos = -(skip_threshold + 1)
-        seq_len = 0
-        seq_keepers = []
-        for frame_index in sorted_frame_indices:
-            if frame_index - pos > skip_threshold:
-                # Read previous sequence
-                if seq_len > 0:
-                    frames = self.read_frames(seq_len)
-                    for i in seq_keepers:
-                        yield frames[i]
-                    seq_keepers.clear()
-                    seq_len = 0
-                # Skip to desired location by seeking.
-                self.seek_to_frame(frame_index)
-            else:
-                # Skip to desired location by reading and discarding intermediate frames.
-                while pos < frame_index:
-                    seq_len += 1
-                    pos += 1
-            # Read the frame that we care about.
-            seq_keepers.append(seq_len)
-            seq_len += 1
-            pos = frame_index + 1
-        if seq_len > 0:
-            frames = self.read_frames(seq_len)
-            for i in seq_keepers:
-                yield frames[i]
+        return self.backend.select_frames(frame_indices, seek_hint=seek_hint)
