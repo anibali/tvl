@@ -169,17 +169,17 @@ int64_t TvFFFrameReader::read_frame_sequence(int64_t* offsets, int n_frames, uin
     // to get all of them at once.
     std::vector<int64_t> frameSequence(offsets, offsets + n_frames);
     const auto frames_vector = _stream->getNextFrameSequence(frameSequence);
-    int n_frames_read = frames_vector.size();
-    for (int i = 0; i < n_frames_read; ++i) {
-        auto const& frame = frames_vector[i];
-        if (frame == nullptr) {
-            if (_stream->isEndOfFile()) {
-                // Return false to indicate "end of file".
-                return false;
-            }
-            throw std::runtime_error("Failed to get the next frame.");
-        }
-        frames[i] = convert_frame(frame);
+    uint32_t index = 0;
+    for (auto& i : frames_vector) {
+        frames[index] = convert_frame(i);
+        ++index;
     }
-    return n_frames_read;
+    if (frames_vector.size() != static_cast<size_t>(n_frames)) {
+        if (_stream->isEndOfFile()) {
+            // Return false to indicate "end of file".
+            return false;
+        }
+        throw std::runtime_error("Failed to get the next frame.");
+    }
+    return frames_vector.size();
 }
