@@ -36,3 +36,23 @@ def test_cuda_device_without_index(video_filename, first_frame_image):
     assert rgb_frame.shape == (3, 720, 1280)
     actual = PIL.Image.fromarray(rgb_frame.cpu().permute(1, 2, 0).numpy(), 'RGB')
     assert_allclose(actual, first_frame_image, atol=50)
+
+
+def test_select_frames(device, video_filename, first_frame_image, mid_frame_image):
+    backend = FffrBackendFactory().create(video_filename, device, torch.uint8)
+    frames = list(backend.select_frames([0, 25]))
+    assert(len(frames) == 2)
+    actual = PIL.Image.fromarray(frames[0].cpu().permute(1, 2, 0).numpy(), 'RGB')
+    assert_allclose(actual, first_frame_image, atol=50)
+    actual = PIL.Image.fromarray(frames[1].cpu().permute(1, 2, 0).numpy(), 'RGB')
+    assert_allclose(actual, mid_frame_image, atol=50)
+
+
+def test_select_many_frames(device, video_filename, first_frame_image, mid_frame_image):
+    backend = FffrBackendFactory().create(video_filename, device, torch.uint8)
+    frames = list(backend.select_frames(list(range(26))))
+    assert(len(frames) == 26)
+    actual = PIL.Image.fromarray(frames[0].cpu().permute(1, 2, 0).numpy(), 'RGB')
+    assert_allclose(actual, first_frame_image, atol=50)
+    actual = PIL.Image.fromarray(frames[25].cpu().permute(1, 2, 0).numpy(), 'RGB')
+    assert_allclose(actual, mid_frame_image, atol=50)
