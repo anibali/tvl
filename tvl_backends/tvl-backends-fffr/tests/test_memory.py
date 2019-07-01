@@ -43,9 +43,11 @@ def test_allocation_alignment(device):
     allocator = TorchImageAllocator(device, dtype)
     addr = allocator.allocate_frame(1, 1, 4, 32)
     tensor = allocator.get_frame_tensor(addr)
-    tensor.storage().fill_(0)
-    tensor.fill_(1)
     storage = tensor.storage()
+    # Not using Storage#fill_ because of https://github.com/pytorch/pytorch/issues/22383
+    for i in range(len(storage)):
+        storage[i] = 0
+    tensor.fill_(1)
     for i in range(3):
         index = tensor.storage_offset() + i * 8
         assert storage[index] == 1
