@@ -68,6 +68,9 @@ def nv12_to_rgb(planar_yuv, h, w):
 class NvdecBackend(Backend):
     def __init__(self, filename, device, dtype, resize=None):
         device = torch.device(device)
+        device_index = device.index
+        if device.type == 'cuda' and device_index is None:
+            device_index = torch.cuda.current_device()
         mem_manager = TorchMemManager(device)
         # Disown mem_manager, since TvlnvFrameReader will be responsible for deleting it.
         mem_manager = mem_manager.__disown__()
@@ -79,7 +82,7 @@ class NvdecBackend(Backend):
             out_width = 0
 
         self.mem_manager = mem_manager
-        self.frame_reader = tvlnv.TvlnvFrameReader(mem_manager, filename, device.index,
+        self.frame_reader = tvlnv.TvlnvFrameReader(mem_manager, filename, device_index,
                                                    out_width, out_height)
         self.dtype = dtype
 
