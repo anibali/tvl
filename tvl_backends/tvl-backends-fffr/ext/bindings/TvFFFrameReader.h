@@ -23,6 +23,7 @@ public:
     void seek(float time_secs);
 
     uint8_t* read_frame();
+    int64_t read_frame_sequence(int64_t* offsets, int n_frames, uint8_t** frames);
 
 private:
     static std::shared_ptr<std::remove_pointer<CUcontext>::type> _context;
@@ -32,4 +33,5 @@ private:
     Ffr::PixelFormat _pixel_format;
 
     static bool init_context(int gpu_index);
+    uint8_t* convert_frame(std::shared_ptr<Ffr::Frame> frame);
 };

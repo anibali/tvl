@@ -15,6 +15,14 @@
     $result = PyInt_FromLong($1);
 %}
 
+%typemap(in) int64_t* %{
+    $1 = (int64_t*)PyInt_AsLong($input);
+%}
+
+%typemap(in) uint8_t** %{
+    $1 = (uint8_t**)PyInt_AsLong($input);
+%}
+
 /*
   Catch all C++ exceptions and rethrow as Python exceptions. There's a good explanation of how
   this mechanism works here:
