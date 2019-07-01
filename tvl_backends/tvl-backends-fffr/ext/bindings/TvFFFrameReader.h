@@ -3,9 +3,10 @@
 #include "FFFrameReader.h"
 #include "ImageAllocator.h"
 
+#include <cuda.h>
+#include <map>
 #include <memory>
 #include <string>
-#include <cuda.h>
 
 class TvFFFrameReader
 {
@@ -26,7 +27,7 @@ public:
     int64_t read_frame_sequence(int64_t* offsets, int n_frames, uint8_t** frames);
 
 private:
-    static std::shared_ptr<std::remove_pointer<CUcontext>::type> _context;
+    static std::map<int, std::shared_ptr<std::remove_pointer<CUcontext>::type>> _contexts;
     std::shared_ptr<Ffr::Stream> _stream = nullptr;
     ImageAllocator* _image_allocator = nullptr;
     std::string _filename;
