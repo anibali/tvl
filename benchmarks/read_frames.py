@@ -21,8 +21,8 @@ def read_sequential(video_file, device):
     vl.seek(0)
 
     t1 = time.time()
-    for i in range(n_frames):
-        frame = vl.read_frame()
+    frames = list(vl.read_frames(n_frames))
+    assert len(frames) == n_frames
     t2 = time.time()
 
     return n_frames / (t2 - t1)
@@ -36,7 +36,8 @@ def read_random(video_file, device):
     vl.seek(0)
 
     t1 = time.time()
-    frames = list(vl.select_frames(np.arange(n_frames) * 10, skip_threshold=0))
+    frames = list(vl.select_frames(np.arange(n_frames) * 10))
+    assert len(frames) == n_frames
     t2 = time.time()
 
     return n_frames / (t2 - t1)
