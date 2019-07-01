@@ -1,4 +1,5 @@
 import PIL.Image
+import pytest
 import torch
 from numpy.testing import assert_allclose
 
@@ -25,4 +26,13 @@ def test_read_frame_float32_cpu(video_filename, first_frame_image):
     rgb_frame = backend.read_frame()
     assert rgb_frame.shape == (3, 720, 1280)
     actual = PIL.Image.fromarray((rgb_frame * 255).byte().permute(1, 2, 0).numpy(), 'RGB')
+    assert_allclose(actual, first_frame_image, atol=50)
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason='CUDA not available.')
+def test_cuda_device_without_index(video_filename, first_frame_image):
+    backend = FffrBackendFactory().create(video_filename, 'cuda', torch.uint8)
+    rgb_frame = backend.read_frame()
+    assert rgb_frame.shape == (3, 720, 1280)
+    actual = PIL.Image.fromarray(rgb_frame.cpu().permute(1, 2, 0).numpy(), 'RGB')
     assert_allclose(actual, first_frame_image, atol=50)

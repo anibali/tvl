@@ -10,6 +10,8 @@ class FffrBackend(Backend):
         device = torch.device(device)
         if device.type == 'cuda':
             device_index = device.index
+            if device_index is None:
+                device_index = torch.cuda.current_device()
         else:
             device_index = -1
 
