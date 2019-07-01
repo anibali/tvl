@@ -12,23 +12,32 @@ bool TvFFFrameReader::init_context(const int gpu_index)
     if (cuInit(0) != CUDA_SUCCESS) {
         return false;
     }
+    CUdevice dev;
+    if (cuDeviceGet(&dev, gpu_index) != CUDA_SUCCESS) {
+        return false;
+    }
     CUcontext context = nullptr;
     if (cuCtxGetCurrent(&context) != CUDA_SUCCESS) {
         return false;
     }
-    if (context == nullptr) {
-        CUdevice dev;
-        if (cuDeviceGet(&dev, gpu_index) != CUDA_SUCCESS) {
+    if (context != nullptr) {
+        CUdevice cur_dev;
+        if (cuCtxGetDevice(&cur_dev) != CUDA_SUCCESS) {
             return false;
         }
-        if (cuDevicePrimaryCtxRetain(&context, dev) != CUDA_SUCCESS) {
-            return false;
+        // If the device for the current context matches the desired device then there's no need
+        // to change context.
+        if (cur_dev == dev) {
+            _context = std::shared_ptr<std::remove_pointer<CUcontext>::type>(context, [](CUcontext) {});
+            return true;
         }
-        _context = std::shared_ptr<std::remove_pointer<CUcontext>::type>(
-            context, [dev](CUcontext) { cuDevicePrimaryCtxRelease(dev); });
-    } else {
-        _context = std::shared_ptr<std::remove_pointer<CUcontext>::type>(context, [](CUcontext) {});
     }
+    // Change context.
+    if (cuDevicePrimaryCtxRetain(&context, dev) != CUDA_SUCCESS) {
+        return false;
+    }
+    _context = std::shared_ptr<std::remove_pointer<CUcontext>::type>(
+        context, [dev](CUcontext) { cuDevicePrimaryCtxRelease(dev); });
     return true;
 }
 
@@ -57,10 +66,8 @@ TvFFFrameReader::TvFFFrameReader(ImageAllocator* image_allocator, const std::str
     // Set up decoding options
     Ffr::DecoderOptions options;
     if (gpu_index >= 0) {
-        if (_context.get() == nullptr) {
-            if (!init_context(gpu_index)) {
-                throw std::runtime_error("CUDA context creation failed.");
-            }
+        if (!init_context(gpu_index)) {
+            throw std::runtime_error("CUDA context creation failed.");
         }
 
         options.m_type = Ffr::DecodeType::Cuda;
