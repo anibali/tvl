@@ -1,3 +1,5 @@
+import warnings
+
 import pyfffr
 import torch
 
@@ -67,7 +69,10 @@ class TorchImageAllocator(pyfffr.ImageAllocator):
         return ptr
 
     def free_frame(self, address):
-        del self.tensors[address]
+        try:
+            del self.tensors[int(address)]
+        except KeyError:
+            warnings.warn('Skipped an attempt to free unrecognised memory.')
 
     def get_data_type(self):
         if self.dtype == torch.uint8:
