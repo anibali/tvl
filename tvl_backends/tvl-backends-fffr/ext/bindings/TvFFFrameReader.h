@@ -24,7 +24,7 @@ public:
     void seek(float time_secs);
 
     uint8_t* read_frame();
-    int64_t read_frame_sequence(int64_t* offsets, int n_frames, uint8_t** frames);
+    int64_t read_frames_by_index(int64_t* indices, int n_frames, uint8_t** frames);
 
 private:
     static std::map<int, std::shared_ptr<std::remove_pointer<CUcontext>::type>> _contexts;

@@ -107,14 +107,14 @@ def test_read_frame_cropped(device, cropped_video_filename, cropped_first_frame_
     assert_allclose(actual, cropped_first_frame_image, atol=50)
 
 
-def test_read_frame_sequence(device, video_filename, mid_frame_image):
+def test_read_frames_by_index(device, video_filename, mid_frame_image):
     allocator = TorchImageAllocator(device, torch.uint8)
     gpu_index = allocator.device.index if allocator.device.type == 'cuda' else -1
     fr = pyfffr.TvFFFrameReader(allocator, video_filename, gpu_index)
     fr.seek(0.4)
-    frame_offsets = torch.tensor([0, 10, 15, 20], device='cpu', dtype=torch.int64)
+    frame_offsets = torch.tensor([0, 10, 25, 30], device='cpu', dtype=torch.int64)
     ptrs = torch.zeros(frame_offsets.shape, device='cpu', dtype=torch.int64)
-    res = fr.read_frame_sequence(frame_offsets.data_ptr(), len(frame_offsets), ptrs.data_ptr())
+    res = fr.read_frames_by_index(frame_offsets.data_ptr(), len(frame_offsets), ptrs.data_ptr())
     assert res == len(frame_offsets)
     rgb_frame = allocator.get_frame_tensor(int(ptrs[2]))
     assert rgb_frame.shape == (3, 720, 1280)
