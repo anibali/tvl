@@ -113,7 +113,8 @@ void TvFFFrameReader::seek(const float time_secs)
     }
 }
 
-uint8_t* TvFFFrameReader::convert_frame(std::shared_ptr<Ffr::Frame> frame) {
+uint8_t* TvFFFrameReader::convert_frame(std::shared_ptr<Ffr::Frame> frame)
+{
     // Check if known pixel format
     if (frame->getPixelFormat() == Ffr::PixelFormat::Auto) {
         throw std::runtime_error("Unknown pixel format.");
@@ -167,19 +168,19 @@ int64_t TvFFFrameReader::read_frame_sequence(int64_t* offsets, int n_frames, uin
 {
     // Read a sequence of frames. We request all of them, but we won't necessarily be able
     // to get all of them at once.
-    std::vector<int64_t> frameSequence(offsets, offsets + n_frames);
-    const auto frames_vector = _stream->getNextFrameSequence(frameSequence);
-    int n_frames_read = frames_vector.size();
-    for (int i = 0; i < n_frames_read; ++i) {
-        auto const& frame = frames_vector[i];
-        if (frame == nullptr) {
-            if (_stream->isEndOfFile()) {
-                // Return false to indicate "end of file".
-                return false;
-            }
-            throw std::runtime_error("Failed to get the next frame.");
-        }
-        frames[i] = convert_frame(frame);
+    const std::vector<int64_t> frame_sequence(offsets, offsets + n_frames);
+    const auto frames_vector = _stream->getNextFrameSequence(frame_sequence);
+    uint32_t index = 0;
+    for (auto& i : frames_vector) {
+        frames[index] = convert_frame(i);
+        ++index;
     }
-    return n_frames_read;
+    if (frames_vector.size() != static_cast<size_t>(n_frames)) {
+        if (_stream->isEndOfFile()) {
+            // Return false to indicate "end of file".
+            return false;
+        }
+        throw std::runtime_error("Failed to get the next frame sequence.");
+    }
+    return frames_vector.size();
 }
