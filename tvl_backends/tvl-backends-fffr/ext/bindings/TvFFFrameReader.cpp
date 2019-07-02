@@ -169,7 +169,7 @@ int64_t TvFFFrameReader::read_frame_sequence(int64_t* offsets, int n_frames, uin
     // Read a sequence of frames. We request all of them, but we won't necessarily be able
     // to get all of them at once.
     const std::vector<int64_t> frame_sequence(offsets, offsets + n_frames);
-    const auto frames_vector = _stream->getNextFrameSequence(frame_sequence);
+    const auto frames_vector = _stream->getNextFramesByIndex(frame_sequence);
     uint32_t index = 0;
     for (auto& i : frames_vector) {
         frames[index] = convert_frame(i);
