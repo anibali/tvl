@@ -9,26 +9,31 @@ from tvl_backends.fffr import FffrBackendFactory
 from tvl_backends.nvdec import NvdecBackendFactory
 from tvl_backends.pyav import PyAvBackendFactory
 
-n_frames = 50
-video_file = os.path.join(os.path.dirname(__file__), 'video00c5c3.mp4')
+video_file = os.path.join(os.path.dirname(__file__), '../data/board_game-h264.mkv')
 
 
 def read_sequential(video_file, device):
+    n_frames = 40
+    n_trials = 1
+
     vl = tvl.VideoLoader(video_file, device, torch.float32)
 
     # Read one frame to get any initialisation out of the way.
     vl.read_frame()
-    vl.seek(0)
 
     t1 = time.time()
-    frames = list(vl.read_frames(n_frames))
-    assert len(frames) == n_frames
+    for _ in range(n_trials):
+        frames = list(vl.read_frames(n_frames))
+        assert len(frames) == n_frames
     t2 = time.time()
 
-    return n_frames / (t2 - t1)
+    return (n_trials * n_frames) / (t2 - t1)
 
 
 def read_random(video_file, device):
+    n_frames = 5
+    n_trials = 8
+
     vl = tvl.VideoLoader(video_file, device, torch.float32)
 
     # Read one frame to get any initialisation out of the way.
@@ -36,17 +41,21 @@ def read_random(video_file, device):
     vl.seek(0)
 
     t1 = time.time()
-    frames = list(vl.select_frames(np.arange(n_frames) * 10))
-    assert len(frames) == n_frames
+    for _ in range(n_trials):
+        frames = list(vl.select_frames(np.arange(n_frames) * 10))
+        assert len(frames) == n_frames
     t2 = time.time()
 
-    return n_frames / (t2 - t1)
+    return (n_trials * n_frames) / (t2 - t1)
 
 
 def main():
-    # Get the slow CUDA initialisation out of the way
+    # Get the slow CUDA initialisation out of the way.
     for i in range(torch.cuda.device_count()):
         torch.empty(0).to(torch.device('cuda', i))
+
+    # Enable/disable using Stream::getFramesByIndex() from the FFFR backend.
+    FffrBackendFactory._USE_FFFR_SELECT_FRAMES = True
 
     backends = [
         ('nvdec-cuda', NvdecBackendFactory, 'cuda'),

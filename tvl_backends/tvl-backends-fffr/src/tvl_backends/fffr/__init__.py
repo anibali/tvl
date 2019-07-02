@@ -1,6 +1,7 @@
+import numpy as np
+import pyfffr
 import torch
 
-import pyfffr
 from tvl.backend import Backend, BackendFactory
 from tvl_backends.fffr.memory import TorchImageAllocator
 
@@ -61,16 +62,10 @@ class FffrBackend(Backend):
                 raise
             self._at_eof = True
 
-    def read_frame(self):
-        if self._at_eof:
-            raise EOFError()
-
-        ptr = self.frame_reader.read_frame()
-        if not ptr:
-            raise EOFError()
-
-        rgb_tensor = self.image_allocator.get_frame_tensor(int(ptr))
-        self.image_allocator.free_frame(int(ptr))  # Release reference held by the memory manager.
+    def _convert_frame(self, ptr):
+        ptr = int(ptr)
+        rgb_tensor = self.image_allocator.get_frame_tensor(ptr)
+        self.image_allocator.free_frame(ptr)  # Release reference held by the memory manager.
 
         if self.dtype == torch.float32:
             if self.image_allocator.dtype != torch.float32:
@@ -80,8 +75,41 @@ class FffrBackend(Backend):
             return rgb_tensor
         raise NotImplementedError(f'Unsupported dtype: {self.dtype}')
 
+    def read_frame(self):
+        if self._at_eof:
+            raise EOFError()
+
+        ptr = self.frame_reader.read_frame()
+        if not ptr:
+            raise EOFError()
+
+        return self._convert_frame(ptr)
+
+    def _read_frames_by_index(self, indices):
+        frame_indices = torch.tensor(indices, device='cpu', dtype=torch.int64)
+        ptrs = torch.zeros(frame_indices.shape, device='cpu', dtype=torch.int64)
+        n_frames_read = self.frame_reader.read_frames_by_index(
+            frame_indices.data_ptr(), frame_indices.shape[0], ptrs.data_ptr())
+        return [self._convert_frame(ptr) for ptr in ptrs[:n_frames_read].tolist()]
+
+    def select_frames(self, frame_indices, seek_hint=3):
+        if FffrBackendFactory._USE_FFFR_SELECT_FRAMES:
+            sorted_frame_indices = np.unique(frame_indices)
+            start_frame = sorted_frame_indices[0]
+            self.seek_to_frame(start_frame)
+            if self._at_eof:
+                raise EOFError()
+            frames = self._read_frames_by_index(sorted_frame_indices - start_frame)
+            assert len(frames) == len(sorted_frame_indices), \
+                'read_frames_by_index returned fewer frames than expected.'
+            return frames
+        else:
+            return super().select_frames(frame_indices, seek_hint)
+
 
 class FffrBackendFactory(BackendFactory):
+    _USE_FFFR_SELECT_FRAMES = False
+
     def create(self, filename, device, dtype, backend_opts=None) -> FffrBackend:
         if backend_opts is None:
             backend_opts = {}
