@@ -34,5 +34,6 @@ private:
     Ffr::PixelFormat _pixel_format;
 
     static bool init_context(int gpu_index);
-    uint8_t* convert_frame(std::shared_ptr<Ffr::Frame> frame);
+    
+    uint8_t* convert_frame(const std::shared_ptr<Ffr::Frame>& frame, bool async);
 };
