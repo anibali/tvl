@@ -14,6 +14,7 @@ target_include_directories(pyfffr
     PRIVATE
     .
     ../FFFrameReader/include
+    ${FfFrameReader_BINARY_DIR}
     ${CUDA_INCLUDE_DIRS}
 )
 
@@ -39,6 +40,7 @@ target_include_directories(_pyfffr
     PRIVATE
     .
     ../FFFrameReader/include
+    ${FfFrameReader_BINARY_DIR}
     ${CUDA_INCLUDE_DIRS}
     ${Python3_INCLUDE_DIRS}
 )
