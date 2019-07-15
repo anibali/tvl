@@ -166,21 +166,27 @@ uint8_t* TvFFFrameReader::read_frame()
 
 int64_t TvFFFrameReader::read_frames_by_index(int64_t* indices, int n_frames, uint8_t** frames)
 {
-    // Read a sequence of frames. We request all of them, but we won't necessarily be able
-    // to get all of them at once.
-    const std::vector<int64_t> frame_sequence(indices, indices + n_frames);
-    const auto frames_vector = _stream->getFramesByIndex(frame_sequence);
-    uint32_t index = 0;
-    for (auto& i : frames_vector) {
-        frames[index] = convert_frame(i);
-        ++index;
-    }
-    if (frames_vector.size() != static_cast<size_t>(n_frames)) {
-        if (_stream->isEndOfFile()) {
-            // Return false to indicate "end of file".
-            return false;
+    constexpr int32_t block_size = 5;
+    const auto blocks = std::div(n_frames, block_size);
+    const auto num_blocks = blocks.quot + (blocks.rem > 0 ? 1 : 0);
+    for (int32_t i = 0; i < num_blocks; ++i) {
+        const auto start = indices + (i * block_size);
+        const auto last = (i + 1) * block_size;
+        const auto end = indices + (last <= n_frames ? last : n_frames);
+        const std::vector<int64_t> frame_sequence(start, end);
+        const auto frames_vector = _stream->getFramesByIndex(frame_sequence);
+        uint32_t index = 0;
+        for (auto& j : frames_vector) {
+            frames[index] = convert_frame(j);
+            ++index;
         }
-        throw std::runtime_error("Failed to get the next frame sequence.");
+        if (frames_vector.size() != frame_sequence.size()) {
+            if (_stream->isEndOfFile()) {
+                // Return false to indicate "end of file".
+                return false;
+            }
+            throw std::runtime_error("Failed to get the next frame sequence.");
+        }
     }
-    return frames_vector.size();
+    return n_frames;
 }
