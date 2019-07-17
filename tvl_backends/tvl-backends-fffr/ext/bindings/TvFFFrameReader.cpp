@@ -66,6 +66,8 @@ TvFFFrameReader::TvFFFrameReader(ImageAllocator* image_allocator, const std::str
     }
     options.m_scale.m_width = out_width;
     options.m_scale.m_height = out_height;
+    options.m_bufferLength = 1;
+    options.m_noBufferFlush = true;
 
     // Create a decoding stream
     _stream = Ffr::Stream::getStream(filename, options);
