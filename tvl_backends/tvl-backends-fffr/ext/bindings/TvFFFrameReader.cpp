@@ -1,9 +1,9 @@
 #include "TvFFFrameReader.h"
 
+#include <algorithm>
 #include <cstring>
 #include <memory>
 #include <stdexcept>
-
 std::map<int, std::shared_ptr<std::remove_pointer<CUcontext>::type>> TvFFFrameReader::_contexts;
 
 bool TvFFFrameReader::init_context(const int gpu_index)
@@ -66,6 +66,8 @@ TvFFFrameReader::TvFFFrameReader(ImageAllocator* image_allocator, const std::str
     }
     options.m_scale.m_width = out_width;
     options.m_scale.m_height = out_height;
+    options.m_bufferLength = 1;
+    options.m_noBufferFlush = true;
 
     // Create a decoding stream
     _stream = Ffr::Stream::getStream(filename, options);
@@ -113,7 +115,7 @@ void TvFFFrameReader::seek(const float time_secs)
     }
 }
 
-uint8_t* TvFFFrameReader::convert_frame(std::shared_ptr<Ffr::Frame> frame)
+uint8_t* TvFFFrameReader::convert_frame(const std::shared_ptr<Ffr::Frame>& frame, const bool async)
 {
     // Check if known pixel format
     if (frame->getPixelFormat() == Ffr::PixelFormat::Auto) {
@@ -133,7 +135,13 @@ uint8_t* TvFFFrameReader::convert_frame(std::shared_ptr<Ffr::Frame> frame)
 
     // Copy/Convert image data into output
     if (frame->getDataType() == Ffr::DecodeType::Cuda) {
-        if (!Ffr::convertFormat(frame, newData, _pixel_format)) {
+        bool err;
+        if (async) {
+            err = Ffr::convertFormatAsync(frame, newData, _pixel_format);
+        } else {
+            err = Ffr::convertFormat(frame, newData, _pixel_format);
+        }
+        if (!err) {
             _image_allocator->free_frame(newData);
             throw std::runtime_error("Pixel format conversion failed.");
         }
@@ -161,26 +169,35 @@ uint8_t* TvFFFrameReader::read_frame()
         }
         throw std::runtime_error("Failed to get the next frame.");
     }
-    return convert_frame(frame);
+    return convert_frame(frame, false);
 }
 
-int64_t TvFFFrameReader::read_frames_by_index(int64_t* indices, int n_frames, uint8_t** frames)
+int64_t TvFFFrameReader::read_frames_by_index(int64_t* indices, const int n_frames, uint8_t** frames)
 {
-    // Read a sequence of frames. We request all of them, but we won't necessarily be able
-    // to get all of them at once.
-    const std::vector<int64_t> frame_sequence(indices, indices + n_frames);
-    const auto frames_vector = _stream->getFramesByIndex(frame_sequence);
-    uint32_t index = 0;
-    for (auto& i : frames_vector) {
-        frames[index] = convert_frame(i);
-        ++index;
-    }
-    if (frames_vector.size() != static_cast<size_t>(n_frames)) {
-        if (_stream->isEndOfFile()) {
-            // Return false to indicate "end of file".
-            return false;
+    constexpr int32_t block_size = 8;
+    const auto blocks = std::div(n_frames, block_size);
+    const auto num_blocks = blocks.quot + (blocks.rem > 0 ? 1 : 0);
+    for (int32_t i = 0; i < num_blocks; ++i) {
+        const auto start = &indices[i * block_size];
+        const auto last = (i + 1) * block_size;
+        const auto end = &indices[std::min(last, n_frames)];
+        const std::vector<int64_t> frame_sequence(start, end);
+        const auto frames_vector = _stream->getFramesByIndex(frame_sequence);
+        for (auto& j : frames_vector) {
+            *(frames++) = convert_frame(j, true);
         }
-        throw std::runtime_error("Failed to get the next frame sequence.");
+        if (_stream->getDecodeType() == Ffr::DecodeType::Cuda) {
+            if (!Ffr::synchroniseConvert(_stream)) {
+                throw std::runtime_error("Pixel format conversion failed.");
+            }
+        }
+        if (frames_vector.size() != frame_sequence.size()) {
+            if (_stream->isEndOfFile()) {
+                // Return false to indicate "end of file".
+                return false;
+            }
+            throw std::runtime_error("Failed to get the next frame sequence.");
+        }
     }
-    return frames_vector.size();
+    return n_frames;
 }
