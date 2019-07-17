@@ -1,13 +1,14 @@
 import numpy as np
 import pyfffr
 import torch
+import warnings
 
 from tvl.backend import Backend, BackendFactory
 from tvl_backends.fffr.memory import TorchImageAllocator
 
 
 class FffrBackend(Backend):
-    def __init__(self, filename, device, dtype):
+    def __init__(self, filename, device, dtype, *, seek_threshold=0):
         device = torch.device(device)
         if device.type == 'cuda':
             device_index = device.index
@@ -23,7 +24,8 @@ class FffrBackend(Backend):
             allocator_dtype = torch.uint8
 
         image_allocator = TorchImageAllocator(device, allocator_dtype)
-        frame_reader = pyfffr.TvFFFrameReader(image_allocator, filename, device_index)
+        frame_reader = pyfffr.TvFFFrameReader(image_allocator, filename, device_index,
+                                              0, 0, seek_threshold)
         # We need to hold a reference to image_allocator for at least as long as the
         # TvFFFrameReader that uses it is around, since we retain ownership of image_allocator.
         setattr(frame_reader, '__image_allocator_ref', image_allocator)
@@ -92,8 +94,11 @@ class FffrBackend(Backend):
             frame_indices.data_ptr(), frame_indices.shape[0], ptrs.data_ptr())
         return [self._convert_frame(ptr) for ptr in ptrs[:n_frames_read].tolist()]
 
-    def select_frames(self, frame_indices, seek_hint=3):
+    def select_frames(self, frame_indices, seek_hint=None):
         if FffrBackendFactory._USE_FFFR_SELECT_FRAMES:
+            if seek_hint is not None:
+                warnings.warn('seek_hint is not used by the FFFR backend. Pass seek_threshold via'
+                              'backend_opts instead.')
             sorted_frame_indices = np.unique(frame_indices)
             start_frame = sorted_frame_indices[0]
             self.seek_to_frame(start_frame)
@@ -104,6 +109,8 @@ class FffrBackend(Backend):
                 'read_frames_by_index returned fewer frames than expected.'
             return frames
         else:
+            if seek_hint is None:
+                seek_hint = 3
             return super().select_frames(frame_indices, seek_hint)
 
 

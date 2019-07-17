@@ -12,11 +12,11 @@ from tvl_backends.pyav import PyAvBackendFactory
 video_file = os.path.join(os.path.dirname(__file__), '../data/board_game-h264.mkv')
 
 
-def read_sequential(video_file, device):
+def read_sequential(video_file, device, **backend_opts):
     n_frames = 40
     n_trials = 1
 
-    vl = tvl.VideoLoader(video_file, device, torch.float32)
+    vl = tvl.VideoLoader(video_file, device, torch.float32, backend_opts)
 
     # Read one frame to get any initialisation out of the way.
     vl.read_frame()
@@ -30,11 +30,11 @@ def read_sequential(video_file, device):
     return (n_trials * n_frames) / (t2 - t1)
 
 
-def read_random(video_file, device):
+def read_random(video_file, device, **backend_opts):
     n_frames = 5
     n_trials = 8
 
-    vl = tvl.VideoLoader(video_file, device, torch.float32)
+    vl = tvl.VideoLoader(video_file, device, torch.float32, backend_opts)
 
     # Read one frame to get any initialisation out of the way.
     vl.read_frame()
@@ -74,8 +74,12 @@ def main():
 
     print('+++ RANDOM +++')
     for name, factory_cls, device_type in backends:
+        if name.startswith('fffr'):
+            backend_opts = {'seek_threshold': 5}
+        else:
+            backend_opts = {}
         tvl.set_backend_factory(device_type, factory_cls())
-        fps = read_random(video_file, device_type)
+        fps = read_random(video_file, device_type, **backend_opts)
         print(f'{name:12s} {fps:10.2f}')
 
 
