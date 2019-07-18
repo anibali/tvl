@@ -36,7 +36,8 @@ def main():
     torch.empty(0).to(device)  # Initialise CUDA manually so that it doesn't interfere with timing.
 
     dataset = VideoDataset([(video_filename, list(range(40)))] * 8, device=device)
-    # NOTE: The VideoLoader object can deadlock if more than one thread try to use it at once
+    # NOTE: The VideoLoader object can deadlock if multiple threads try to use it at once,
+    #       depending on the backend.
     async_dataset = AsyncDataset(dataset, ThreadPoolExecutor(max_workers=1))
     loader = BatchDataLoader(async_dataset, batch_size=2, shuffle=False)
 
