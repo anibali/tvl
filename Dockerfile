@@ -1,4 +1,4 @@
-FROM nvidia/cuda:10.0-devel-ubuntu16.04 as ffmpeg-builder
+FROM nvidia/cuda:10.0-devel-ubuntu18.04 as ffmpeg-builder
 
 RUN apt-get update \
  && apt-get install -y curl git pkg-config yasm libx264-dev checkinstall \
@@ -20,21 +20,11 @@ RUN cd /tmp && curl -sO http://ffmpeg.org/releases/ffmpeg-$FFMPEG_VERSION.tar.bz
  && cd ffmpeg-$FFMPEG_VERSION \
  && ./configure --prefix=/usr/local \
     --disable-static \
-    --disable-everything \
-    --disable-autodetect \
+    --enable-shared \
+    --enable-gpl \
     --disable-iconv \
     --disable-doc \
     --disable-ffplay \
-    --enable-shared \
-    --enable-gpl \
-    --enable-libx264 \
-    --enable-decoder=h264 \
-    --enable-protocol=file \
-    --enable-demuxer=mov,matroska,mxf \
-    --enable-bsf=h264_mp4toannexb,hevc_mp4toannexb \
-    --enable-filter=scale \
-    --enable-ffnvcodec \
-    --enable-nvenc \
  && make -j8 \
  && checkinstall -y --nodoc --install=no \
  && mv ffmpeg_$FFMPEG_VERSION-1_amd64.deb /ffmpeg.deb \
@@ -44,7 +34,7 @@ RUN cd /tmp && curl -sO http://ffmpeg.org/releases/ffmpeg-$FFMPEG_VERSION.tar.bz
 ################################################################################
 
 
-FROM nvidia/cuda:10.0-devel-ubuntu16.04 as tvl-builder
+FROM nvidia/cuda:10.0-devel-ubuntu18.04 as tvl-builder
 
 RUN apt-get update \
  && apt-get install -y curl git \
@@ -62,9 +52,8 @@ RUN curl -so ~/miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-4.5.4
 
 # Install PyTorch with CUDA support
 RUN conda install -y -c pytorch \
-    cuda100=1.0 \
-    magma-cuda100=2.4.0 \
-    "pytorch=1.0.0=py3.6_cuda10.0.130_cudnn7.4.1_1" \
+    cudatoolkit=10.0 \
+    "pytorch=1.1.0=py3.6_cuda10.0.130_cudnn7.5.1_0" \
  && conda clean -ya
 
 RUN apt-get update \
@@ -86,17 +75,8 @@ RUN curl -so /usr/lib/x86_64-linux-gnu/libnvcuvid.so.1 \
  && ln -s /usr/local/nvidia/lib64/libnvcuvid.so.1 /usr/local/lib/libnvcuvid.so \
  && ln -s libnvcuvid.so.1 /usr/lib/x86_64-linux-gnu/libnvcuvid.so
 
-# Install nvvl
+# Install CMake
 RUN pip install cmake==3.13.3
-RUN cd /tmp \
- && git clone https://github.com/NVIDIA/nvvl.git \
- && cd nvvl \
- && git checkout 14b660c87b4c5a86d95da04a50be70674e68e625 \
- && mkdir build \
- && cd build \
- && cmake .. \
- && make -j8 \
- && make install
 
 # Install scikit-build
 RUN pip install scikit-build==0.9.0
@@ -111,7 +91,7 @@ RUN make dist
 ################################################################################
 
 
-FROM nvidia/cuda:10.0-devel-ubuntu16.04
+FROM nvidia/cuda:10.0-devel-ubuntu18.04
 
 RUN apt-get update \
  && apt-get install -y curl git \
@@ -153,14 +133,13 @@ COPY requirements.txt /app
 RUN pip install -r requirements.txt
 
 # Install tvl
-COPY --from=tvl-builder /usr/local/lib/libnvvl.so /usr/local/lib/
 COPY --from=tvl-builder /app/dist/tvl*.whl /tmp/
 RUN pip install -f /tmp \
     tvl \
     tvl-backends-nvdec \
-    tvl-backends-nvvl \
     tvl-backends-opencv \
     tvl-backends-pyav \
+    tvl-backends-fffr \
   && rm /tmp/tvl*.whl
 
 COPY . /app

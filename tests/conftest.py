@@ -21,6 +21,7 @@ def dummy_backend():
 
     class DummyBackend(Backend):
         def __init__(self, frames):
+            super().__init__('dummy.avi', 'cpu', torch.float32, 3)
             self.frames = frames
             self.pos = 0
 

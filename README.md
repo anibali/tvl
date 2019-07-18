@@ -66,19 +66,40 @@ doing some other work (eg. training a model). See [`examples/async_dataloading.p
 
 ### Backends
 
-| Backend class | Supported devices |
-|---------------|-------------------|
-| NvdecBackend  | cuda              |
-| NvvlBackend   | cuda              |
-| PyAvBackend   | cpu               |
-| OpenCvBackend | cpu               |
+| Backend class               | Supported devices |
+|-----------------------------|-------------------|
+| FffrBackend (recommended)   | cpu,cuda          |
+| NvdecBackend                | cuda              |
+| PyAvBackend                 | cpu               |
+| OpenCvBackend               | cpu               |
 
-If you wanted to install `tvl` with support for the NVDEC and PyAV backends you would install the
+If you wanted to install `tvl` with support for the FFFR backend you would install the
 package like so:
 
 ```bash
-$ pip install "tvl[NvdecBackend,PyAvBackend]"
+$ pip install "tvl[FffrBackend]"
 ```
+
+
+### Optimisation tweaks
+
+When you call `select_frames` to read a bunch of frames, TVL must decide when to read frames
+sequentially and when to seek. Sometimes reading frames sequentially and discarding unneeded frames
+is faster than seeking, and sometimes it isn't. The minimum distance between frames for which
+seeking is faster than reading sequentially depends on a number of file-specific factors, such as
+GoP size. Unfortunately, these factors can't be inferred automatically on the fly.
+
+In TVL you can manually configure the threshold value for triggering seeks using the
+`seek_threshold` backend option.
+
+```python
+import tvl
+# Provide a hint that if frames are more than 3 frames apart, a seek should be triggered.
+vl = tvl.VideoLoader('my_video.mkv', 'cpu', backend_opts={'seek_threshold': 3})
+```
+
+If you expect to be reading a lot of videos that are encoded in a similar way, we recommend
+benchmarking a range of `seek_threshold` values to find which is fastest.
 
 
 ### Limitations

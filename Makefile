@@ -2,7 +2,7 @@ SHELL	:= /bin/bash
 PYTHON	?= python
 SETUP	:= setup.py
 
-SUBDIRS := $(wildcard tvl_backends/*/.)
+SUBDIRS := $(wildcard tvl_backends/tvl-backends-*/.)
 
 clean:
 	$(PYTHON) $(SETUP) clean --all
@@ -41,12 +41,15 @@ install-dev:
 	# TODO: Also need to set up symlinks for build outputs (eg. tvlnv.py, _tvlnv.*.so)
 
 uninstall:
-	pip uninstall tvl tvl-backends-nvdec tvl-backends-nvvl tvl-backends-opencv tvl-backends-pyav
+	pip uninstall tvl tvl-backends-fffr tvl-backends-nvdec tvl-backends-opencv tvl-backends-pyav
 
 test:
 	pytest -s tests
 	for dir in $(SUBDIRS); do \
-		pushd $$dir && pytest -s tests && popd || exit 1; \
+		if [ -d "$$dir/tests" ]; then \
+			pushd $$dir && pytest -s tests && popd || exit 1; \
+		fi \
 	done
+	pushd tvl_backends && pytest -s tests && popd || exit 1;
 
 .PHONY: clean build dist install-dev uninstall test

@@ -1,4 +1,0 @@
-include README.md
-include LICENSE
-include VERSION
-recursive-include ext *

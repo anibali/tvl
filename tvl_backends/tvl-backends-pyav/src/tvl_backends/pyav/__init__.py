@@ -5,13 +5,12 @@ from tvl.backend import Backend, BackendFactory
 
 
 class PyAvBackend(Backend):
-    def __init__(self, filename, device, dtype):
-        device = torch.device(device)
-        assert device.type == 'cpu'
-        self.container = av.open(filename)
+    def __init__(self, filename, device, dtype, *, seek_threshold=3):
+        super().__init__(filename, device, dtype, seek_threshold)
+        assert self.device.type == 'cpu'
+        self.container = av.open(self.filename)
         self.generator = None
         self.seek_time = None
-        self.dtype = dtype
 
     @property
     def duration(self):

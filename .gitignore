@@ -6,3 +6,4 @@ __pycache__
 *.egg-info
 .hypothesis/
 pip-wheel-metadata/
+_skbuild/
