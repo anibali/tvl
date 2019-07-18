@@ -79,7 +79,7 @@ RUN curl -so /usr/lib/x86_64-linux-gnu/libnvcuvid.so.1 \
 RUN pip install cmake==3.13.3
 
 # Install scikit-build
-RUN pip install scikit-build==0.9.0
+RUN pip install scikit-build==0.10.0
 
 RUN mkdir /app
 WORKDIR /app
