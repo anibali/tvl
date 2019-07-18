@@ -1,7 +1,7 @@
 import os
 import time
-import numpy as np
 
+import numpy as np
 import torch
 
 import tvl
@@ -54,9 +54,6 @@ def main():
     for i in range(torch.cuda.device_count()):
         torch.empty(0).to(torch.device('cuda', i))
 
-    # Enable/disable using Stream::getFramesByIndex() from the FFFR backend.
-    FffrBackendFactory._USE_FFFR_SELECT_FRAMES = True
-
     backends = [
         ('nvdec-cuda', NvdecBackendFactory, 'cuda'),
         ('fffr-cuda', FffrBackendFactory, 'cuda'),
@@ -74,12 +71,8 @@ def main():
 
     print('+++ RANDOM +++')
     for name, factory_cls, device_type in backends:
-        if name.startswith('fffr'):
-            backend_opts = {'seek_threshold': 5}
-        else:
-            backend_opts = {}
         tvl.set_backend_factory(device_type, factory_cls())
-        fps = read_random(video_file, device_type, **backend_opts)
+        fps = read_random(video_file, device_type, seek_threshold=5)
         print(f'{name:12s} {fps:10.2f}')
 
 

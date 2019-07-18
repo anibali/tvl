@@ -1,7 +1,27 @@
 from abc import ABC, abstractmethod
 
+import torch
+
 
 class Backend(ABC):
+    def __init__(self, filename, device, dtype, seek_threshold):
+        """Create a video-reading backend instance for a particular video file.
+
+        Args:
+            filename: Path to the video file.
+            device:
+            dtype:
+            seek_threshold (int): Hint for predicting when seeking to the next target frame
+                would be faster than reading and discarding intermediate frames. Setting this value
+                close to the video's GOP size should be a reasonable choice.
+        """
+        self.filename = filename
+        self.device = torch.device(device)
+        if self.device.type == 'cuda':
+            self.device = torch.device('cuda', torch.cuda.current_device())
+        self.dtype = dtype
+        self.seek_threshold = seek_threshold
+
     @property
     @abstractmethod
     def duration(self):
@@ -41,15 +61,15 @@ class Backend(ABC):
     def read_frames(self, n):
         return [self.read_frame() for _ in range(n)]
 
-    def select_frames(self, frame_indices, seek_hint=3):
+    def select_frames(self, frame_indices):
         # We will be loading unique frames in ascending index order.
         sorted_frame_indices = list(sorted(set(frame_indices)))
 
-        pos = -(seek_hint + 1)
+        pos = -(self.seek_threshold + 1)
         seq_len = 0
         seq_keepers = []
         for frame_index in sorted_frame_indices:
-            if frame_index - pos > seek_hint:
+            if frame_index - pos > self.seek_threshold:
                 # Read previous sequence
                 if seq_len > 0:
                     frames = self.read_frames(seq_len)

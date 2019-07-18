@@ -6,11 +6,10 @@ from tvl.backend import Backend, BackendFactory
 
 
 class OpenCvBackend(Backend):
-    def __init__(self, filename, device, dtype):
-        device = torch.device(device)
-        assert device.type == 'cpu'
-        self.cap = cv2.VideoCapture(filename)
-        self.dtype = dtype
+    def __init__(self, filename, device, dtype, *, seek_threshold=3):
+        super().__init__(filename, device, dtype, seek_threshold)
+        assert self.device.type == 'cpu'
+        self.cap = cv2.VideoCapture(self.filename)
 
     @property
     def duration(self):

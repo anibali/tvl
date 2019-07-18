@@ -103,7 +103,7 @@ class VideoLoader:
         self.seek_to_frame(0)
         return self.remaining_frames()
 
-    def select_frames(self, frame_indices, seek_hint=None):
+    def select_frames(self, frame_indices):
         """Iterate over frames selected by frame index.
 
         Frames will be yielded in ascending order of frame index, regardless of the way
@@ -111,11 +111,5 @@ class VideoLoader:
 
         Args:
             frame_indices (Sequence of int): Indices of frames to read.
-            seek_hint (int, optional): Hint for predicting when seeking to the next target frame
-                would be faster than reading and discarding intermediate frames. Setting this value
-                close to the video's GOP size should be a reasonable choice.
         """
-        kwargs = {}
-        if seek_hint is not None:
-            kwargs['seek_hint'] = seek_hint
-        return self.backend.select_frames(frame_indices, **kwargs)
+        return self.backend.select_frames(frame_indices)

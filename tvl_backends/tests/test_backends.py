@@ -60,3 +60,9 @@ def test_seek(backend, mid_frame_image):
     backend.seek(1.0)
     rgb = backend.read_frame()
     assert_same_image(rgb, mid_frame_image)
+
+
+def test_select_frames(backend, first_frame_image, mid_frame_image):
+    frames = list(backend.select_frames([0, 25]))
+    assert_same_image(frames[0], first_frame_image)
+    assert_same_image(frames[1], mid_frame_image)

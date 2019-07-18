@@ -1,7 +1,6 @@
 import numpy as np
 import pyfffr
 import torch
-import warnings
 
 from tvl.backend import Backend, BackendFactory
 from tvl_backends.fffr.memory import TorchImageAllocator
@@ -9,30 +8,24 @@ from tvl_backends.fffr.memory import TorchImageAllocator
 
 class FffrBackend(Backend):
     def __init__(self, filename, device, dtype, *, seek_threshold=0):
-        device = torch.device(device)
-        if device.type == 'cuda':
-            device_index = device.index
-            if device_index is None:
-                device_index = torch.cuda.current_device()
-        else:
-            device_index = -1
+        super().__init__(filename, device, dtype, seek_threshold)
 
-        allocator_dtype = dtype
+        allocator_dtype = self.dtype
         # The FFFR backend does not currently support direct conversion to float32 for software
         # decoding, so we will read as uint8 and do the data type conversion afterwards.
-        if device.type == 'cpu' and dtype != torch.uint8:
+        if self.device.type == 'cpu' and self.dtype != torch.uint8:
             allocator_dtype = torch.uint8
 
-        image_allocator = TorchImageAllocator(device, allocator_dtype)
-        frame_reader = pyfffr.TvFFFrameReader(image_allocator, filename, device_index,
-                                              0, 0, seek_threshold)
+        image_allocator = TorchImageAllocator(self.device, allocator_dtype)
+        device_index = self.device.index if self.device.type == 'cuda' else -1
+        frame_reader = pyfffr.TvFFFrameReader(image_allocator, self.filename, device_index,
+                                              0, 0, self.seek_threshold)
         # We need to hold a reference to image_allocator for at least as long as the
         # TvFFFrameReader that uses it is around, since we retain ownership of image_allocator.
         setattr(frame_reader, '__image_allocator_ref', image_allocator)
 
         self.image_allocator = image_allocator
         self.frame_reader = frame_reader
-        self.dtype = dtype
         self._at_eof = False
 
     @property
@@ -94,29 +87,19 @@ class FffrBackend(Backend):
             frame_indices.data_ptr(), frame_indices.shape[0], ptrs.data_ptr())
         return [self._convert_frame(ptr) for ptr in ptrs[:n_frames_read].tolist()]
 
-    def select_frames(self, frame_indices, seek_hint=None):
-        if FffrBackendFactory._USE_FFFR_SELECT_FRAMES:
-            if seek_hint is not None:
-                warnings.warn('seek_hint is not used by the FFFR backend. Pass seek_threshold via'
-                              'backend_opts instead.')
-            sorted_frame_indices = np.unique(frame_indices)
-            start_frame = sorted_frame_indices[0]
-            self.seek_to_frame(start_frame)
-            if self._at_eof:
-                raise EOFError()
-            frames = self._read_frames_by_index(sorted_frame_indices - start_frame)
-            assert len(frames) == len(sorted_frame_indices), \
-                'read_frames_by_index returned fewer frames than expected.'
-            return frames
-        else:
-            if seek_hint is None:
-                seek_hint = 3
-            return super().select_frames(frame_indices, seek_hint)
+    def select_frames(self, frame_indices):
+        sorted_frame_indices = np.unique(frame_indices)
+        start_frame = sorted_frame_indices[0]
+        self.seek_to_frame(start_frame)
+        if self._at_eof:
+            raise EOFError()
+        frames = self._read_frames_by_index(sorted_frame_indices - start_frame)
+        assert len(frames) == len(sorted_frame_indices), \
+            'read_frames_by_index returned fewer frames than expected.'
+        return frames
 
 
 class FffrBackendFactory(BackendFactory):
-    _USE_FFFR_SELECT_FRAMES = False
-
     def create(self, filename, device, dtype, backend_opts=None) -> FffrBackend:
         if backend_opts is None:
             backend_opts = {}
