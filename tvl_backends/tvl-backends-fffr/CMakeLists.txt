@@ -8,6 +8,10 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+# NVIDIA Docker images add the CUDA stub library directory to the environment variable
+# "LIBRARY_PATH". Here we make CMake aware of this.
+list(APPEND CMAKE_SYSTEM_LIBRARY_PATH $ENV{LIBRARY_PATH})
+
 find_package(CUDA)
 find_package(Python3 COMPONENTS Interpreter Development)
 
