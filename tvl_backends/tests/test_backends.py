@@ -66,3 +66,8 @@ def test_select_frames(backend, first_frame_image, mid_frame_image):
     frames = list(backend.select_frames([0, 25]))
     assert_same_image(frames[0], first_frame_image)
     assert_same_image(frames[1], mid_frame_image)
+
+
+def test_select_frames_without_first(backend, mid_frame_image):
+    frames = list(backend.select_frames([25, 27, 29]))
+    assert_same_image(frames[0], mid_frame_image)

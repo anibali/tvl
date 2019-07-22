@@ -88,15 +88,13 @@ class FffrBackend(Backend):
         return [self._convert_frame(ptr) for ptr in ptrs[:n_frames_read].tolist()]
 
     def select_frames(self, frame_indices):
-        sorted_frame_indices = np.unique(frame_indices)
-        start_frame = sorted_frame_indices[0]
-        self.seek_to_frame(start_frame)
         if self._at_eof:
             raise EOFError()
-        frames = self._read_frames_by_index(sorted_frame_indices - start_frame)
+        sorted_frame_indices = np.unique(frame_indices)
+        frames = self._read_frames_by_index(sorted_frame_indices)
         assert len(frames) == len(sorted_frame_indices), \
             'read_frames_by_index returned fewer frames than expected.'
-        return frames
+        return iter(frames)
 
 
 class FffrBackendFactory(BackendFactory):
