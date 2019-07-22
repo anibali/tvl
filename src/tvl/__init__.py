@@ -1,5 +1,5 @@
 import importlib
-from typing import Dict, Sequence
+from typing import Dict, Sequence, Iterator
 
 import torch
 
@@ -107,9 +107,12 @@ class VideoLoader:
         """Iterate over frames selected by frame index.
 
         Frames will be yielded in ascending order of frame index, regardless of the way
-        `frame_indices` is ordered.
+        `frame_indices` is ordered. Duplicate frame indices will be ignored.
 
         Args:
             frame_indices (Sequence of int): Indices of frames to read.
+
+        Returns:
+            Iterator[torch.Tensor]: An iterator of image tensors.
         """
         return self.backend.select_frames(frame_indices)

@@ -7,12 +7,18 @@ frames are returned as [PyTorch](https://pytorch.org/) tensors, ready for use wi
 vision model.
 
 ```python
+import torch
 import tvl
 
-device = 'cuda:0'  # Use 'cpu' for CPU decoding
-vl = tvl.VideoLoader('my_video.mkv', device)
-generator_of_rgb_tensors = vl.select_frames([24, 26, 25])
-list_of_rgb_tensors = list(generator_of_rgb_tensors)
+# Create a VideoLoader for the video file 'my_video.mkv' that will decode frames as float tensors
+# using the first CUDA-enabled GPU device ('cuda:0').
+vl = tvl.VideoLoader('my_video.mkv', 'cuda:0', dtype=torch.float32)
+# Request three frames by index. Note that the return value is an iterator, and the frames may
+# be lazy-loaded.
+frames_iter = vl.select_frames([24, 26, 25])
+# Force all of the frames to be decoded by creating a list from the iterator. The result will
+# be a list of torch.cuda.FloatTensor objects, with shape [3 x H x W].
+frames = list(frames_iter)
 ```
 
 
