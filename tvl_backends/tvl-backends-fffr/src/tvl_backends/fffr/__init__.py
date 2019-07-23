@@ -7,7 +7,7 @@ from tvl_backends.fffr.memory import TorchImageAllocator
 
 
 class FffrBackend(Backend):
-    def __init__(self, filename, device, dtype, *, seek_threshold=0):
+    def __init__(self, filename, device, dtype, *, out_width=0, out_height=0, seek_threshold=0):
         super().__init__(filename, device, dtype, seek_threshold)
 
         allocator_dtype = self.dtype
@@ -19,7 +19,7 @@ class FffrBackend(Backend):
         image_allocator = TorchImageAllocator(self.device, allocator_dtype)
         device_index = self.device.index if self.device.type == 'cuda' else -1
         frame_reader = pyfffr.TvFFFrameReader(image_allocator, self.filename, device_index,
-                                              0, 0, self.seek_threshold)
+                                              out_width, out_height, self.seek_threshold)
         # We need to hold a reference to image_allocator for at least as long as the
         # TvFFFrameReader that uses it is around, since we retain ownership of image_allocator.
         setattr(frame_reader, '__image_allocator_ref', image_allocator)

@@ -43,6 +43,15 @@ def test_cuda_device_without_index(video_filename, first_frame_image):
     assert_allclose(_as_pil_image(rgb_frame), first_frame_image, atol=50)
 
 
+def test_out_size(device, video_filename, first_frame_image):
+    backend = FffrBackendFactory().create(video_filename, device, torch.uint8,
+                                          backend_opts=dict(out_width=1140, out_height=360))
+    rgb_frame = backend.read_frame()
+    assert rgb_frame.shape == (3, 360, 1140)
+    expected = first_frame_image.resize((1140, 360), resample=PIL.Image.BILINEAR)
+    assert_allclose(_as_pil_image(rgb_frame), expected, atol=50)
+
+
 def test_select_frames(device, video_filename, first_frame_image, mid_frame_image):
     backend = FffrBackendFactory().create(video_filename, device, torch.uint8)
     frames = list(backend.select_frames([0, 25]))
