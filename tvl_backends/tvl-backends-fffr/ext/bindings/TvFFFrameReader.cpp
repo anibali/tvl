@@ -199,7 +199,7 @@ int64_t TvFFFrameReader::read_frames_by_index(int64_t* indices, const int n_fram
                 throw std::runtime_error("Pixel format conversion failed.");
             }
         }
-        if (frames_vector.size() == 0) {
+        if (n_frames_read == 0) {
             if (_stream->isEndOfFile()) {
                 // Return false to indicate "end of file".
                 return false;
