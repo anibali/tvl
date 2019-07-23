@@ -109,6 +109,7 @@ int64_t TvFFFrameReader::get_number_of_frames() const
 
 void TvFFFrameReader::seek(const float time_secs)
 {
+    std::lock_guard<std::mutex> lock(_mutex);
     const auto time = static_cast<int64_t>(time_secs * 1000000.0f);
     const bool ret = _stream->seek(time);
     if (!ret) {
@@ -161,6 +162,7 @@ uint8_t* TvFFFrameReader::convert_frame(const std::shared_ptr<Ffr::Frame>& frame
 
 uint8_t* TvFFFrameReader::read_frame()
 {
+    std::lock_guard<std::mutex> lock(_mutex);
     // Get next frame
     const auto frame = _stream->getNextFrame();
     if (frame == nullptr) {
@@ -175,6 +177,7 @@ uint8_t* TvFFFrameReader::read_frame()
 
 int64_t TvFFFrameReader::read_frames_by_index(int64_t* indices, const int n_frames, uint8_t** frames)
 {
+    std::lock_guard<std::mutex> lock(_mutex);
     int32_t block_size = 8;
     for (int32_t pos = 0; pos < n_frames;) {
         const auto start = &indices[pos];
