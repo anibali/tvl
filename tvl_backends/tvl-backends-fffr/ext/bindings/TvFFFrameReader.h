@@ -32,6 +32,7 @@ private:
     ImageAllocator* _image_allocator = nullptr;
     std::string _filename;
     Ffr::PixelFormat _pixel_format;
+    std::mutex _mutex;
 
     static bool init_context(int gpu_index);
     
