@@ -175,30 +175,39 @@ uint8_t* TvFFFrameReader::read_frame()
 
 int64_t TvFFFrameReader::read_frames_by_index(int64_t* indices, const int n_frames, uint8_t** frames)
 {
-    constexpr int32_t block_size = 8;
-    const auto blocks = std::div(n_frames, block_size);
-    const auto num_blocks = blocks.quot + (blocks.rem > 0 ? 1 : 0);
-    for (int32_t i = 0; i < num_blocks; ++i) {
-        const auto start = &indices[i * block_size];
-        const auto last = (i + 1) * block_size;
+    int32_t block_size = 8;
+    for (int32_t pos = 0; pos < n_frames;) {
+        const auto start = &indices[pos];
+        const auto last = pos + block_size;
         const auto end = &indices[std::min(last, n_frames)];
         const std::vector<int64_t> frame_sequence(start, end);
         const auto frames_vector = _stream->getFramesByIndex(frame_sequence);
-        for (auto& j : frames_vector) {
-            *(frames++) = convert_frame(j, true);
+        int32_t n_frames_read = frames_vector.size();
+        // If the actual number of frames decoded is less than the number of frames that we
+        // requested, reduce the number of frames that we request next time and ignore the last
+        // frame returned (it might be wrong).
+        if (n_frames_read < frame_sequence.size()) {
+            block_size = n_frames_read;
+            --n_frames_read;
+        }
+        // Convert the pixel format of the decoded frames.
+        for (int i = 0; i < n_frames_read; ++i) {
+            *(frames++) = convert_frame(frames_vector.at(i), true);
         }
         if (_stream->getDecodeType() == Ffr::DecodeType::Cuda) {
             if (!Ffr::synchroniseConvert(_stream)) {
                 throw std::runtime_error("Pixel format conversion failed.");
             }
         }
-        if (frames_vector.size() != frame_sequence.size()) {
+        if (frames_vector.size() == 0) {
             if (_stream->isEndOfFile()) {
                 // Return false to indicate "end of file".
                 return false;
             }
             throw std::runtime_error("Failed to get the next frame sequence.");
         }
+        // Advance our position within the array of frame indices.
+        pos += n_frames_read;
     }
     return n_frames;
 }

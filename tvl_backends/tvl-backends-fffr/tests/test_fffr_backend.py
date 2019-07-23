@@ -70,6 +70,13 @@ def test_select_many_frames(device, video_filename, first_frame_image, mid_frame
     assert_allclose(_as_pil_image(frames[25]), mid_frame_image, atol=50)
 
 
+def test_select_frames_diving_video(device, diving_video_filename, diving_frame07_image):
+    backend = FffrBackendFactory().create(diving_video_filename, device, torch.uint8)
+    frames = list(backend.select_frames(list(range(16))))
+    assert(len(frames) == 16)
+    assert_allclose(_as_pil_image(frames[7]), diving_frame07_image, atol=50)
+
+
 @pytest.mark.skip('TODO: fix thread-safety so that this test passes consistently.')
 def test_multithreading(device, video_filename, first_frame_image, mid_frame_image):
     executor = ThreadPoolExecutor(max_workers=8)

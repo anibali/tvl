@@ -39,6 +39,16 @@ def cropped_first_frame_image():
     return PIL.Image.open(data_dir.joinpath('board_game_first-cropped.jpg'), 'r')
 
 
+@pytest.fixture
+def diving_video_filename():
+    return str(data_dir.joinpath('diving-h264.mkv'))
+
+
+@pytest.fixture
+def diving_frame07_image():
+    return PIL.Image.open(data_dir.joinpath('diving_frame07.jpg'), 'r')
+
+
 @pytest.fixture(params=['cpu', *CUDA_DEVICES])
 def device(request):
     return request.param
