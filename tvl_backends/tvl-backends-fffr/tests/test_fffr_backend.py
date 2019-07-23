@@ -77,7 +77,6 @@ def test_select_frames_diving_video(device, diving_video_filename, diving_frame0
     assert_allclose(_as_pil_image(frames[7]), diving_frame07_image, atol=50)
 
 
-@pytest.mark.skip('TODO: fix thread-safety so that this test passes consistently.')
 def test_multithreading(device, video_filename, first_frame_image, mid_frame_image):
     executor = ThreadPoolExecutor(max_workers=8)
     seq_len = 5

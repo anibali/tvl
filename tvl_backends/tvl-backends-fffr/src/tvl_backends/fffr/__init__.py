@@ -1,3 +1,5 @@
+from threading import RLock
+
 import numpy as np
 import pyfffr
 import torch
@@ -9,6 +11,8 @@ from tvl_backends.fffr.memory import TorchImageAllocator
 class FffrBackend(Backend):
     def __init__(self, filename, device, dtype, *, out_width=0, out_height=0, seek_threshold=0):
         super().__init__(filename, device, dtype, seek_threshold)
+
+        self.lock = RLock()
 
         allocator_dtype = self.dtype
         # The FFFR backend does not currently support direct conversion to float32 for software
@@ -50,7 +54,8 @@ class FffrBackend(Backend):
 
     def seek(self, time_secs):
         try:
-            self.frame_reader.seek(time_secs)
+            with self.lock:
+                self.frame_reader.seek(time_secs)
             self._at_eof = False
         except RuntimeError:
             if time_secs < self.duration - (1.0 / self.frame_rate + 1e-9):
@@ -74,18 +79,19 @@ class FffrBackend(Backend):
         if self._at_eof:
             raise EOFError()
 
-        ptr = self.frame_reader.read_frame()
-        if not ptr:
-            raise EOFError()
-
-        return self._convert_frame(ptr)
+        with self.lock:
+            ptr = self.frame_reader.read_frame()
+            if not ptr:
+                raise EOFError()
+            return self._convert_frame(ptr)
 
     def _read_frames_by_index(self, indices):
         frame_indices = torch.tensor(indices, device='cpu', dtype=torch.int64)
         ptrs = torch.zeros(frame_indices.shape, device='cpu', dtype=torch.int64)
-        n_frames_read = self.frame_reader.read_frames_by_index(
-            frame_indices.data_ptr(), frame_indices.shape[0], ptrs.data_ptr())
-        return [self._convert_frame(ptr) for ptr in ptrs[:n_frames_read].tolist()]
+        with self.lock:
+            n_frames_read = self.frame_reader.read_frames_by_index(
+                frame_indices.data_ptr(), frame_indices.shape[0], ptrs.data_ptr())
+            return [self._convert_frame(ptr) for ptr in ptrs[:n_frames_read].tolist()]
 
     def select_frames(self, frame_indices):
         if self._at_eof:
