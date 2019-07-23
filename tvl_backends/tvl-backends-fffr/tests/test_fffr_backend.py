@@ -1,3 +1,5 @@
+from concurrent.futures import ThreadPoolExecutor
+
 import PIL.Image
 import pytest
 import torch
@@ -66,3 +68,20 @@ def test_select_many_frames(device, video_filename, first_frame_image, mid_frame
     assert(len(frames) == 26)
     assert_allclose(_as_pil_image(frames[0]), first_frame_image, atol=50)
     assert_allclose(_as_pil_image(frames[25]), mid_frame_image, atol=50)
+
+
+@pytest.mark.skip('TODO: fix thread-safety so that this test passes consistently.')
+def test_multithreading(device, video_filename, first_frame_image, mid_frame_image):
+    executor = ThreadPoolExecutor(max_workers=8)
+    seq_len = 5
+    backend = FffrBackendFactory().create(video_filename, device, torch.uint8)
+
+    def get(index):
+        frames = list(backend.select_frames(list(range(index * seq_len, (index + 1) * seq_len))))
+        return frames
+
+    jobs = [executor.submit(get, i) for i in range(8)]
+    results = [job.result() for job in jobs]
+
+    assert_allclose(_as_pil_image(results[0][0]), first_frame_image, atol=50)
+    assert_allclose(_as_pil_image(results[25 // seq_len][25 % seq_len]), mid_frame_image, atol=50)
