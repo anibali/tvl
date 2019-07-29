@@ -5,6 +5,10 @@ add_library(tvlnv
     nvidia/MemManager.cpp
 )
 
+# NVIDIA Docker images add the CUDA stub library directory to the environment variable
+# "LIBRARY_PATH". Here we make CMake aware of this.
+list(APPEND CMAKE_SYSTEM_LIBRARY_PATH $ENV{LIBRARY_PATH})
+
 # TODO: Error message upon fail to find
 find_library(CUDA_LIBRARY cuda)
 find_path(AVCODEC_INCLUDE_DIR libavcodec/avcodec.h)
