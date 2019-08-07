@@ -24,4 +24,9 @@ public:
      * Get the frame data type.
      */
     virtual DataType get_data_type() = 0;
+    /**
+     * Get the GPU device index for memory allocated by this allocator.
+     * A return value of -1 means main system memory.
+     */
+    virtual int get_device_index() = 0;
 };

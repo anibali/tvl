@@ -81,5 +81,13 @@ class TorchImageAllocator(pyfffr.ImageAllocator):
             return pyfffr.ImageAllocator.FLOAT32
         raise Exception(f'unsupported dtype: {self.dtype}')
 
+    def get_device_index(self):
+        if self.device.type == 'cuda':
+            if self.device.index is None:
+                return torch.cuda.current_device()
+            else:
+                return self.device.index
+        return -1
+
     def get_frame_tensor(self, address):
         return self.tensors[address]

@@ -52,3 +52,10 @@ def test_allocation_alignment(device):
         index = tensor.storage_offset() + i * 8
         assert storage[index] == 1
     assert(len(storage) == 32)
+
+
+def test_get_device_index():
+    allocator = TorchImageAllocator('cuda', torch.float32)
+    assert allocator.get_device_index() >= 0
+    allocator = TorchImageAllocator('cpu', torch.float32)
+    assert allocator.get_device_index() == -1
