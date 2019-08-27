@@ -17,7 +17,7 @@ class Backend(ABC):
         """
         self.filename = filename
         self.device = torch.device(device)
-        if self.device.type == 'cuda':
+        if self.device.type == 'cuda' and self.device.index is None:
             self.device = torch.device('cuda', torch.cuda.current_device())
         self.dtype = dtype
         self.seek_threshold = seek_threshold

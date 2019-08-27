@@ -1,6 +1,10 @@
 from unittest.mock import call
 
+import pytest
+import torch
+
 import tvl
+from tvl.backend import Backend
 
 
 def test_vl_read_frame(dummy_backend):
@@ -40,3 +44,14 @@ def test_vl_select_frames_mixed(dummy_backend, mocker):
     mocked_seek = mocker.patch.object(vl.backend, 'seek_to_frame')
     list(vl.select_frames([1, 2, 10, 12]))
     assert mocked_seek.mock_calls == [call(1), call(10)]
+
+
+@pytest.mark.parametrize('device,expected', [
+    ('cuda:0', 'cuda:0'),
+    ('cuda:1', 'cuda:1'),
+    ('cuda', 'cuda:0'),
+])
+def test_backend_device(device, expected, mocker):
+    mocker.patch.object(Backend, '__abstractmethods__', new_callable=set)
+    backend = Backend('dummy.avi', device, torch.float32, 3)
+    assert str(backend.device) == expected
