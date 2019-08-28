@@ -1,6 +1,8 @@
 import importlib
 import os
-from typing import Dict, Sequence, Iterator
+from contextlib import contextmanager
+from threading import RLock, Condition
+from typing import Dict, Sequence, Iterator, Union
 
 import torch
 
@@ -53,7 +55,7 @@ def get_backend_factory(device_type) -> BackendFactory:
 
 
 class VideoLoader:
-    def __init__(self, filename, device, dtype=torch.float32, backend_opts=None):
+    def __init__(self, filename, device: Union[torch.device, str], dtype=torch.float32, backend_opts=None):
         if isinstance(device, str):
             device = torch.device(device)
         filename = os.fspath(filename)
@@ -118,3 +120,43 @@ class VideoLoader:
             Iterator[torch.Tensor]: An iterator of image tensors.
         """
         return self.backend.select_frames(frame_indices)
+
+
+class VideoLoaderPool:
+    def __init__(self, slots: Dict[str, int]):
+        self.slots = slots
+        self.condition = Condition(RLock())
+
+    def peek_slot(self):
+        for device, available in self.slots.items():
+            if available > 0:
+                return device
+        return None
+
+    def remove_slot(self):
+        device = self.peek_slot()
+        if device is None:
+            raise Exception('No slots available')
+        self.slots[device] -= 1
+        return device
+
+    def add_slots(self, device, n=1):
+        available = self.slots.get(device, 0)
+        self.slots[device] = available + n
+
+    @contextmanager
+    def loader(self, filename, dtype=torch.float32, backend_opts_by_device=None):
+        with self.condition:
+            while self.peek_slot() is None:
+                self.condition.wait()
+            device = self.remove_slot()
+
+        if backend_opts_by_device is None:
+            backend_opts_by_device = {}
+
+        try:
+            yield VideoLoader(filename, device, dtype, backend_opts_by_device.get(device, None))
+        finally:
+            with self.condition:
+                self.add_slots(device, 1)
+                self.condition.notify()
