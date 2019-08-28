@@ -1,5 +1,5 @@
-import os
 from collections import namedtuple
+from pathlib import Path
 
 import pytest
 import pytest_mock
@@ -8,7 +8,7 @@ import torch
 import tvl
 
 mocker = pytest_mock.mocker
-data_dir = os.path.join(os.path.dirname(__file__), 'data')
+data_dir = Path(__file__).parent.parent.joinpath('data')
 
 # Get the slow CUDA initialisation out of the way
 for i in range(torch.cuda.device_count()):
@@ -16,12 +16,17 @@ for i in range(torch.cuda.device_count()):
 
 
 @pytest.fixture
-def dummy_backend():
+def video_filename():
+    return str(data_dir.joinpath('board_game-h264.mkv'))
+
+
+@pytest.fixture
+def dummy_backend(video_filename):
     from tvl.backend import Backend, BackendFactory
 
     class DummyBackend(Backend):
         def __init__(self, frames):
-            super().__init__('dummy.avi', 'cpu', torch.float32, 3)
+            super().__init__(video_filename, 'cpu', torch.float32, 3)
             self.frames = frames
             self.pos = 0
 

@@ -1,3 +1,4 @@
+import os.path
 from abc import ABC, abstractmethod
 
 import torch
@@ -16,6 +17,8 @@ class Backend(ABC):
                 close to the video's GOP size should be a reasonable choice.
         """
         self.filename = filename
+        if not os.path.isfile(filename):
+            raise FileNotFoundError(filename)
         self.device = torch.device(device)
         if self.device.type == 'cuda' and self.device.index is None:
             self.device = torch.device('cuda', torch.cuda.current_device())

@@ -51,7 +51,7 @@ def test_vl_select_frames_mixed(dummy_backend, mocker):
     ('cuda:1', 'cuda:1'),
     ('cuda', 'cuda:0'),
 ])
-def test_backend_device(device, expected, mocker):
+def test_backend_device(video_filename, device, expected, mocker):
     mocker.patch.object(Backend, '__abstractmethods__', new_callable=set)
-    backend = Backend('dummy.avi', device, torch.float32, 3)
+    backend = Backend(video_filename, device, torch.float32, 3)
     assert str(backend.device) == expected
