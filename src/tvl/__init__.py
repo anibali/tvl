@@ -1,4 +1,5 @@
 import importlib
+import os
 from typing import Dict, Sequence, Iterator
 
 import torch
@@ -55,6 +56,7 @@ class VideoLoader:
     def __init__(self, filename, device, dtype=torch.float32, backend_opts=None):
         if isinstance(device, str):
             device = torch.device(device)
+        filename = os.fspath(filename)
         self.backend = get_backend_factory(device.type).create(filename, device, dtype, backend_opts)
 
     def seek(self, time_secs):
