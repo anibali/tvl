@@ -108,6 +108,29 @@ vl = tvl.VideoLoader('my_video.mkv', 'cpu', backend_opts={'seek_threshold': 3})
 If you expect to be reading a lot of videos that are encoded in a similar way, we recommend
 benchmarking a range of `seek_threshold` values to find which is fastest.
 
+TVL also includes a helper class for managing VideoLoader objects on multiple devices at once.
+Say, for example, that you want to load at most 2 videos at a time on the first GPU device,
+and 3 on the CPU.
+
+```python
+import tvl
+import torch
+
+pool = tvl.VideoLoaderPool({'cuda:0': 2, 'cpu': 3})
+
+def do_video_loading(video_filename):
+    # Optional: you can define device-specific backend options.
+    backend_opts_by_device = {
+        'cuda:0': { 'seek_threshold': 5 },
+    }
+
+    with pool.loader(video_filename, torch.float32, backend_opts_by_device) as vl:
+        # ...use the VideoLoader instance (vl)...
+        pass
+
+# ...call do_video_loading from multiple threads...
+```
+
 
 ### Limitations
 
