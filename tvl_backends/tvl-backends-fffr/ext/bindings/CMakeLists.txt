@@ -32,7 +32,7 @@ swig_add_library(_pyfffr
     SOURCES pyfffr.i
 )
 set_target_properties(_pyfffr PROPERTIES
-    LIBRARY_OUTPUT_NAME "pyfffr.${Python3_SOABI}"
+    OUTPUT_NAME pyfffr
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
     SWIG_USE_TARGET_INCLUDE_DIRECTORIES ON
 )
@@ -57,6 +57,7 @@ set(RELATIVE_INSTALL_DEST
 )
 
 # Install the compiled library file.
+set(CMAKE_SHARED_LIBRARY_SUFFIX ".${Python3_SOABI}${CMAKE_SHARED_LIBRARY_SUFFIX}")
 install(TARGETS _pyfffr
     LIBRARY DESTINATION ${RELATIVE_INSTALL_DEST}
 )
