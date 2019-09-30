@@ -32,7 +32,7 @@ swig_add_library(_pyfffr
     SOURCES pyfffr.i
 )
 set_target_properties(_pyfffr PROPERTIES
-    OUTPUT_NAME "pyfffr.${Python3_SOABI}"
+    LIBRARY_OUTPUT_NAME "pyfffr.${Python3_SOABI}"
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
     SWIG_USE_TARGET_INCLUDE_DIRECTORIES ON
 )

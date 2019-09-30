@@ -1,5 +1,8 @@
 FROM nvidia/cuda:10.0-devel-ubuntu18.04 as ffmpeg-builder
 
+# https://github.com/NVIDIA/nvidia-docker/issues/969
+RUN rm /etc/apt/sources.list.d/nvidia-ml.list
+
 RUN apt-get update \
  && apt-get install -y curl git pkg-config yasm libx264-dev checkinstall \
  && rm -rf /var/lib/apt/lists/*
@@ -35,6 +38,9 @@ RUN cd /tmp && curl -sO http://ffmpeg.org/releases/ffmpeg-$FFMPEG_VERSION.tar.bz
 
 
 FROM nvidia/cuda:10.0-devel-ubuntu18.04 as tvl-builder
+
+# https://github.com/NVIDIA/nvidia-docker/issues/969
+RUN rm /etc/apt/sources.list.d/nvidia-ml.list
 
 RUN apt-get update \
  && apt-get install -y curl git \
@@ -92,6 +98,9 @@ RUN make dist
 
 
 FROM nvidia/cuda:10.0-devel-ubuntu18.04
+
+# https://github.com/NVIDIA/nvidia-docker/issues/969
+RUN rm /etc/apt/sources.list.d/nvidia-ml.list
 
 RUN apt-get update \
  && apt-get install -y curl git \
