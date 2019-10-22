@@ -1,6 +1,6 @@
 hypothesis==4.10.0
 numpy==1.16.2
-Pillow==5.2.0
+Pillow==6.2.0
 torch==1.1.0
 torchgeometry==0.1.2
 
