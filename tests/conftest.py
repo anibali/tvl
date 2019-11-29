@@ -17,7 +17,7 @@ for i in range(torch.cuda.device_count()):
 
 class DummyBackend(Backend):
     def __init__(self, frames, video_filename, device):
-        super().__init__(video_filename, device, torch.float32, 3)
+        super().__init__(video_filename, device, torch.float32, 3, 0, 0)
         self.frames = frames
         self.pos = 0
 

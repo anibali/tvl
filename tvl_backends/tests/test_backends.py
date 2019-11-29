@@ -2,15 +2,20 @@ import PIL.Image
 import pytest
 import torch
 from numpy.testing import assert_allclose
+import numpy as np
 
 
-def assert_same_image(actual, expected, atol=50):
+def assert_same_image(actual, expected, atol=50, allow_mismatch=0.0):
     if torch.is_tensor(actual):
         if actual.is_floating_point():
             actual = actual * 255
         actual = actual.to(device='cpu', dtype=torch.uint8)
         actual = PIL.Image.fromarray(actual.permute(1, 2, 0).numpy(), 'RGB')
-    assert_allclose(actual, expected, rtol=0, atol=atol)
+    if allow_mismatch == 0:
+        assert_allclose(actual, expected, rtol=0, atol=atol)
+    else:
+        close_elements = np.isclose(actual, expected, rtol=0, atol=atol)
+        assert np.sum(close_elements) / close_elements.size > (1.0 - allow_mismatch)
 
 
 def test_duration(backend):
@@ -35,9 +40,21 @@ def test_height(backend):
 
 def test_read_frame(backend, first_frame_image):
     rgb = backend.read_frame()
-    assert(rgb.size() == (3, 720, 1280))
+    assert rgb.size() == (3, 720, 1280)
     assert_same_image(rgb, first_frame_image)
 
+
+def test_resizing_read_frame(resizing_backend, first_frame_image):
+    rgb = resizing_backend.read_frame()
+    assert rgb.size() == (3, 90, 160)
+    assert_same_image(rgb, first_frame_image.resize((160, 90), PIL.Image.NEAREST), allow_mismatch=0.01)
+
+
+def test_out_size_attributes(backend, resizing_backend):
+    assert backend.out_width == 1280
+    assert backend.out_height == 720
+    assert resizing_backend.out_width == 160
+    assert resizing_backend.out_height == 90
 
 def test_eof(backend):
     backend.seek(2.0)

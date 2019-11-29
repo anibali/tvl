@@ -132,6 +132,28 @@ def do_video_loading(video_filename):
 ```
 
 
+### Backend options
+
+The following options are supported by all backends, and can be specified by giving a
+`backend_opts` argument to `tvl.VideoLoader`.
+
+* `out_width`: Specify a width for read frames to be automatically resized to.
+* `out_height`: Specify a height for read frames to be automatically resized to.
+* `seek_threshold`: Specify the threshold value for seeking instead of reading frames sequentially.
+
+#### Example: Reading resized image frames
+
+```python
+import torch
+import tvl
+
+vl = tvl.VideoLoader('my_video.mkv', 'cuda:0', dtype=torch.float32,
+                     backend_opts={'out_width': 200, 'out_height': 100})
+# This tensor will have dimensions [3, 100, 200].
+frame = vl.read_frame()
+```
+
+
 ### Limitations
 
 * GPU support is only available for NVIDIA cards

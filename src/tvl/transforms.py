@@ -74,6 +74,17 @@ def resize(tensor, size, mode='bilinear'):
         Tensor: The resized image tensor.
     """
     assert len(size) == 2
+
+    # If the tensor is already the desired size, return it immediately.
+    if tensor.shape[-2] == size[0] and tensor.shape[-1] == size[1]:
+        return tensor
+
+    if not tensor.is_floating_point():
+        dtype = tensor.dtype
+        tensor = tensor.to(torch.float32)
+        tensor = resize(tensor, size, mode)
+        return tensor.to(dtype)
+
     out_shape = (*tensor.shape[:-2], *size)
     if tensor.ndimension() < 3:
         raise Exception('tensor must be at least 2D')

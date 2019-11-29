@@ -9,8 +9,8 @@ from tvl_backends.fffr.memory import TorchImageAllocator
 
 
 class FffrBackend(Backend):
-    def __init__(self, filename, device, dtype, *, out_width=0, out_height=0, seek_threshold=0):
-        super().__init__(filename, device, dtype, seek_threshold)
+    def __init__(self, filename, device, dtype, *, seek_threshold=0, out_width=0, out_height=0):
+        super().__init__(filename, device, dtype, seek_threshold, out_width, out_height)
 
         self.lock = RLock()
 
@@ -66,14 +66,7 @@ class FffrBackend(Backend):
         ptr = int(ptr)
         rgb_tensor = self.image_allocator.get_frame_tensor(ptr)
         self.image_allocator.free_frame(ptr)  # Release reference held by the memory manager.
-
-        if self.dtype == torch.float32:
-            if self.image_allocator.dtype != torch.float32:
-                return rgb_tensor.to(self.dtype).div_(255)
-            return rgb_tensor
-        elif self.dtype == torch.uint8:
-            return rgb_tensor
-        raise NotImplementedError(f'Unsupported dtype: {self.dtype}')
+        return self._postprocess_frame(rgb_tensor)
 
     def read_frame(self):
         if self._at_eof:

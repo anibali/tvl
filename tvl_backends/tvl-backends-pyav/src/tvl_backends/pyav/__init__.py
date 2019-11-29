@@ -5,8 +5,8 @@ from tvl.backend import Backend, BackendFactory
 
 
 class PyAvBackend(Backend):
-    def __init__(self, filename, device, dtype, *, seek_threshold=3):
-        super().__init__(filename, device, dtype, seek_threshold)
+    def __init__(self, filename, device, dtype, *, seek_threshold=3, out_width=0, out_height=0):
+        super().__init__(filename, device, dtype, seek_threshold, out_width, out_height)
         assert self.device.type == 'cpu'
         self.container = av.open(self.filename)
         self.generator = None
@@ -50,14 +50,12 @@ class PyAvBackend(Backend):
             raise EOFError()
         self.seek_time = None
         np_frame = frame.to_rgb().to_ndarray()
-        rgb = torch.from_numpy(np_frame).permute(2, 0, 1).float().div_(255)
-        if self.dtype == torch.float32:
-            return rgb
-        elif self.dtype == torch.uint8:
-            return (rgb * 255).round_().byte()
-        raise NotImplementedError(f'Unsupported dtype: {self.dtype}')
+        rgb_bytes = torch.from_numpy(np_frame).permute(2, 0, 1)
+        return self._postprocess_frame(rgb_bytes)
 
 
 class PyAvBackendFactory(BackendFactory):
     def create(self, filename, device, dtype, backend_opts=None) -> PyAvBackend:
-        return PyAvBackend(filename, device, dtype)
+        if backend_opts is None:
+            backend_opts = {}
+        return PyAvBackend(filename, device, dtype, **backend_opts)

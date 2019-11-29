@@ -6,8 +6,8 @@ from tvl.backend import Backend, BackendFactory
 
 
 class OpenCvBackend(Backend):
-    def __init__(self, filename, device, dtype, *, seek_threshold=3):
-        super().__init__(filename, device, dtype, seek_threshold)
+    def __init__(self, filename, device, dtype, *, seek_threshold=3, out_width=0, out_height=0):
+        super().__init__(filename, device, dtype, seek_threshold, out_width, out_height)
         assert self.device.type == 'cpu'
         self.cap = cv2.VideoCapture(self.filename)
 
@@ -42,15 +42,13 @@ class OpenCvBackend(Backend):
         if ret:
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             rgb_bytes = torch.from_numpy(np.moveaxis(frame, -1, 0))
-            if self.dtype == torch.float32:
-                return rgb_bytes.float().div_(255)
-            elif self.dtype == torch.uint8:
-                return rgb_bytes
-            raise NotImplementedError(f'Unsupported dtype: {self.dtype}')
+            return self._postprocess_frame(rgb_bytes)
         else:
             raise EOFError()
 
 
 class OpenCvBackendFactory(BackendFactory):
     def create(self, filename, device, dtype, backend_opts=None) -> OpenCvBackend:
-        return OpenCvBackend(filename, device, dtype)
+        if backend_opts is None:
+            backend_opts = {}
+        return OpenCvBackend(filename, device, dtype, **backend_opts)

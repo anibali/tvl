@@ -66,18 +66,12 @@ def nv12_to_rgb(planar_yuv, h, w):
 
 
 class NvdecBackend(Backend):
-    def __init__(self, filename, device, dtype, *, seek_threshold=3, resize=None):
-        super().__init__(filename, device, dtype, seek_threshold)
+    def __init__(self, filename, device, dtype, *, seek_threshold=3, out_width=0, out_height=0):
+        super().__init__(filename, device, dtype, seek_threshold, out_width, out_height)
         assert self.device.type == 'cuda'
         mem_manager = TorchMemManager(self.device)
         # Disown mem_manager, since TvlnvFrameReader will be responsible for deleting it.
         mem_manager = mem_manager.__disown__()
-
-        if resize:
-            out_height, out_width = resize
-        else:
-            out_height = 0
-            out_width = 0
 
         self.mem_manager = mem_manager
         self.frame_reader = tvlnv.TvlnvFrameReader(mem_manager, self.filename, self.device.index,
@@ -115,11 +109,7 @@ class NvdecBackend(Backend):
         width = self.frame_reader.get_width()
         height = self.frame_reader.get_height()
         rgb = nv12_to_rgb(planar_yuv, height, width)
-        if self.dtype == torch.float32:
-            return rgb
-        elif self.dtype == torch.uint8:
-            return (rgb * 255).round_().byte()
-        raise NotImplementedError(f'Unsupported dtype: {self.dtype}')
+        return self._postprocess_frame(rgb)
 
 
 class NvdecBackendFactory(BackendFactory):

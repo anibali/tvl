@@ -57,7 +57,7 @@ def test_vl_select_frames_mixed(dummy_backend_factory_cpu, mocker):
 ])
 def test_backend_device(video_filename, device, expected, mocker):
     mocker.patch.object(Backend, '__abstractmethods__', new_callable=set)
-    backend = Backend(video_filename, device, torch.float32, 3)
+    backend = Backend(video_filename, device, torch.float32, 3, 0, 0)
     assert str(backend.device) == expected
 
 

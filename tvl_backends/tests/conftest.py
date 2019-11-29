@@ -82,3 +82,11 @@ def backend(backend_factory_and_device, dtype, video_filename):
     backend_factory, device = backend_factory_and_device
     backend = backend_factory.create(video_filename, device, dtype)
     return backend
+
+
+@pytest.fixture
+def resizing_backend(backend_factory_and_device, dtype, video_filename):
+    assert(Path(video_filename).is_file())
+    backend_factory, device = backend_factory_and_device
+    backend = backend_factory.create(video_filename, device, dtype, backend_opts=dict(out_width=160, out_height=90))
+    return backend
