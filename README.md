@@ -24,9 +24,12 @@ frames = list(frames_iter)
 
 ## Requirements
 
-* ffmpeg 4
+Depending on the backend(s) you choose, you may need to install the following dependencies:
+
+* ffmpeg >= 4.1
+* GCC >= 7
 * SWIG 3
-* NVIDIA drivers >= 396.24
+* CUDA >= 10
 
 
 ## Building from source
