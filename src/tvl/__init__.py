@@ -121,6 +121,17 @@ class VideoLoader:
         """
         return self.backend.select_frames(frame_indices)
 
+    def select_frame(self, frame_index):
+        """Read a single frame by frame index.
+
+        Args:
+            frame_index (int): Index of frame to read.
+
+        Returns:
+            torch.Tensor: Frame image tensor.
+        """
+        return self.backend.select_frame(frame_index)
+
 
 class VideoLoaderPool:
     def __init__(self, slots: Dict[str, int]):

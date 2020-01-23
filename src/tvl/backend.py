@@ -118,6 +118,9 @@ class Backend(ABC):
             for i in seq_keepers:
                 yield frames[i]
 
+    def select_frame(self, frame_index):
+        return next(self.select_frames([frame_index]))
+
     def _postprocess_frame(self, rgb: torch.Tensor):
         """Postprocess an RGB image tensor to have the expected dtype and size."""
         if self.dtype == torch.float32:

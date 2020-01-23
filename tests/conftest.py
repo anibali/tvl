@@ -3,9 +3,13 @@ from pathlib import Path
 import pytest
 import pytest_mock
 import torch
+import hypothesis
 
 import tvl
 from tvl.backend import Backend, BackendFactory
+
+hypothesis.settings.register_profile('tvl', deadline=None)
+hypothesis.settings.load_profile('tvl')
 
 mocker = pytest_mock.mocker
 data_dir = Path(__file__).parent.parent.joinpath('data')

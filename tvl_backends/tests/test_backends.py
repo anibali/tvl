@@ -56,6 +56,7 @@ def test_out_size_attributes(backend, resizing_backend):
     assert resizing_backend.out_width == 160
     assert resizing_backend.out_height == 90
 
+
 def test_eof(backend):
     backend.seek(2.0)
     with pytest.raises(EOFError):
@@ -88,3 +89,8 @@ def test_select_frames(backend, first_frame_image, mid_frame_image):
 def test_select_frames_without_first(backend, mid_frame_image):
     frames = list(backend.select_frames([25, 27, 29]))
     assert_same_image(frames[0], mid_frame_image)
+
+
+def test_select_frame(backend, mid_frame_image):
+    frame = backend.select_frame(25)
+    assert_same_image(frame, mid_frame_image)
