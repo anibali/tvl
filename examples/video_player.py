@@ -1,3 +1,4 @@
+import importlib
 import tkinter as tk
 import traceback
 from functools import lru_cache
@@ -6,12 +7,13 @@ from queue import Queue
 from threading import Thread
 from time import time, sleep
 from tkinter import filedialog
+from tkinter import ttk
 
 import PIL.Image
 import PIL.ImageTk
 import torch
 
-from tvl import VideoLoader
+import tvl
 
 data_dir = Path(__file__).parent.parent.joinpath('data')
 
@@ -20,6 +22,7 @@ class VideoThread(Thread):
     def __init__(self):
         super().__init__(name='VideoThread')
         self.vl = None
+        self.replace_vl = None
         self.running = True
         self.paused = True
         self.seeking = False
@@ -28,9 +31,7 @@ class VideoThread(Thread):
         self.queue = Queue(maxsize=1)
 
     def set_video_loader(self, vl):
-        self.vl = vl
-        self.frame_index = 0
-        self._read_frame()
+        self.replace_vl = vl
 
     def seek_to_frame(self, frame_index):
         self.frame_index = frame_index
@@ -50,6 +51,10 @@ class VideoThread(Thread):
         last_time = time()
         acc_time = 0
         while self.running:
+            if self.replace_vl is not None:
+                self.vl = self.replace_vl
+                self.replace_vl = None
+                self.seeking = True
             if self.vl is None:
                 sleep(0.01)
                 continue
@@ -82,13 +87,32 @@ class MainApp(tk.Tk):
     def __init__(self, video_thread):
         super().__init__()
 
-        self.device = torch.device('cuda:0')
+        self.device = torch.device('cuda')
         torch.empty(0).to(self.device)  # Ensure device is initialised
+
+        self.file_path = None
+        self.backend_factory = None
+        self.backend_opts = {}
 
         self.video_thread = video_thread
 
         self.wm_title('Video player')
         self.geometry('1280x720')
+
+        # Don't show hidden files in the file dialog by default.
+        try:
+            # call a dummy dialog with an impossible option to initialize the file
+            # dialog without really getting a dialog window; this will throw a
+            # TclError, so we need a try...except :
+            try:
+                self.tk.call('tk_getOpenFile', '-thisoptiondoesnotexist')
+            except tk.TclError:
+                pass
+            # now set the magic variables accordingly
+            self.tk.call('set', '::tk::dialog::file::showHiddenBtn', '1')
+            self.tk.call('set', '::tk::dialog::file::showHiddenVar', '0')
+        except:
+            pass
 
         self.var_frame_index = tk.IntVar(value=0)
 
@@ -101,8 +125,6 @@ class MainApp(tk.Tk):
         self.canvas = tk.Canvas(root_frame, background='#111111')
         self.canvas.pack(fill=tk.BOTH, expand=True)
 
-        self.first_file_open = True
-
         self.do_update()
 
     @lru_cache(maxsize=1)
@@ -112,15 +134,39 @@ class MainApp(tk.Tk):
         rgb_bytes = (rgb_tensor * 255).round_().byte().cpu()
         img = PIL.Image.fromarray(rgb_bytes.permute(1, 2, 0).numpy(), 'RGB')
         if img is not None:
-            img = img.copy()
             canvas_width = self.canvas.winfo_width()
             canvas_height = self.canvas.winfo_height()
+            img = img.copy()
             img.thumbnail((canvas_width, canvas_height))
             photo_image = PIL.ImageTk.PhotoImage(img)
             self.canvas.create_image((canvas_width / 2, canvas_height / 2), anchor=tk.CENTER,
                                      image=photo_image)
             self.canvas.image = photo_image
             self.canvas.update()
+
+    def update_video_loader(self, file_path=None, device=None, backend_factory=None, backend_opts=None):
+        if backend_factory is not None:
+            self.backend_factory = backend_factory
+        if device is not None:
+            self.device = device
+        if file_path is not None:
+            self.file_path = file_path
+        if backend_opts is not None:
+            self.backend_opts = backend_opts
+
+        if not self.file_path:
+            return
+
+        try:
+            if self.backend_factory is not None:
+                tvl.set_backend_factory(self.device.type, self.backend_factory)
+            vl = tvl.VideoLoader(self.file_path, self.device, backend_opts=self.backend_opts)
+            self.video_thread.set_video_loader(vl)
+            self.spn_frame_index.configure(to=vl.n_frames - 1)
+            self.title(self.file_path.name)
+        except Exception:
+            print(f'Failed to load video: {self.file_path:s}')
+            traceback.print_exc()
 
     def do_seek(self):
         try:
@@ -130,17 +176,13 @@ class MainApp(tk.Tk):
 
     def do_select_video_file(self):
         start_dir = None
-        if self.first_file_open and Path(data_dir).is_dir():
+        if self.file_path is not None:
+            start_dir = str(self.file_path.parent)
+        elif Path(data_dir).is_dir():
             start_dir = str(data_dir)
         filename = filedialog.askopenfilename(initialdir=start_dir, title='Select a video file')
         if filename:
-            try:
-                self.video_thread.set_video_loader(VideoLoader(filename, self.device))
-                self.spn_frame_index.configure(to=self.video_thread.vl.n_frames - 1)
-                self.first_file_open = False
-            except Exception:
-                print(f'Failed to load video: {filename}')
-                traceback.print_exc()
+            self.update_video_loader(Path(filename), self.device)
 
     def do_update(self):
         rgb_tensor = None
@@ -185,6 +227,39 @@ class MainApp(tk.Tk):
 
         btn_pause = tk.Button(toolbar, text='Play/Pause', command=on_click_pause)
         btn_pause.pack(side=tk.LEFT, fill=tk.Y, padx=2, pady=2)
+
+        backend_items = {}
+        for device_type, backend_names in tvl._known_backends.items():
+            for backend_name in backend_names:
+                try:
+                    module_name, class_name = backend_name.rsplit('.', 1)
+                    module = importlib.import_module(module_name)
+                    backend_items[f'{device_type} {class_name}'] = (torch.device(device_type), getattr(module, class_name)())
+                except ImportError:
+                    pass
+
+        cmb_backends = ttk.Combobox(toolbar, values=list(backend_items.keys()))
+        cmb_backends.pack(side=tk.LEFT, fill=tk.Y, padx=2, pady=2)
+
+        def on_backend_change(event):
+            device, backend_factory = backend_items[cmb_backends.get()]
+            self.update_video_loader(device=device, backend_factory=backend_factory)
+        cmb_backends.bind("<<ComboboxSelected>>", on_backend_change)
+
+        cmb_backends.current(0)
+        on_backend_change(None)
+
+        self.var_720p = tk.IntVar()
+        def on_toggle_720p(*args):
+            if self.var_720p.get():
+                backend_opts = dict(out_width=1280, out_height=720)
+            else:
+                backend_opts = {}
+            self.update_video_loader(backend_opts=backend_opts)
+        self.var_720p.trace_variable('w', on_toggle_720p)
+        self.var_720p.set(1)
+        chk_force_720p = tk.Checkbutton(toolbar, text="Force 720p", variable=self.var_720p)
+        chk_force_720p.pack(side=tk.LEFT, fill=tk.Y, padx=2, pady=2)
 
         return toolbar
 
