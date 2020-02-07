@@ -66,7 +66,7 @@ TvFFFrameReader::TvFFFrameReader(ImageAllocator* image_allocator, const std::str
     }
     options.m_scale.m_width = out_width;
     options.m_scale.m_height = out_height;
-    options.m_bufferLength = 1;
+    options.m_bufferLength = 2;
     options.m_noBufferFlush = true;
     options.m_seekThreshold = static_cast<uint32_t>(seek_threshold);
 
