@@ -26,7 +26,7 @@ bool TvFFFrameReader::init_context(const int gpu_index)
 }
 
 TvFFFrameReader::TvFFFrameReader(ImageAllocator* image_allocator, const std::string& filename, const int gpu_index,
-    const int out_width, const int out_height, int seek_threshold)
+    const int out_width, const int out_height, const int seek_threshold, const int buffer_length)
     : _image_allocator(image_allocator)
     , _filename(filename)
 {
@@ -66,7 +66,7 @@ TvFFFrameReader::TvFFFrameReader(ImageAllocator* image_allocator, const std::str
     }
     options.m_scale.m_width = out_width;
     options.m_scale.m_height = out_height;
-    options.m_bufferLength = 2;
+    options.m_bufferLength = static_cast<uint32_t>(buffer_length);
     options.m_noBufferFlush = true;
     options.m_seekThreshold = static_cast<uint32_t>(seek_threshold);
 

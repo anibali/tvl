@@ -12,7 +12,7 @@ class TvFFFrameReader
 {
 public:
     TvFFFrameReader(ImageAllocator* image_allocator, const std::string& filename, int gpu_index, int out_width = 0,
-        int out_height = 0, int seek_threshold = 0);
+        int out_height = 0, int seek_threshold = 0, int buffer_length = 8);
     ~TvFFFrameReader() = default;
 
     std::string get_filename() const;
