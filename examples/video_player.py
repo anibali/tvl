@@ -1,4 +1,6 @@
 import importlib
+import logging
+import sys
 import tkinter as tk
 import traceback
 from functools import lru_cache
@@ -19,8 +21,9 @@ data_dir = Path(__file__).parent.parent.joinpath('data')
 
 
 class VideoThread(Thread):
-    def __init__(self):
+    def __init__(self, log):
         super().__init__(name='VideoThread')
+        self.log = log
         self.vl = None
         self.replace_vl = None
         self.running = True
@@ -54,6 +57,7 @@ class VideoThread(Thread):
                 self.vl = self.replace_vl
                 self.replace_vl = None
                 self.seeking = True
+                self.log.debug(f'Switched backend to {self.vl.backend.__class__.__name__}')
             if self.vl is None:
                 sleep(0.01)
                 continue
@@ -61,10 +65,12 @@ class VideoThread(Thread):
             frame_time = 1.0 / self.vl.frame_rate
             if self.seeking:
                 self.seeking = False
+                self.log.debug(f'Seeking to frame {self.frame_index}')
                 self.vl.seek_to_frame(self.frame_index)
                 try:
                     self._read_frame()
                 except EOFError:
+                    self.log.debug(f'Hit end of file, seeking to frame 0')
                     self.vl.seek(0)
                     self.frame_index = 0
                     self._read_frame()
@@ -75,6 +81,7 @@ class VideoThread(Thread):
                         self.frame_index += 1
                         self._read_frame()
                     except EOFError:
+                        self.log.debug(f'Hit end of file, seeking to frame 0')
                         self.vl.seek(0)
                         self.frame_index = 0
                         self._read_frame()
@@ -265,7 +272,14 @@ class MainApp(tk.Tk):
 
 
 def main():
-    video_thread = VideoThread()
+    log = logging.Logger('video_player')
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('[%(levelname)s] %(name)s: %(message)s')
+    handler.setFormatter(formatter)
+    log.addHandler(handler)
+
+    video_thread = VideoThread(log)
     video_thread.start()
     app = MainApp(video_thread)
     app.mainloop()
