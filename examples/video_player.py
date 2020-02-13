@@ -45,7 +45,6 @@ class VideoThread(Thread):
         while not self.queue.empty():
             self.queue.get()
         self.queue.put((self.cur_image, self.frame_index))
-        self.frame_index += 1
 
     def run(self):
         last_time = time()
@@ -73,6 +72,7 @@ class VideoThread(Thread):
                 acc_time += this_time - last_time
                 while acc_time > frame_time:
                     try:
+                        self.frame_index += 1
                         self._read_frame()
                     except EOFError:
                         self.vl.seek(0)
