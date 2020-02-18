@@ -16,7 +16,7 @@ RUN cd /tmp \
  && rm -rf /tmp/nv-codec-headers
 
 # Build FFmpeg, enabling only selected features
-ARG FFMPEG_VERSION=4.1.1
+ARG FFMPEG_VERSION=4.2.2
 RUN cd /tmp && curl -sO http://ffmpeg.org/releases/ffmpeg-$FFMPEG_VERSION.tar.bz2 \
  && tar xf ffmpeg-$FFMPEG_VERSION.tar.bz2 \
  && rm ffmpeg-$FFMPEG_VERSION.tar.bz2 \
@@ -124,6 +124,11 @@ RUN conda install -y -c pytorch \
 
 RUN apt-get update \
  && apt-get install -y pkg-config \
+ && rm -rf /var/lib/apt/lists/*
+
+# Install X display server client
+RUN apt-get update \
+ && apt-get install -y libx11-6 \
  && rm -rf /var/lib/apt/lists/*
 
 # Install FFmpeg
