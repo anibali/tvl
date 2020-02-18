@@ -28,6 +28,7 @@ class VideoThread(Thread):
         self.replace_vl = None
         self.running = True
         self.paused = True
+        self.time_multiplier = 1
         self.seeking = False
         self.frame_index = 0
         self.cur_image = None
@@ -62,7 +63,7 @@ class VideoThread(Thread):
                 sleep(0.01)
                 continue
             this_time = time()
-            frame_time = 1.0 / self.vl.frame_rate
+            frame_time = (1.0 / self.vl.frame_rate) * self.time_multiplier
             if self.seeking:
                 self.seeking = False
                 self.log.debug(f'Seeking to frame {self.frame_index}')
@@ -267,6 +268,17 @@ class MainApp(tk.Tk):
         self.var_720p.set(1)
         chk_force_720p = tk.Checkbutton(toolbar, text="Force 720p", variable=self.var_720p)
         chk_force_720p.pack(side=tk.LEFT, fill=tk.Y, padx=2, pady=2)
+
+        self.var_slomo = tk.IntVar()
+        def on_toggle_slomo(*args):
+            if self.var_slomo.get():
+                self.video_thread.time_multiplier = 10
+            else:
+                self.video_thread.time_multiplier = 1
+        self.var_slomo.trace_variable('w', on_toggle_slomo)
+        self.var_slomo.set(0)
+        chk_slomo = tk.Checkbutton(toolbar, text="10x slow motion", variable=self.var_slomo)
+        chk_slomo.pack(side=tk.LEFT, fill=tk.Y, padx=2, pady=2)
 
         return toolbar
 
