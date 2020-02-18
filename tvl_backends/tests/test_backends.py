@@ -1,21 +1,8 @@
 import PIL.Image
 import pytest
 import torch
-from numpy.testing import assert_allclose
-import numpy as np
 
-
-def assert_same_image(actual, expected, atol=50, allow_mismatch=0.0):
-    if torch.is_tensor(actual):
-        if actual.is_floating_point():
-            actual = actual * 255
-        actual = actual.to(device='cpu', dtype=torch.uint8)
-        actual = PIL.Image.fromarray(actual.permute(1, 2, 0).numpy(), 'RGB')
-    if allow_mismatch == 0:
-        assert_allclose(actual, expected, rtol=0, atol=atol)
-    else:
-        close_elements = np.isclose(actual, expected, rtol=0, atol=atol)
-        assert np.sum(close_elements) / close_elements.size > (1.0 - allow_mismatch)
+from tvl.testing import assert_same_image
 
 
 def test_duration(backend):
@@ -94,3 +81,18 @@ def test_select_frames_without_first(backend, mid_frame_image):
 def test_select_frame(backend, mid_frame_image):
     frame = backend.select_frame(25)
     assert_same_image(frame, mid_frame_image)
+
+
+def test_swimming_video(backend_factory_and_device, swimming_video_filename, swimming_mid_image):
+    backend_factory, device = backend_factory_and_device
+    backend = backend_factory.create(swimming_video_filename, device, torch.float32)
+    frame = backend.select_frame(9)
+    assert_same_image(frame, swimming_mid_image, allow_mismatch=0.001)
+
+
+def test_swimming_video_resized(backend_factory_and_device, swimming_video_filename, swimming_mid_image):
+    backend_factory, device = backend_factory_and_device
+    backend = backend_factory.create(swimming_video_filename, device, torch.float32,
+                                     backend_opts=dict(out_width=1280, out_height=720))
+    frame = backend.select_frame(9)
+    assert_same_image(frame, swimming_mid_image.resize((1280, 720)), allow_mismatch=0.001)

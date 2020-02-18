@@ -49,6 +49,16 @@ def diving_frame07_image():
     return PIL.Image.open(data_dir.joinpath('diving_frame07.jpg'), 'r')
 
 
+@pytest.fixture
+def swimming_video_filename():
+    return str(data_dir.joinpath('swimming-h264.mp4'))
+
+
+@pytest.fixture
+def swimming_mid_image():
+    return PIL.Image.open(data_dir.joinpath('swimming_mid.jpg'), 'r')
+
+
 @pytest.fixture(params=['cpu', *CUDA_DEVICES])
 def device(request):
     return request.param
