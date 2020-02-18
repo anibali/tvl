@@ -16,7 +16,7 @@ RUN cd /tmp \
  && rm -rf /tmp/nv-codec-headers
 
 # Build FFmpeg, enabling only selected features
-ARG FFMPEG_VERSION=4.1.1
+ARG FFMPEG_VERSION=4.2.2
 RUN cd /tmp && curl -sO http://ffmpeg.org/releases/ffmpeg-$FFMPEG_VERSION.tar.bz2 \
  && tar xf ffmpeg-$FFMPEG_VERSION.tar.bz2 \
  && rm ffmpeg-$FFMPEG_VERSION.tar.bz2 \
