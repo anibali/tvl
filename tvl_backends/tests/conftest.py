@@ -60,7 +60,7 @@ def swimming_mid_image():
 
 
 cpu_backends = [
-    'fffr',
+    # 'fffr',  # This currently causes a freeze due to some kind of conflict with PyAV.
     'pyav',
     'opencv',
 ]
