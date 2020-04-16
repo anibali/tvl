@@ -64,6 +64,16 @@ class FffrBackend(Backend):
                 raise
             self._at_eof = True
 
+    def seek_to_frame(self, frame_index):
+        try:
+            with self.lock:
+                self.frame_reader.seek_frame(frame_index)
+            self._at_eof = False
+        except RuntimeError:
+            if frame_index < self.n_frames:
+                raise
+            self._at_eof = True
+
     def _convert_frame(self, ptr):
         ptr = int(ptr)
         rgb_tensor = self.image_allocator.get_frame_tensor(ptr)

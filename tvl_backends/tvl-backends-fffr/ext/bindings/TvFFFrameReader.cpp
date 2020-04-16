@@ -116,6 +116,14 @@ void TvFFFrameReader::seek(const float time_secs)
     }
 }
 
+void TvFFFrameReader::seek_frame(int frame_index)
+{
+    const bool ret = _stream->seekFrame(static_cast<int64_t>(frame_index));
+    if (!ret) {
+        throw std::runtime_error("Seek failed.");
+    }
+}
+
 uint8_t* TvFFFrameReader::convert_frame(const std::shared_ptr<Ffr::Frame>& frame, const bool async)
 {
     // Check if known pixel format

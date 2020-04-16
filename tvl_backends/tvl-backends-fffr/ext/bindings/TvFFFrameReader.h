@@ -22,6 +22,7 @@ public:
     double get_frame_rate() const;
     int64_t get_number_of_frames() const;
     void seek(float time_secs);
+    void seek_frame(int frame_index);
 
     uint8_t* read_frame();
     int64_t read_frames_by_index(int64_t* indices, int n_frames, uint8_t** frames);
