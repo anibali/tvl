@@ -1,5 +1,5 @@
 numpy==1.16.2
-Pillow==6.2.1
+Pillow==6.2.2
 pytest==4.4.0
 torch==1.1.0
 av==6.2.0
