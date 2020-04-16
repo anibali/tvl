@@ -2,7 +2,8 @@ SHELL	:= /bin/bash
 PYTHON	?= python
 SETUP	:= setup.py
 
-SUBDIRS := $(wildcard tvl_backends/tvl-backends-*/.)
+SUBDIRS := $(wildcard tvl_backends/tvl-backends-*)
+PY_PKG_DIR := $(shell $(PYTHON) -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")
 
 clean:
 	$(PYTHON) $(SETUP) clean --all
@@ -37,8 +38,10 @@ install-dev:
 	pip install -e .
 	for dir in $(SUBDIRS); do \
 		pushd $$dir && pip install -e . && popd || exit 1; \
+		if [ -d "$$dir/_skbuild" ]; then \
+			ln -sfn "$(PWD)/$$dir/_skbuild/linux-x86_64-3.6/cmake-install/lib/python3.6/site-packages/"* "$(PY_PKG_DIR)/"; \
+		fi \
 	done
-	# TODO: Also need to set up symlinks for build outputs (eg. tvlnv.py, _tvlnv.*.so)
 
 uninstall:
 	pip uninstall tvl tvl-backends-fffr tvl-backends-nvdec tvl-backends-opencv tvl-backends-pyav
