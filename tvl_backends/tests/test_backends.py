@@ -14,14 +14,17 @@ def test_frame_rate(backend):
 
 
 def test_n_frames(backend):
+    assert type(backend.n_frames) is int
     assert backend.n_frames == 50
 
 
 def test_width(backend):
+    assert type(backend.width) is int
     assert backend.width == 1280
 
 
 def test_height(backend):
+    assert type(backend.height) is int
     assert backend.height == 720
 
 
