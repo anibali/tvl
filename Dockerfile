@@ -17,7 +17,7 @@ RUN cd /tmp \
 
 # Build FFmpeg, enabling only selected features
 ARG FFMPEG_VERSION=4.2.2
-RUN cd /tmp && curl -sO http://ffmpeg.org/releases/ffmpeg-$FFMPEG_VERSION.tar.bz2 \
+RUN cd /tmp && curl -sLO http://ffmpeg.org/releases/ffmpeg-$FFMPEG_VERSION.tar.bz2 \
  && tar xf ffmpeg-$FFMPEG_VERSION.tar.bz2 \
  && rm ffmpeg-$FFMPEG_VERSION.tar.bz2 \
  && cd ffmpeg-$FFMPEG_VERSION \
@@ -49,7 +49,7 @@ RUN apt-get update \
 # Install Miniconda and Python 3.6.5
 ENV CONDA_AUTO_UPDATE_CONDA=false
 ENV PATH=/root/miniconda/bin:$PATH
-RUN curl -so ~/miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-4.5.4-Linux-x86_64.sh \
+RUN curl -sLo ~/miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-4.5.4-Linux-x86_64.sh \
  && chmod +x ~/miniconda.sh \
  && ~/miniconda.sh -b -p ~/miniconda \
  && rm ~/miniconda.sh \
@@ -76,7 +76,7 @@ RUN conda install -y swig=3.0.12 && conda clean -ya
 # Add a stub version of libnvcuvid.so for building (required for CUDA backends).
 # This library is provided by nvidia-docker at runtime when the environment variable
 # NVIDIA_DRIVER_CAPABILITIES includes "video".
-RUN curl -so /usr/lib/x86_64-linux-gnu/libnvcuvid.so.1 \
+RUN curl -sLo /usr/lib/x86_64-linux-gnu/libnvcuvid.so.1 \
     https://raw.githubusercontent.com/NVIDIA/nvvl/bde20830cf171af8d10ef8222449237382b178ef/pytorch/test/docker/libnvcuvid.so \
  && ln -s /usr/local/nvidia/lib64/libnvcuvid.so.1 /usr/local/lib/libnvcuvid.so \
  && ln -s libnvcuvid.so.1 /usr/lib/x86_64-linux-gnu/libnvcuvid.so
@@ -109,7 +109,7 @@ RUN apt-get update \
 # Install Miniconda and Python 3.6.5
 ENV CONDA_AUTO_UPDATE_CONDA=false
 ENV PATH=/root/miniconda/bin:$PATH
-RUN curl -so ~/miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-4.5.4-Linux-x86_64.sh \
+RUN curl -sLo ~/miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-4.5.4-Linux-x86_64.sh \
  && chmod +x ~/miniconda.sh \
  && ~/miniconda.sh -b -p ~/miniconda \
  && rm ~/miniconda.sh \
