@@ -5,7 +5,7 @@ import pyfffr
 import jax.numpy as jnp
 
 from tvl.backend import Backend, BackendFactory
-from tvl_backends.fffr.memory import ImageAllocator
+from tvl_backends.fffr.memory import JaxImageAllocator
 import torch
 
 
