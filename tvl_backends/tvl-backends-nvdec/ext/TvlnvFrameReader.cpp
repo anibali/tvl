@@ -146,8 +146,6 @@ uint8_t* TvlnvFrameReader::read_frame() {
         uint8_t* pFrame = frame_buf.front();
         frame_buf.pop();
         LOG(INFO) << "Finally : return a frame with data  " << pFrame ;
-        LOG(INFO) << "Finally : return a frame with data  " << &pFrame ;
-        LOG(INFO) << "Finally : return a frame with data  " << *pFrame ;
         return pFrame;
     }
 
