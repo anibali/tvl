@@ -61,7 +61,14 @@ class JaxImageAllocator(pyfffr.ImageAllocator):
         plane_stride = height * line_elems
 
         # Create a tensor for viewing the allocated memory.
-        self.tensors[ptr] = storage
+        self.tensors[ptr] = storage.reshape(3, height, width)
+        # tensor = jnp.empty((0,), dtype=self.dtype)
+        # tensor.set_(
+        #     storage,
+        #     storage_offset=storage_offset,
+        #     size=(3, height, width),
+        #     stride=(plane_stride, line_elems, 1),
+        # )
 
         return ptr
 
