@@ -17,7 +17,7 @@ RUN cd /tmp \
  && git clone --branch n9.0.18.1 --single-branch --depth 1 \
     https://git.videolan.org/git/ffmpeg/nv-codec-headers.git \
  && cd nv-codec-headers \
- && make && make install \
+ && make -j$(nproc) && make install \
  && rm -rf /tmp/nv-codec-headers
 
 # Build FFmpeg, enabling only selected features
@@ -33,7 +33,7 @@ RUN cd /tmp && curl -sLO http://ffmpeg.org/releases/ffmpeg-$FFMPEG_VERSION.tar.b
     --disable-iconv \
     --disable-doc \
     --disable-ffplay \
- && make -j8 \
+ && make -j$(nproc) \
  && checkinstall -y --nodoc --install=no \
  && mv ffmpeg_$FFMPEG_VERSION-1_amd64.deb /ffmpeg.deb \
  && cd /tmp && rm -rf ffmpeg-$FFMPEG_VERSION
@@ -84,7 +84,7 @@ RUN mkdir /app
 WORKDIR /app
 
 COPY . /app
-RUN make dist
+RUN make dist -j$(nproc)
 
 
 ################################################################################
