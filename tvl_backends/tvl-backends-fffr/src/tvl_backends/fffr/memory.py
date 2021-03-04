@@ -50,7 +50,7 @@ class JaxImageAllocator(pyfffr.ImageAllocator):
         align_elems = alignment // elem_size
 
         # Allocate memory with extra space for starting pointer alignment.
-        n_padded_elems = 3 * (height * line_elems) + align_elems
+        n_padded_elems = 3 * (height * line_elems)
         storage = jnp.empty(n_padded_elems, dtype=self.dtype)
         ptr = storage.__cuda_array_interface__["data"][0]
 
@@ -61,16 +61,7 @@ class JaxImageAllocator(pyfffr.ImageAllocator):
         plane_stride = height * line_elems
 
         # Create a tensor for viewing the allocated memory.
-        self.tensors[ptr] = storage
-        storage_ = torch.empty(n_padded_elems, dtype=torch.uint8).storage()
-        tensor_ = torch.empty((0,), dtype=torch.uint8)
-        tensor_.set_(
-            storage_,
-            storage_offset=storage_offset,
-            size=(3, height, width),
-            stride=(plane_stride, line_elems, 1),
-        )
-        print(tensor_.size())
+        self.tensors[ptr] = storage.reshape(3, height, width)
 
         return ptr
 
