@@ -44,6 +44,8 @@ def _auto_set_backend_factory(device_type):
                 set_backend_factory(device_type, getattr(module, class_name)())
                 return
             except ImportError as e:
+                print(backend_name)
+                traceback.print_exc()
                 pass
 
 
