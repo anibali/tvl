@@ -135,9 +135,6 @@ RUN pip3 install --upgrade jax jaxlib==0.1.61+cuda112 -f https://storage.googlea
 COPY --from=tvl-builder /app/dist/tvl*.whl /tmp/
 RUN pip3 install -f /tmp \
     tvl \
-    tvl-backends-nvdec \
-    tvl-backends-opencv \
-    tvl-backends-pyav \
     tvl-backends-fffr \
   && rm /tmp/tvl*.whl
 

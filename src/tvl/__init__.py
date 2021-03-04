@@ -1,3 +1,4 @@
+import traceback
 import importlib
 import os
 from contextlib import contextmanager
@@ -14,14 +15,14 @@ _device_backends: Dict[str, BackendFactory] = {}
 # Known backends. These will be searched if a device type does not have a backend factory
 # set explicitly.
 _known_backends = {
-    'cpu': [
+    "cpu": [
         # 'tvl_backends.fffr.FffrBackendFactory',     # PyPI package: tvl-backends-fffr
-        'tvl_backends.pyav.PyAvBackendFactory',     # PyPI package: tvl-backends-pyav
-        'tvl_backends.opencv.OpenCvBackendFactory', # PyPI package: tvl-backends-opencv
+        "tvl_backends.pyav.PyAvBackendFactory",  # PyPI package: tvl-backends-pyav
+        "tvl_backends.opencv.OpenCvBackendFactory",  # PyPI package: tvl-backends-opencv
     ],
-    'cuda': [
-        'tvl_backends.fffr.FffrBackendFactory',     # PyPI package: tvl-backends-fffr
-        'tvl_backends.nvdec.NvdecBackendFactory',   # PyPI package: tvl-backends-nvdec
+    "cuda": [
+        "tvl_backends.fffr.FffrBackendFactory",  # PyPI package: tvl-backends-fffr
+        "tvl_backends.nvdec.NvdecBackendFactory",  # PyPI package: tvl-backends-nvdec
     ],
 }
 
@@ -38,11 +39,11 @@ def _auto_set_backend_factory(device_type):
     if device_type in _known_backends:
         for backend_name in _known_backends[device_type]:
             try:
-                module_name, class_name = backend_name.rsplit('.', 1)
+                module_name, class_name = backend_name.rsplit(".", 1)
                 module = importlib.import_module(module_name)
                 set_backend_factory(device_type, getattr(module, class_name)())
                 return
-            except ImportError:
+            except ImportError as e:
                 pass
 
 
@@ -51,15 +52,23 @@ def get_backend_factory(device_type) -> BackendFactory:
     _auto_set_backend_factory(device_type)
     if device_type in _device_backends:
         return _device_backends[device_type]
-    raise Exception(f'failed to find a backend factory for device type: {device_type}')
+    raise Exception(f"failed to find a backend factory for device type: {device_type}")
 
 
 class VideoLoader:
-    def __init__(self, filename, device: Union[torch.device, str], dtype=torch.float32, backend_opts=None):
+    def __init__(
+        self,
+        filename,
+        device: Union[torch.device, str],
+        dtype=torch.float32,
+        backend_opts=None,
+    ):
         if isinstance(device, str):
             device = torch.device(device)
         filename = os.fspath(filename)
-        self.backend = get_backend_factory(device.type).create(filename, device, dtype, backend_opts)
+        self.backend = get_backend_factory(device.type).create(
+            filename, device, dtype, backend_opts
+        )
 
     def seek(self, time_secs):
         self.backend.seek(time_secs)
@@ -147,7 +156,7 @@ class VideoLoaderPool:
     def remove_slot(self):
         device = self.peek_slot()
         if device is None:
-            raise Exception('No slots available')
+            raise Exception("No slots available")
         self.slots[device] -= 1
         return device
 
@@ -166,7 +175,9 @@ class VideoLoaderPool:
             backend_opts_by_device = {}
 
         try:
-            yield VideoLoader(filename, device, dtype, backend_opts_by_device.get(device, None))
+            yield VideoLoader(
+                filename, device, dtype, backend_opts_by_device.get(device, None)
+            )
         finally:
             with self.condition:
                 self.add_slots(device, 1)
