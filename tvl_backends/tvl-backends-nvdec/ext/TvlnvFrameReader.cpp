@@ -92,11 +92,14 @@ void TvlnvFrameReader::seek(float time_secs) {
 }
 
 uint8_t* TvlnvFrameReader::read_frame() {
+    LOG(INFO) << "start reading frames \n";
     if(!frame_buf.empty()) {
         uint8_t* pFrame = frame_buf.front();
         frame_buf.pop();
+        LOG(INFO) << "non empty buffer " << _decoder->GetVideoInfo();
         return pFrame;
     }
+    LOG(INFO) << "Empty memoyr bbuffer, start reading more \n";
 
     int nVideoBytes = 0, nFrameReturned = 0, nFrame = 0;
     uint8_t *pVideo = NULL;
@@ -111,6 +114,7 @@ uint8_t* TvlnvFrameReader::read_frame() {
 //        if (!nFrame && nFrameReturned)
 //            LOG(INFO) << _decoder->GetVideoInfo();
         nFrame += nFrameReturned;
+        LOG(INFO) << "Demuxing returned  " << nFrameReturned << "  frames \n";
 
         for (int i = 0; i < nFrameReturned; i++)
         {
@@ -131,6 +135,7 @@ uint8_t* TvlnvFrameReader::read_frame() {
 
     for(int i = 0; i < nFrameReturned; ++i) {
         if(pTimestamp[i] >= _seek_pts || pTimestamp[i] == AV_NOPTS_VALUE) {
+            LOG(INFO) << "appending frames info to frame buffer\n";
             frame_buf.push(ppFrame[i]);
         }
     }
@@ -140,6 +145,9 @@ uint8_t* TvlnvFrameReader::read_frame() {
     if(!frame_buf.empty()) {
         uint8_t* pFrame = frame_buf.front();
         frame_buf.pop();
+        LOG(INFO) << "Finally : return a frame with data  " << pFrame ;
+        LOG(INFO) << "Finally : return a frame with data  " << &pFrame ;
+        LOG(INFO) << "Finally : return a frame with data  " << *pFrame ;
         return pFrame;
     }
 
