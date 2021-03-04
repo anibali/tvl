@@ -130,4 +130,4 @@ class FffrBackendFactory(BackendFactory):
     def create(self, filename, device, dtype, backend_opts=None) -> FffrBackend:
         if backend_opts is None:
             backend_opts = {}
-        return FffrBackend(filename, dtype, **backend_opts)
+        return FffrBackend(filename, device, dtype, **backend_opts)
