@@ -1,4 +1,9 @@
-FROM nvidia/cuda:10.0-devel-ubuntu18.04 as ffmpeg-builder
+FROM nvcr.io/nvidia/cuda:11.2.1-devel-ubuntu20.04 as ffmpeg-builder
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Europe/Paris
+ENV NVIDIA_DRIVER_CAPABILITIES=all
+
 
 # https://github.com/NVIDIA/nvidia-docker/issues/969
 RUN rm /etc/apt/sources.list.d/nvidia-ml.list
@@ -37,30 +42,20 @@ RUN cd /tmp && curl -sLO http://ffmpeg.org/releases/ffmpeg-$FFMPEG_VERSION.tar.b
 ################################################################################
 
 
-FROM nvidia/cuda:10.0-devel-ubuntu18.04 as tvl-builder
+FROM nvcr.io/nvidia/cuda:11.2.1-devel-ubuntu20.04 as tvl-builder
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Europe/Paris
+ENV NVIDIA_DRIVER_CAPABILITIES=all
+
 
 # https://github.com/NVIDIA/nvidia-docker/issues/969
 RUN rm /etc/apt/sources.list.d/nvidia-ml.list
 
 RUN apt-get update \
- && apt-get install -y curl git \
+ && apt-get install -y curl git swig python3.8-dev python3-pip \
  && rm -rf /var/lib/apt/lists/*
 
-# Install Miniconda and Python 3.6.5
-ENV CONDA_AUTO_UPDATE_CONDA=false
-ENV PATH=/root/miniconda/bin:$PATH
-RUN curl -sLo ~/miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-4.5.4-Linux-x86_64.sh \
- && chmod +x ~/miniconda.sh \
- && ~/miniconda.sh -b -p ~/miniconda \
- && rm ~/miniconda.sh \
- && conda install -y python==3.6.5 \
- && conda clean -ya
-
-# Install PyTorch with CUDA support
-RUN conda install -y -c pytorch \
-    cudatoolkit=10.0 \
-    "pytorch=1.1.0=py3.6_cuda10.0.130_cudnn7.5.1_0" \
- && conda clean -ya
 
 RUN apt-get update \
  && apt-get install -y pkg-config \
@@ -70,8 +65,6 @@ RUN apt-get update \
 COPY --from=ffmpeg-builder /ffmpeg.deb /tmp/ffmpeg.deb
 RUN dpkg -i /tmp/ffmpeg.deb && rm /tmp/ffmpeg.deb
 
-# Install Swig
-RUN conda install -y swig=3.0.12 && conda clean -ya
 
 # Add a stub version of libnvcuvid.so for building (required for CUDA backends).
 # This library is provided by nvidia-docker at runtime when the environment variable
@@ -82,10 +75,10 @@ RUN curl -sLo /usr/lib/x86_64-linux-gnu/libnvcuvid.so.1 \
  && ln -s libnvcuvid.so.1 /usr/lib/x86_64-linux-gnu/libnvcuvid.so
 
 # Install CMake
-RUN pip install cmake==3.13.3
+RUN pip3 install cmake==3.18.4
 
 # Install scikit-build
-RUN pip install scikit-build==0.10.0
+RUN pip3 install scikit-build==0.10.0
 
 RUN mkdir /app
 WORKDIR /app
@@ -96,8 +89,12 @@ RUN make dist
 
 ################################################################################
 
+FROM nvcr.io/nvidia/cuda:11.2.1-devel-ubuntu20.04
 
-FROM nvidia/cuda:10.0-devel-ubuntu18.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Europe/Paris
+ENV NVIDIA_DRIVER_CAPABILITIES=all
 
 # https://github.com/NVIDIA/nvidia-docker/issues/969
 RUN rm /etc/apt/sources.list.d/nvidia-ml.list
@@ -106,21 +103,7 @@ RUN apt-get update \
  && apt-get install -y curl git \
  && rm -rf /var/lib/apt/lists/*
 
-# Install Miniconda and Python 3.6.5
-ENV CONDA_AUTO_UPDATE_CONDA=false
-ENV PATH=/root/miniconda/bin:$PATH
-RUN curl -sLo ~/miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-4.5.4-Linux-x86_64.sh \
- && chmod +x ~/miniconda.sh \
- && ~/miniconda.sh -b -p ~/miniconda \
- && rm ~/miniconda.sh \
- && conda install -y python==3.6.5 \
- && conda clean -ya
 
-# Install PyTorch with CUDA support
-RUN conda install -y -c pytorch \
-    cudatoolkit=10.0 \
-    "pytorch=1.1.0=py3.6_cuda10.0.130_cudnn7.5.1_0" \
- && conda clean -ya
 
 RUN apt-get update \
  && apt-get install -y pkg-config \
@@ -140,15 +123,17 @@ WORKDIR /app
 
 # Install OpenCV dependencies
 RUN apt-get update \
- && apt-get install -y libsm6 libxext6 libxrender1 \
+ && apt-get install -y libsm6 libxext6 libxrender1 python3.8-dev python3-pip \
  && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt /app
-RUN pip install -r requirements.txt
+RUN pip3 install -r requirements.txt
+
+RUN pip3 install --upgrade jax jaxlib==0.1.61+cuda112 -f https://storage.googleapis.com/jax-releases/jax_releases.html
 
 # Install tvl
 COPY --from=tvl-builder /app/dist/tvl*.whl /tmp/
-RUN pip install -f /tmp \
+RUN pip3 install -f /tmp \
     tvl \
     tvl-backends-nvdec \
     tvl-backends-opencv \

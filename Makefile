@@ -1,5 +1,5 @@
 SHELL	:= /bin/bash
-PYTHON	?= python
+PYTHON	?= python3
 SETUP	:= setup.py
 
 SUBDIRS := $(wildcard tvl_backends/tvl-backends-*)
@@ -39,7 +39,7 @@ install-dev:
 	for dir in $(SUBDIRS); do \
 		pushd $$dir && pip install -e . && popd || exit 1; \
 		if [ -d "$$dir/_skbuild" ]; then \
-			ln -sfn "$(PWD)/$$dir/_skbuild/linux-x86_64-3.6/cmake-install/lib/python3.6/site-packages/"* "$(PY_PKG_DIR)/"; \
+			ln -sfn "$(PWD)/$$dir/_skbuild/linux-x86_64-3.8/cmake-install/lib/python3.8/site-packages/"* "$(PY_PKG_DIR)/"; \
 		fi \
 	done
 
