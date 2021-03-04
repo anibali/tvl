@@ -62,14 +62,14 @@ class JaxImageAllocator(pyfffr.ImageAllocator):
 
         # Create a tensor for viewing the allocated memory.
         self.tensors[ptr] = storage
-        tensor = torch.empty((0,), dtype=self.dtype)
-        tensor.set_(
-            storage,
-            storage_offset=storage_offset,
-            size=(3, height, width),
-            stride=(plane_stride, line_elems, 1),
-        )
-        print(tensor.size())
+        # tensor = torch.empty((0,), dtype=self.dtype)
+        # tensor.set_(
+        #     storage,
+        #     storage_offset=storage_offset,
+        #     size=(3, height, width),
+        #     stride=(plane_stride, line_elems, 1),
+        # )
+        # print(tensor.size())
 
         return ptr
 
