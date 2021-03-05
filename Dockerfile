@@ -135,9 +135,6 @@ RUN pip3 install --upgrade cupy-cuda112
 COPY --from=tvl-builder /app/dist/tvl*.whl /tmp/
 RUN pip3 install -f /tmp \
     tvl \
-    tvl-backends-nvdec \
-    tvl-backends-opencv \
-    tvl-backends-pyav \
     tvl-backends-fffr \
   && rm /tmp/tvl*.whl
 

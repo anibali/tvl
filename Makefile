@@ -2,7 +2,7 @@ SHELL	:= /bin/bash
 PYTHON	?= python3.8
 SETUP	:= setup.py
 
-SUBDIRS := $(wildcard tvl_backends/tvl-backends-*)
+SUBDIRS := $(wildcard tvl_backends/tvl-backends-f*)
 PY_PKG_DIR := $(shell $(PYTHON) -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")
 
 clean:
