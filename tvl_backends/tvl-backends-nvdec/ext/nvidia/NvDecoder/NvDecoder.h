@@ -127,7 +127,7 @@ public:
     /**
     *   @brief  This function is used to get the current frame size based on pixel format.
     */
-    int GetFrameSize() { assert(m_nWidth); return m_nWidth * m_nHeight * 3 / (m_nBitDepthMinus8 ? 1 : 2); }
+    int GetFrameSize() { assert(m_nWidth); return m_nWidth * m_nHeight * 3; }
 
     /**
     *  @brief  This function is used to get the pitch of the device buffer holding the decoded frame.
@@ -202,7 +202,7 @@ private:
     int HandlePictureDecode(CUVIDPICPARAMS *pPicParams);
 
     /**
-    *   @brief  This function gets called after a picture is decoded and available for display. Frames are fetched and stored in 
+    *   @brief  This function gets called after a picture is decoded and available for display. Frames are fetched and stored in
         internal buffer
     */
     int HandlePictureDisplay(CUVIDPARSERDISPINFO *pDispInfo);
@@ -224,7 +224,7 @@ private:
     CUvideodecoder m_hDecoder = NULL;
     // dimension of the output
     unsigned int m_nWidth = 0, m_nHeight = 0;
-    // height of the mapped surface 
+    // height of the mapped surface
     int m_nSurfaceHeight = 0;
     int m_nSurfaceWidth = 0;
     cudaVideoChromaFormat m_eChromaFormat;
@@ -232,7 +232,7 @@ private:
     CUVIDEOFORMAT m_videoFormat = {};
     Rect m_displayRect = {};
     // stock of frames
-    std::vector<uint8_t *> m_vpFrame; 
+    std::vector<uint8_t *> m_vpFrame;
     // decoded frames for return
     std::vector<uint8_t *> m_vpFrameRet;
     // timestamps of decoded frames
