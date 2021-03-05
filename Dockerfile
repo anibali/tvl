@@ -129,6 +129,7 @@ RUN apt-get update \
 COPY requirements.txt /app
 RUN pip3 install -r requirements.txt
 
+RUN pip3 install --upgrade cupy-cuda112
 
 # Install tvl
 COPY --from=tvl-builder /app/dist/tvl*.whl /tmp/

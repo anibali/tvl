@@ -2,6 +2,7 @@ import warnings
 
 import pyfffr
 import torch
+import cupy
 
 
 def _dtype_bytes(dtype):
@@ -15,12 +16,9 @@ def _align(value, alignment):
     return ((value - 1) // alignment + 1) * alignment
 
 
-class TorchImageAllocator(pyfffr.ImageAllocator):
-    def __init__(self, device, dtype):
+class CupyImageAllocator(pyfffr.ImageAllocator):
+    def __init__(self, dtype):
         super().__init__()
-        if isinstance(device, str):
-            device = torch.device(device)
-        self.device = device
         self.dtype = dtype
         self.tensors = {}
 
@@ -39,8 +37,8 @@ class TorchImageAllocator(pyfffr.ImageAllocator):
         Returns:
             Address of the allocated memory.
         """
-        elem_size = _dtype_bytes(self.dtype)  # Size of a pixel channel element.
         assert alignment % elem_size == 0, 'alignment must be a multiple of element size'
+        elem_size = 1
 
         # Align the line size.
         line_size = _align(line_size, alignment)
@@ -50,21 +48,18 @@ class TorchImageAllocator(pyfffr.ImageAllocator):
         align_elems = alignment // elem_size
 
         # Allocate memory with extra space for starting pointer alignment.
-        n_padded_elems = 3 * (height * line_elems) + align_elems
-        storage = torch.empty(n_padded_elems, device=self.device, dtype=self.dtype).storage()
+        n_padded_elems = 3 * (height * line_elems)
+        storage = cupy.empty(n_padded_elems, dtype=self.dtype)
+        ptr = storage.data.ptr
 
         # Calculate memory offset and stride.
-        ptr = storage.data_ptr()
         aligned_ptr = _align(ptr, alignment)
         assert (aligned_ptr - ptr) % elem_size == 0
         storage_offset = (aligned_ptr - ptr) // elem_size
         plane_stride = height * line_elems
 
         # Create a tensor for viewing the allocated memory.
-        tensor = torch.empty((0,), device=self.device, dtype=self.dtype)
-        tensor.set_(storage, storage_offset=storage_offset, size=(3, height, width),
-                    stride=(plane_stride, line_elems, 1))
-        self.tensors[ptr] = tensor
+        self.tensors[ptr] = storage.reshape(3, height, width)
 
         return ptr
 
@@ -75,19 +70,14 @@ class TorchImageAllocator(pyfffr.ImageAllocator):
             warnings.warn('Skipped an attempt to free unrecognised memory.')
 
     def get_data_type(self):
-        if self.dtype == torch.uint8:
+        if self.dtype == cupy.uint8:
             return pyfffr.ImageAllocator.UINT8
-        if self.dtype == torch.float32:
+        if self.dtype == cupy.float32:
             return pyfffr.ImageAllocator.FLOAT32
-        raise Exception(f'unsupported dtype: {self.dtype}')
+        raise Exception(f"unsupported dtype: {self.dtype}")
 
     def get_device_index(self):
-        if self.device.type == 'cuda':
-            if self.device.index is None:
-                return torch.cuda.current_device()
-            else:
-                return self.device.index
-        return -1
+        return 0
 
     def get_frame_tensor(self, address):
         return self.tensors[address]
