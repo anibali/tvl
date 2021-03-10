@@ -29,10 +29,18 @@ Depending on the backend(s) you choose, you may need to install the following de
 * ffmpeg >= 4.1
 * GCC >= 7
 * SWIG 3
-* CUDA >= 10
+* CUDA >= 10 (with dev tools)
 
 
 ## Building from source
+
+The Git repository for TVL uses submodules, so ensure that you clone recursively when downloading
+the code from version control:
+
+```bash
+git clone --recursive https://github.com/anibali/tvl.git
+```
+
 
 ### Build wheels on host
 
