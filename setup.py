@@ -21,6 +21,7 @@ setup(
         "torchgeometry>=0.1.2",
     ],
     extras_require={
-        'FffrBackend': ['tvl-backends-fffr==' + version],
+        "FffrBackend": ["tvl-backends-fffr==" + version],
     },
+    setup_requires=["wheel"],
 )
