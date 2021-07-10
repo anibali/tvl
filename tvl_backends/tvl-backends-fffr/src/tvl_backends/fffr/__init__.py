@@ -2,10 +2,11 @@ from threading import RLock
 
 import numpy as np
 import pyfffr
-import torch
+import cupy
 
 from tvl.backend import Backend, BackendFactory
-from tvl_backends.fffr.memory import TorchImageAllocator
+from tvl_backends.fffr.memory import CupyImageAllocator
+import torch
 
 
 class FffrBackend(Backend):
@@ -15,17 +16,21 @@ class FffrBackend(Backend):
 
         self.lock = RLock()
 
-        allocator_dtype = self.dtype
         # The FFFR backend does not currently support direct conversion to float32 for software
         # decoding, so we will read as uint8 and do the data type conversion afterwards.
-        if self.device.type == 'cpu' and self.dtype != torch.uint8:
-            allocator_dtype = torch.uint8
+        allocator_dtype = cupy.uint8
 
-        image_allocator = TorchImageAllocator(self.device, allocator_dtype)
-        device_index = self.device.index if self.device.type == 'cuda' else -1
-        frame_reader = pyfffr.TvFFFrameReader(image_allocator, self.filename, device_index,
-                                              out_width, out_height, self.seek_threshold,
-                                              buffer_length)
+        image_allocator = CupyImageAllocator(allocator_dtype)
+        device_index = 0
+        frame_reader = pyfffr.TvFFFrameReader(
+            image_allocator,
+            self.filename,
+            device_index,
+            out_width,
+            out_height,
+            self.seek_threshold,
+            buffer_length,
+        )
         # We need to hold a reference to image_allocator for at least as long as the
         # TvFFFrameReader that uses it is around, since we retain ownership of image_allocator.
         setattr(frame_reader, '__image_allocator_ref', image_allocator)

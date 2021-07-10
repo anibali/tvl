@@ -1,7 +1,7 @@
 import os.path
 from abc import ABC, abstractmethod
 
-import torch
+import cupy
 
 from tvl.transforms import resize
 
@@ -23,9 +23,6 @@ class Backend(ABC):
         self.filename = filename
         if not os.path.isfile(filename):
             raise FileNotFoundError(filename)
-        self.device = torch.device(device)
-        if self.device.type == 'cuda' and self.device.index is None:
-            self.device = torch.device('cuda', torch.cuda.current_device())
         self.dtype = dtype
         self.seek_threshold = seek_threshold
         self._out_width = out_width
@@ -81,7 +78,7 @@ class Backend(ABC):
 
     @abstractmethod
     def read_frame(self):
-        """Read a single video frame as an RGB PyTorch tensor."""
+        """Read a single video frame as an RGB cupy array."""
 
     def read_frames(self, n):
         return [self.read_frame() for _ in range(n)]
@@ -121,20 +118,8 @@ class Backend(ABC):
     def select_frame(self, frame_index):
         return next(self.select_frames([frame_index]))
 
-    def _postprocess_frame(self, rgb: torch.Tensor):
+    def _postprocess_frame(self, rgb: cupy.array):
         """Postprocess an RGB image tensor to have the expected dtype and size."""
-        if self.dtype == torch.float32:
-            if not rgb.is_floating_point():
-                rgb = rgb.to(self.dtype).div_(255)
-            else:
-                rgb = rgb.to(self.dtype)
-        elif self.dtype == torch.uint8:
-            if rgb.is_floating_point():
-                rgb = rgb.mul_(255).to(self.dtype)
-            else:
-                rgb = rgb.to(self.dtype)
-        else:
-            raise NotImplementedError(f'Unsupported dtype: {self.dtype}')
         if self._out_height > 0 or self._out_width > 0:
             rgb = resize(rgb, (self.out_height, self.out_width))
         return rgb
