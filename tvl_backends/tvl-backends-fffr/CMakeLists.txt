@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14.0)
+cmake_minimum_required(VERSION 3.17.0)
 cmake_policy(SET CMP0086 OLD)
 
 project(tvl_backends_fffr
@@ -14,7 +14,17 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 list(APPEND CMAKE_SYSTEM_LIBRARY_PATH $ENV{LIBRARY_PATH})
 
 find_package(CUDA)
-find_package(Python3 ${PYTHON_VERSION_STRING} EXACT COMPONENTS Interpreter Development REQUIRED)
-message(STATUS "Python SOABI suffix: ${Python3_SOABI}")
+
+if(SKBUILD)
+    # Use Python location hints supplied by scikit-build.
+    # See: https://github.com/scikit-build/scikit-build/issues/506
+    set(Python_EXECUTABLE "${PYTHON_EXECUTABLE}")
+    set(Python_INCLUDE_DIR "${PYTHON_INCLUDE_DIR}")
+    set(Python_LIBRARY "${PYTHON_LIBRARY}")
+    find_package(Python ${PYTHON_VERSION_STRING} EXACT COMPONENTS Interpreter Development REQUIRED)
+else()
+    find_package(Python COMPONENTS Interpreter Development REQUIRED)
+endif()
+message(STATUS "Python SOABI suffix: ${Python_SOABI}")
 
 add_subdirectory(ext)

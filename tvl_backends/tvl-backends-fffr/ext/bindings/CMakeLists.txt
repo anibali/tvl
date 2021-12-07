@@ -42,7 +42,7 @@ target_include_directories(_pyfffr
     ../FFFrameReader/include
     ${FfFrameReader_BINARY_DIR}
     ${CUDA_INCLUDE_DIRS}
-    ${Python3_INCLUDE_DIRS}
+    ${Python_INCLUDE_DIRS}
 )
 
 target_link_libraries(_pyfffr
@@ -53,11 +53,11 @@ target_link_libraries(_pyfffr
 )
 
 set(RELATIVE_INSTALL_DEST
-    "lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages"
+    "lib/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}/site-packages"
 )
 
 # Install the compiled library file.
-set(CMAKE_SHARED_LIBRARY_SUFFIX ".${Python3_SOABI}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+set(CMAKE_SHARED_LIBRARY_SUFFIX ".${Python_SOABI}${CMAKE_SHARED_LIBRARY_SUFFIX}")
 install(TARGETS _pyfffr
     LIBRARY DESTINATION ${RELATIVE_INSTALL_DEST}
 )

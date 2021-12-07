@@ -19,21 +19,21 @@ target_include_directories(_tvlnv
     ..
     ../nvidia
     ${CUDA_INCLUDE_DIRS}
-    ${Python3_INCLUDE_DIRS}
+    ${Python_INCLUDE_DIRS}
 )
 
 target_link_libraries(_tvlnv
     PRIVATE
     tvlnv
-    ${PYTHON_LIBRARIES}
+    ${Python_LIBRARIES}
 )
 
 set(RELATIVE_INSTALL_DEST
-    "lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages"
+    "lib/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}/site-packages"
 )
 
 # Install the compiled library file.
-set(CMAKE_SHARED_LIBRARY_SUFFIX ".${Python3_SOABI}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+set(CMAKE_SHARED_LIBRARY_SUFFIX ".${Python_SOABI}${CMAKE_SHARED_LIBRARY_SUFFIX}")
 install(TARGETS _tvlnv
     LIBRARY DESTINATION ${RELATIVE_INSTALL_DEST}
 )
