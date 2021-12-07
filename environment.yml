@@ -9,6 +9,7 @@ dependencies:
   - ca-certificates=2019.1.23=0
   - certifi=2019.3.9=py36_0
   - cffi=1.12.2=py36h2e261b9_1
+  - cmake=3.14.0
   - cuda100=1.0=0
   - cudatoolkit=10.0.130=0
   - freetype=2.8.1=hfa320df_1
@@ -53,7 +54,6 @@ dependencies:
     - av==6.1.2
     - bleach==3.1.0
     - chardet==3.0.4
-    - cmake==3.13.3
     - docutils==0.14
     - execnet==1.6.0
     - hypothesis==4.10.0
