@@ -173,7 +173,7 @@ class MainApp(tk.Tk):
             self.spn_frame_index.configure(to=vl.n_frames - 1)
             self.title(self.file_path.name)
         except Exception:
-            print(f'Failed to load video: {self.file_path:s}')
+            print(f'Failed to load video: {self.file_path}')
             traceback.print_exc()
 
     def do_seek(self):
