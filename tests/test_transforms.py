@@ -7,7 +7,7 @@ from hypothesis.extra.numpy import arrays, array_shapes
 from hypothesis.strategies import booleans, one_of, just, integers
 from torch.testing import assert_allclose
 
-from tvl.transforms import normalise, denormalise, resize, crop, flip, rotate, fit
+from tvl.transforms import normalise, denormalise, resize, crop, flip, fit
 
 DENORMALISED_IMAGE = torch.tensor([math.sqrt(3), -math.sqrt(3)]).add_(5).repeat(3, 2, 1)
 MEAN = [5.0, 5.0, 5.0]
@@ -169,40 +169,6 @@ def test_flip_vertical():
         [1, 2],
     ]])
     actual = flip(inp, vertical=True)
-    assert_allclose(actual, expected)
-
-
-def test_rotate():
-    inp = torch.FloatTensor([[
-        [1, 2],
-        [3, 4],
-        [5, 6],
-        [7, 8],
-    ]])
-    expected = torch.FloatTensor([[
-        [0, 0],
-        [4, 6],
-        [3, 5],
-        [0, 0],
-    ]])
-    actual = rotate(inp, 90)
-    assert_allclose(actual, expected)
-
-
-def test_rotate_cuda():
-    inp = torch.cuda.FloatTensor([[
-        [1, 2],
-        [3, 4],
-        [5, 6],
-        [7, 8],
-    ]])
-    expected = torch.cuda.FloatTensor([[
-        [0, 0],
-        [4, 6],
-        [3, 5],
-        [0, 0],
-    ]])
-    actual = rotate(inp, 90)
     assert_allclose(actual, expected)
 
 
