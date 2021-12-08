@@ -56,10 +56,10 @@ def nv12_to_rgb(planar_yuv, h, w):
     u.copy_(planar_yuv[w*h::2].view(h//2, 1, w//2, 1).expand(h//2, 2, w//2, 2).contiguous().view(h, w))
     v.copy_(planar_yuv[w*h+1::2].view(h//2, 1, w//2, 1).expand(h//2, 2, w//2, 2).contiguous().view(h, w))
     # YUV [0, 255] to RGB [0, 1]
-    torch.add(u, 2.075161, v, out=rgb[1])
+    torch.add(u, v, alpha=2.075161, out=rgb[1])
     const1, const2 = _nv12_conv_consts(str(rgb.device))
     rgb.mul_(const1)
-    torch.add(rgb, 4.566207e-3, y, out=rgb)
+    torch.add(rgb, y, alpha=4.566207e-3, out=rgb)
     rgb.add_(const2)
 
     return rgb.clamp_(0, 1)
