@@ -10,7 +10,7 @@ RUN apt-get update \
 # Install nv-codec-headers for FFmpeg NVIDIA hardware acceleration
 RUN cd /tmp \
  && git clone --branch n9.0.18.1 --single-branch --depth 1 \
-    https://git.videolan.org/git/ffmpeg/nv-codec-headers.git \
+    https://github.com/FFmpeg/nv-codec-headers.git \
  && cd nv-codec-headers \
  && make && make install \
  && rm -rf /tmp/nv-codec-headers
@@ -46,32 +46,29 @@ RUN apt-get update \
  && apt-get install -y curl git \
  && rm -rf /var/lib/apt/lists/*
 
-# Install Miniconda and Python 3.6.5
+# Install Miniconda and Python 3.6.13
 ENV CONDA_AUTO_UPDATE_CONDA=false
 ENV PATH=/root/miniconda/bin:$PATH
-RUN curl -sLo ~/miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-4.5.4-Linux-x86_64.sh \
+RUN curl -sLo ~/miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-py39_4.10.3-Linux-x86_64.sh \
  && chmod +x ~/miniconda.sh \
  && ~/miniconda.sh -b -p ~/miniconda \
  && rm ~/miniconda.sh \
- && conda install -y python==3.6.5 \
- && conda clean -ya
-
-# Install PyTorch with CUDA support
-RUN conda install -y -c pytorch \
-    cudatoolkit=10.0 \
-    "pytorch=1.1.0=py3.6_cuda10.0.130_cudnn7.5.1_0" \
+ && conda install -y python==3.6.13 \
  && conda clean -ya
 
 RUN apt-get update \
  && apt-get install -y pkg-config \
  && rm -rf /var/lib/apt/lists/*
 
+# Install project requirements
+COPY environment.yml /tmp/environment.yml
+RUN conda env update -n base -f /tmp/environment.yml \
+ && conda clean -ya \
+ && rm /tmp/environment.yml
+
 # Install FFmpeg
 COPY --from=ffmpeg-builder /ffmpeg.deb /tmp/ffmpeg.deb
 RUN dpkg -i /tmp/ffmpeg.deb && rm /tmp/ffmpeg.deb
-
-# Install Swig
-RUN conda install -y swig=3.0.12 && conda clean -ya
 
 # Add a stub version of libnvcuvid.so for building (required for CUDA backends).
 # This library is provided by nvidia-docker at runtime when the environment variable
@@ -80,12 +77,6 @@ RUN curl -sLo /usr/lib/x86_64-linux-gnu/libnvcuvid.so.1 \
     https://raw.githubusercontent.com/NVIDIA/nvvl/bde20830cf171af8d10ef8222449237382b178ef/pytorch/test/docker/libnvcuvid.so \
  && ln -s /usr/local/nvidia/lib64/libnvcuvid.so.1 /usr/local/lib/libnvcuvid.so \
  && ln -s libnvcuvid.so.1 /usr/lib/x86_64-linux-gnu/libnvcuvid.so
-
-# Install CMake
-RUN pip install cmake==3.13.3
-
-# Install scikit-build
-RUN pip install scikit-build==0.10.0
 
 RUN mkdir /app
 WORKDIR /app
@@ -106,25 +97,25 @@ RUN apt-get update \
  && apt-get install -y curl git \
  && rm -rf /var/lib/apt/lists/*
 
-# Install Miniconda and Python 3.6.5
+# Install Miniconda and Python 3.6.13
 ENV CONDA_AUTO_UPDATE_CONDA=false
 ENV PATH=/root/miniconda/bin:$PATH
-RUN curl -sLo ~/miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-4.5.4-Linux-x86_64.sh \
+RUN curl -sLo ~/miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-py39_4.10.3-Linux-x86_64.sh \
  && chmod +x ~/miniconda.sh \
  && ~/miniconda.sh -b -p ~/miniconda \
  && rm ~/miniconda.sh \
- && conda install -y python==3.6.5 \
- && conda clean -ya
-
-# Install PyTorch with CUDA support
-RUN conda install -y -c pytorch \
-    cudatoolkit=10.0 \
-    "pytorch=1.1.0=py3.6_cuda10.0.130_cudnn7.5.1_0" \
+ && conda install -y python==3.6.13 \
  && conda clean -ya
 
 RUN apt-get update \
  && apt-get install -y pkg-config \
  && rm -rf /var/lib/apt/lists/*
+
+# Install project requirements
+COPY environment.yml /tmp/environment.yml
+RUN conda env update -n base -f /tmp/environment.yml \
+ && conda clean -ya \
+ && rm /tmp/environment.yml
 
 # Install X display server client
 RUN apt-get update \
@@ -142,9 +133,6 @@ WORKDIR /app
 RUN apt-get update \
  && apt-get install -y libsm6 libxext6 libxrender1 \
  && rm -rf /var/lib/apt/lists/*
-
-COPY requirements.txt /app
-RUN pip install -r requirements.txt
 
 # Install tvl
 COPY --from=tvl-builder /app/dist/tvl*.whl /tmp/

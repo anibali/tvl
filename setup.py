@@ -16,7 +16,6 @@ setup(
     install_requires=[
         'numpy',
         'torch',
-        'torchgeometry>=0.1.2',
     ],
     extras_require={
         'FffrBackend': ['tvl-backends-fffr==' + version],

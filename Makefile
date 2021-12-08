@@ -4,6 +4,7 @@ SETUP	:= setup.py
 
 SUBDIRS := $(wildcard tvl_backends/tvl-backends-*)
 PY_PKG_DIR := $(shell $(PYTHON) -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")
+PY_VER := $(shell $(PYTHON) -c "import sys; print(str(sys.version_info[0])+'.'+str(sys.version_info[1]))")
 
 clean:
 	$(PYTHON) $(SETUP) clean --all
@@ -39,7 +40,7 @@ install-dev:
 	for dir in $(SUBDIRS); do \
 		pushd $$dir && pip install -e . && popd || exit 1; \
 		if [ -d "$$dir/_skbuild" ]; then \
-			ln -sfn "$(PWD)/$$dir/_skbuild/linux-x86_64-3.6/cmake-install/lib/python3.6/site-packages/"* "$(PY_PKG_DIR)/"; \
+			ln -sfn "$(PWD)/$$dir/_skbuild/linux-x86_64-$(PY_VER)/cmake-install/lib/python$(PY_VER)/site-packages/"* "$(PY_PKG_DIR)/"; \
 		fi \
 	done
 
